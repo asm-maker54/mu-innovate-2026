@@ -1,0 +1,42 @@
+@import "tailwindcss";
+
+html {
+  scroll-behavior: smooth;
+}
+
+@layer base {
+  :root {
+    --primary: 0 87 184;    /* #0057B8 */
+    --secondary: 34 197 94; /* #22C55E */
+    --accent: 245 158 11;   /* #F59E0B */
+    --background: 248 250 252; /* #F8FAFC */
+    --surface: 255 255 255; /* White */
+    --text-primary: 15 23 42; /* #0f172a */
+    --text-secondary: 71 85 105; /* #475569 */
+    --border: 226 232 240; /* #e2e8f0 */
+  }
+
+  body {
+    @apply bg-[rgb(var(--background))] text-[rgb(var(--text-primary))] antialiased;
+    font-family: 'Inter', sans-serif;
+  }
+  
+  [dir="rtl"] body {
+    font-family: 'Cairo', sans-serif;
+  }
+}
+
+@layer utilities {
+  .glass {
+    @apply bg-white/70 backdrop-blur-md border border-white/20;
+    box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.05);
+  }
+  
+  .shadow-soft {
+    box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.05);
+  }
+  
+  .rounded-custom {
+    border-radius: 16px;
+  }
+}
