@@ -7,18 +7,12 @@ const AuthPage = () => {
   const { t, i18n } = useTranslation();
   const isRtl = i18n.language === 'ar';
   const [isLogin, setIsLogin] = useState(true);
-  const [selectedRole, setSelectedRole] = useState('speaker');
   const navigate = useNavigate();
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    if (isLogin) {
-      // Simulate login
-      navigate('/dashboard');
-    } else {
-      // Redirect to specific registration page
-      navigate(`/register?role=${selectedRole}`);
-    }
+    // Simulate login
+    navigate('/dashboard');
   };
 
   return (
@@ -88,23 +82,6 @@ const AuthPage = () => {
                       className="w-full bg-[#d1d5db]/40 border-none rounded-2xl px-5 py-4 text-gray-800 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#1b4332] focus:bg-white transition-all font-medium"
                       placeholder={isRtl ? 'اسم العائلة' : 'Last Name'}
                     />
-                  </div>
-                  <div className="space-y-2 sm:col-span-2">
-                    <label className="block text-sm font-bold text-gray-700">
-                      {isRtl ? 'نوع الحساب / المشاركة *' : 'Account Type / Role *'}
-                    </label>
-                    <select
-                      value={selectedRole}
-                      onChange={(e) => setSelectedRole(e.target.value)}
-                      required
-                      className="w-full bg-[#d1d5db]/40 border border-transparent rounded-2xl px-5 py-4 text-gray-800 focus:outline-none focus:ring-2 focus:ring-[#1b4332] focus:bg-white transition-all font-bold text-sm"
-                    >
-                      <option value="speaker">{isRtl ? 'متحدث (Speaker)' : 'Speaker'}</option>
-                      <option value="startup">{isRtl ? 'شركة ناشئة (Startup)' : 'Startup'}</option>
-                      <option value="investor">{isRtl ? 'مستثمر (Investor)' : 'Investor'}</option>
-                      <option value="mentor">{isRtl ? 'مدرب / موجه (Mentor)' : 'Mentor'}</option>
-                      <option value="partner">{isRtl ? 'شريك (Partner)' : 'Partner'}</option>
-                    </select>
                   </div>
                 </>
               )}

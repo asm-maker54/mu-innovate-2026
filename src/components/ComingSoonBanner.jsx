@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react';
 import { Sparkles, Bell, CalendarDays, MapPin } from 'lucide-react';
-import { Link } from 'react-router-dom';
 
 const ComingSoonBanner = () => {
   const [days, setDays] = useState(0);
@@ -35,7 +34,7 @@ const ComingSoonBanner = () => {
   );
 
   return (
-    <div className="relative font-cairo mb-20" dir="rtl">
+    <div className="relative font-cairo mb-32" dir="rtl">
       
       {/* Background Banner */}
       <div className="relative overflow-hidden bg-gradient-to-l from-[#0d1b4b] via-[#1a1040] to-[#0a2540] pt-24 pb-36 border-b border-white/10">
@@ -115,11 +114,9 @@ const ComingSoonBanner = () => {
               <span>جامعة المنيا</span>
             </div>
           </div>
-          <Link to="/auth" className="w-full lg:w-auto">
-            <button className="w-full lg:w-auto px-10 py-4 bg-gradient-to-r from-[#ff9800] to-[#ff5722] text-white font-bold text-lg rounded-xl hover:from-[#f57c00] hover:to-[#e64a19] transition-all shadow-lg shadow-orange-500/30 hover:-translate-y-1">
-              سجّل اهتمامك الآن
-            </button>
-          </Link>
+          <button className="w-full lg:w-auto px-10 py-4 bg-gradient-to-r from-[#ff9800] to-[#ff5722] text-white font-bold text-lg rounded-xl hover:from-[#f57c00] hover:to-[#e64a19] transition-all shadow-lg shadow-orange-500/30 hover:-translate-y-1">
+            سجّل اهتمامك الآن
+          </button>
         </div>
 
       </div>

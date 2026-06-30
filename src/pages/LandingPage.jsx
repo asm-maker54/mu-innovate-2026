@@ -145,14 +145,19 @@ const LandingPage = () => {
 
 
 
-      {/* Coming Soon Banner (Countdown) */}
-      <div id="coming-soon" className="relative z-20">
-        <ComingSoonBanner />
+      {/* Join Us Section (Overlapping Hero) */}
+      <div id="join-us" className="relative z-20">
+        <JoinUs />
       </div>
 
       {/* Vision & Mission Section */}
       <div id="vision-mission">
         <VisionMission />
+      </div>
+
+      {/* Coming Soon Banner */}
+      <div id="coming-soon">
+        <ComingSoonBanner />
       </div>
 
       {/* News & Announcements Section */}
