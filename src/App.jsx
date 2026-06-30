@@ -24,6 +24,7 @@ import AlumniFairPage from './pages/AlumniFairPage';
 import GraduationProjectsPage from './pages/GraduationProjectsPage';
 import SubmitGraduationProjectPage from './pages/SubmitGraduationProjectPage';
 import GreenInnovationPage from './pages/GreenInnovationPage';
+import AdminDashboard from './pages/AdminDashboard';
 import Chatbot from './components/Chatbot';
 
 function App() {
@@ -62,6 +63,7 @@ function App() {
             <Route path="/graduation-projects" element={<GraduationProjectsPage />} />
             <Route path="/submit-graduation-project" element={<SubmitGraduationProjectPage />} />
             <Route path="/green-innovation" element={<GreenInnovationPage />} />
+            <Route path="/admin" element={<AdminDashboard />} />
           </Routes>
         </main>
         <Footer />

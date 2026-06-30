@@ -1,12 +1,28 @@
 import React, { useState, useEffect } from 'react';
-import { ArrowRight, ArrowLeft, CheckCircle2, Check, UploadCloud, Plus, Trash2, FileText } from 'lucide-react';
+import { ArrowRight, ArrowLeft, CheckCircle2, Check, UploadCloud, Plus, Trash2, FileText, Send, Loader2 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
+import { supabase, isSupabaseConfigured } from '../supabaseClient';
 
 const SubmitResearchPage = () => {
   const { i18n } = useTranslation();
   const isRtl = i18n.language === 'ar';
   const [currentStep, setCurrentStep] = useState(1);
   const totalSteps = 15;
+  
+  const [selectedFiles, setSelectedFiles] = useState({});
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState('');
+  const [submitSuccess, setSubmitSuccess] = useState(false);
+
+  const handleFileChange = (e, fileKey) => {
+    const file = e.target.files[0];
+    if (file) {
+      setSelectedFiles(prev => ({
+        ...prev,
+        [fileKey]: file
+      }));
+    }
+  };
 
   const [formData, setFormData] = useState({
     // Step 1
@@ -56,6 +72,72 @@ const SubmitResearchPage = () => {
 
   const nextStep = () => setCurrentStep(p => Math.min(p + 1, totalSteps));
   const prevStep = () => setCurrentStep(p => Math.max(p - 1, 1));
+
+  const handleSubmit = async () => {
+    setIsSubmitting(true);
+    setSubmitError('');
+
+    try {
+      let uploadedFileUrls = {};
+
+      if (isSupabaseConfigured) {
+        // 1. Upload files to Supabase Storage
+        for (const [key, file] of Object.entries(selectedFiles)) {
+          const fileExt = file.name.split('.').pop();
+          const fileName = `${Date.now()}_${key}.${fileExt}`;
+          const filePath = `applied_research/${fileName}`;
+
+          const { data, error } = await supabase.storage
+            .from('project-attachments')
+            .upload(filePath, file, { cacheControl: '3600', upsert: true });
+
+          if (error) throw error;
+
+          const { data: publicUrlData } = supabase.storage
+            .from('project-attachments')
+            .getPublicUrl(filePath);
+
+          uploadedFileUrls[key] = publicUrlData.publicUrl;
+        }
+
+        // 2. Insert into applied_research table
+        const { piName, piFaculty, piDept, piRank, piEmail, piPhone, piOrcid, customFaculty, ...otherDetails } = formData;
+        const finalFaculty = piFaculty === 'أخرى' ? customFaculty : piFaculty;
+
+        const { data, error } = await supabase
+          .from('applied_research')
+          .insert([
+            {
+              pi_name: piName,
+              pi_faculty: finalFaculty,
+              pi_dept: piDept,
+              pi_rank: piRank,
+              pi_email: piEmail,
+              pi_phone: piPhone,
+              pi_orcid: piOrcid,
+              files: uploadedFileUrls,
+              details: {
+                ...otherDetails,
+                customFaculty
+              }
+            }
+          ]);
+
+        if (error) throw error;
+      } else {
+        console.warn("Supabase is not configured. Mocking research submission...");
+        await new Promise(resolve => setTimeout(resolve, 2000));
+      }
+
+      setSubmitSuccess(true);
+      setCurrentStep(15); // Go to success screen
+    } catch (err) {
+      console.error(err);
+      setSubmitError(err.message || 'حدث خطأ أثناء إرسال البيانات. يرجى المحاولة مرة أخرى.');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   // Helper Components
   const Input = ({ label, name, type = 'text', placeholder = '' }) => (
@@ -298,21 +380,30 @@ const SubmitResearchPage = () => {
           <div className="animate-fade-in">
             <h2 className="text-2xl font-black text-[#183059] mb-6 border-b pb-4">الخطوة 12: المرفقات</h2>
             <div className="space-y-6">
-              <div className="p-4 border-2 border-dashed border-gray-300 rounded-xl bg-gray-50 text-center hover:bg-blue-50 transition-colors cursor-pointer group">
+              <label className="block p-4 border-2 border-dashed border-gray-300 rounded-xl bg-gray-50 text-center hover:bg-blue-50 transition-colors cursor-pointer group">
                 <UploadCloud className="w-10 h-10 text-gray-400 group-hover:text-blue-500 mx-auto mb-2 transition-colors" />
                 <p className="text-sm font-bold text-gray-600">ملف البحث أو ملخص البحث PDF (إلزامي)</p>
-                <input type="file" className="hidden" />
-              </div>
-              <div className="p-4 border-2 border-dashed border-gray-300 rounded-xl bg-gray-50 text-center hover:bg-blue-50 transition-colors cursor-pointer group">
+                <input type="file" onChange={(e) => handleFileChange(e, 'researchPdf')} className="hidden" accept=".pdf" />
+                {selectedFiles.researchPdf && (
+                  <div className="text-xs text-green-600 font-bold mt-1">✓ {selectedFiles.researchPdf.name}</div>
+                )}
+              </label>
+              <label className="block p-4 border-2 border-dashed border-gray-300 rounded-xl bg-gray-50 text-center hover:bg-blue-50 transition-colors cursor-pointer group">
                 <UploadCloud className="w-10 h-10 text-gray-400 group-hover:text-blue-500 mx-auto mb-2 transition-colors" />
                 <p className="text-sm font-bold text-gray-600">ملخص تسويقي من صفحة واحدة (إلزامي)</p>
-                <input type="file" className="hidden" />
-              </div>
-              <div className="p-4 border-2 border-dashed border-gray-300 rounded-xl bg-gray-50 text-center hover:bg-blue-50 transition-colors cursor-pointer group">
+                <input type="file" onChange={(e) => handleFileChange(e, 'marketSummaryPdf')} className="hidden" accept=".pdf" />
+                {selectedFiles.marketSummaryPdf && (
+                  <div className="text-xs text-green-600 font-bold mt-1">✓ {selectedFiles.marketSummaryPdf.name}</div>
+                )}
+              </label>
+              <label className="block p-4 border-2 border-dashed border-gray-300 rounded-xl bg-gray-50 text-center hover:bg-blue-50 transition-colors cursor-pointer group">
                 <UploadCloud className="w-10 h-10 text-gray-400 group-hover:text-blue-500 mx-auto mb-2 transition-colors" />
                 <p className="text-sm font-bold text-gray-600">مرفقات اختيارية (Pitch Deck، صور، فيديو، الخ)</p>
-                <input type="file" className="hidden" multiple />
-              </div>
+                <input type="file" onChange={(e) => handleFileChange(e, 'optionalAttachments')} className="hidden" />
+                {selectedFiles.optionalAttachments && (
+                  <div className="text-xs text-green-600 font-bold mt-1">✓ {selectedFiles.optionalAttachments.name}</div>
+                )}
+              </label>
             </div>
           </div>
         );
@@ -433,14 +524,21 @@ const SubmitResearchPage = () => {
           
           {renderStep()}
 
+          {/* Submit Error Message */}
+          {submitError && (
+            <div className="mt-6 p-4 bg-red-50 border border-red-200 text-red-700 rounded-xl font-bold text-center">
+              {submitError}
+            </div>
+          )}
+
           {/* Navigation Buttons */}
           {currentStep < 15 && (
             <div className="flex justify-between items-center mt-10 pt-6 border-t border-gray-100">
               <button 
                 onClick={prevStep}
-                disabled={currentStep === 1}
+                disabled={currentStep === 1 || isSubmitting}
                 className={`flex items-center gap-2 px-6 py-3 rounded-xl font-bold transition-all ${
-                  currentStep === 1 ? 'opacity-0 pointer-events-none' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                  currentStep === 1 || isSubmitting ? 'opacity-50 cursor-not-allowed bg-gray-100 text-gray-400' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                 }`}
               >
                 {isRtl ? <ArrowRight className="w-5 h-5" /> : <ArrowLeft className="w-5 h-5" />}
@@ -457,10 +555,22 @@ const SubmitResearchPage = () => {
                 </button>
               ) : (
                 <button 
-                  onClick={nextStep}
-                  className="flex items-center gap-2 px-10 py-3 rounded-xl font-black bg-green-600 text-white hover:bg-green-700 shadow-md shadow-green-600/30 transition-all hover:-translate-y-1"
+                  onClick={handleSubmit}
+                  disabled={isSubmitting}
+                  className={`flex items-center gap-2 px-10 py-3 rounded-xl font-black bg-green-600 text-white hover:bg-green-700 shadow-md shadow-green-600/30 transition-all ${
+                    isSubmitting ? 'opacity-70 cursor-wait' : 'hover:-translate-y-1'
+                  }`}
                 >
-                  إرسال الطلب للمراجعة
+                  {isSubmitting ? (
+                    <>
+                      <span className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
+                      جاري رفع المرفقات وحفظ البحث...
+                    </>
+                  ) : (
+                    <>
+                      إرسال الطلب للمراجعة
+                    </>
+                  )}
                 </button>
               )}
             </div>

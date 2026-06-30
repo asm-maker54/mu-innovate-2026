@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { ArrowRight, ArrowLeft, CheckCircle, Upload, Plus, Trash2, Send, Save } from 'lucide-react';
+import { ArrowRight, ArrowLeft, CheckCircle, Upload, Plus, Trash2, Send, Save, Loader2 } from 'lucide-react';
+import { supabase, isSupabaseConfigured } from '../supabaseClient';
 
 // Form Data Initial State
 const initialFormData = {
@@ -42,6 +43,21 @@ const STEPS = [
 const SubmitGraduationProjectPage = () => {
   const [currentStep, setCurrentStep] = useState(1);
   const [formData, setFormData] = useState(initialFormData);
+  
+  const [selectedFiles, setSelectedFiles] = useState({});
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState('');
+  const [submitSuccess, setSubmitSuccess] = useState(false);
+
+  const handleFileChange = (e, fileKey) => {
+    const file = e.target.files[0];
+    if (file) {
+      setSelectedFiles(prev => ({
+        ...prev,
+        [fileKey]: file
+      }));
+    }
+  };
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -93,7 +109,72 @@ const SubmitGraduationProjectPage = () => {
 
   const nextStep = () => setCurrentStep(prev => Math.min(prev + 1, 14));
   const prevStep = () => setCurrentStep(prev => Math.max(prev - 1, 1));
-  const submitForm = (e) => { e.preventDefault(); alert("تم استلام المشروع بنجاح! شكراً لتقديمك."); };
+  const submitForm = async (e) => {
+    e.preventDefault();
+    setIsSubmitting(true);
+    setSubmitError('');
+
+    try {
+      let uploadedFileUrls = {};
+
+      if (isSupabaseConfigured) {
+        // 1. Upload files to Supabase Storage
+        for (const [key, file] of Object.entries(selectedFiles)) {
+          const fileExt = file.name.split('.').pop();
+          const fileName = `${Date.now()}_${key}.${fileExt}`;
+          const filePath = `graduation_projects/${fileName}`;
+
+          const { data, error } = await supabase.storage
+            .from('project-attachments')
+            .upload(filePath, file, { cacheControl: '3600', upsert: true });
+
+          if (error) throw error;
+
+          const { data: publicUrlData } = supabase.storage
+            .from('project-attachments')
+            .getPublicUrl(filePath);
+
+          uploadedFileUrls[key] = publicUrlData.publicUrl;
+        }
+
+        // 2. Insert text data and file URLs into the graduation_projects table
+        const { projectNameAr, projectNameEn, college, department, year, courseName, projectType, teamMembers, customCollege, ...otherDetails } = formData;
+        const finalCollege = college === 'أخرى' ? customCollege : college;
+
+        const { data, error } = await supabase
+          .from('graduation_projects')
+          .insert([
+            {
+              project_name_ar: projectNameAr,
+              project_name_en: projectNameEn,
+              college: finalCollege,
+              department,
+              year,
+              course_name: courseName,
+              project_type: projectType,
+              team_members: teamMembers,
+              files: uploadedFileUrls,
+              details: {
+                ...otherDetails,
+                customCollege
+              }
+            }
+          ]);
+
+        if (error) throw error;
+      } else {
+        console.warn("Supabase is not configured. Mocking form submission...");
+        await new Promise(resolve => setTimeout(resolve, 2000));
+      }
+
+      setSubmitSuccess(true);
+    } catch (err) {
+      console.error(err);
+      setSubmitError(err.message || 'حدث خطأ أثناء إرسال البيانات. يرجى المحاولة مرة أخرى.');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   // Helper for Checkbox Groups
   const CheckboxGroup = ({ name, options }) => (
@@ -499,12 +580,24 @@ const SubmitGraduationProjectPage = () => {
                 <div className="bg-orange-50/50 p-6 rounded-2xl border border-orange-100 mb-6">
                   <h3 className="font-black text-[#F4A217] mb-4">مرفقات إلزامية</h3>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {['ملخص المشروع PDF', 'عرض تقديمي Pitch Deck', 'صورة لقطة شاشة للمشروع', 'بيانات الفريق والمشرف'].map((item, i) => (
+                    {[
+                      { label: 'ملخص المشروع PDF', key: 'summaryPdf' },
+                      { label: 'عرض تقديمي Pitch Deck', key: 'pitchDeck' },
+                      { label: 'صورة لقطة شاشة للمشروع', key: 'screenshot' },
+                      { label: 'بيانات الفريق والمشرف', key: 'teamSheet' }
+                    ].map((item, i) => (
                       <div key={i} className="flex items-center gap-4 bg-white p-3 rounded-xl border border-slate-300">
                         <Upload className="w-5 h-5 text-slate-400" />
                         <div className="flex-1">
-                          <div className="text-sm font-bold text-slate-700">{item}</div>
-                          <input type="file" className="text-xs w-full mt-1 file:bg-[#26462C] file:text-white file:border-0 file:rounded-md file:px-2 file:py-1 file:cursor-pointer" />
+                          <div className="text-sm font-bold text-slate-700">{item.label}</div>
+                          <input 
+                            type="file" 
+                            onChange={(e) => handleFileChange(e, item.key)}
+                            className="text-xs w-full mt-1 file:bg-[#26462C] file:text-white file:border-0 file:rounded-md file:px-2 file:py-1 file:cursor-pointer" 
+                          />
+                          {selectedFiles[item.key] && (
+                            <div className="text-xs text-green-600 font-bold mt-1">✓ {selectedFiles[item.key].name}</div>
+                          )}
                         </div>
                       </div>
                     ))}
@@ -515,15 +608,31 @@ const SubmitGraduationProjectPage = () => {
                   <h3 className="font-black text-slate-600 mb-4">مرفقات اختيارية</h3>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     {[
-                      'التقرير الكامل', 'رابط التطبيق', 'رابط GitHub', 'صور النموذج',
-                      'فيديو Demo', 'دراسة جدوى', 'نموذج عمل', 'خطة تسويق',
-                      'خطاب المشرف', 'شهادة مشاركة', 'إثبات اختبار', 'موافقة ملكية'
+                      { label: 'التقرير الكامل', key: 'fullReport' },
+                      { label: 'رابط التطبيق', key: 'appLink' },
+                      { label: 'رابط GitHub', key: 'githubLink' },
+                      { label: 'صور النموذج', key: 'prototypeImages' },
+                      { label: 'فيديو Demo', key: 'demoVideo' },
+                      { label: 'دراسة جدوى', key: 'feasibilityStudy' },
+                      { label: 'نموذج عمل', key: 'businessModel' },
+                      { label: 'خطة تسويق', key: 'marketingPlan' },
+                      { label: 'خطاب المشرف', key: 'supervisorLetter' },
+                      { label: 'شهادة مشاركة', key: 'participationCert' },
+                      { label: 'إثبات اختبار', key: 'testingProof' },
+                      { label: 'موافقة ملكية', key: 'ipApproval' }
                     ].map((item, i) => (
                       <div key={i} className="flex items-center gap-4 bg-white p-3 rounded-xl border border-slate-300">
                         <Upload className="w-5 h-5 text-slate-400" />
                         <div className="flex-1">
-                          <div className="text-sm font-bold text-slate-700">{item}</div>
-                          <input type="file" className="text-xs w-full mt-1 file:bg-slate-200 file:text-slate-700 file:border-0 file:rounded-md file:px-2 file:py-1 file:cursor-pointer" />
+                          <div className="text-sm font-bold text-slate-700">{item.label}</div>
+                          <input 
+                            type="file" 
+                            onChange={(e) => handleFileChange(e, item.key)}
+                            className="text-xs w-full mt-1 file:bg-slate-200 file:text-slate-700 file:border-0 file:rounded-md file:px-2 file:py-1 file:cursor-pointer" 
+                          />
+                          {selectedFiles[item.key] && (
+                            <div className="text-xs text-green-600 font-bold mt-1">✓ {selectedFiles[item.key].name}</div>
+                          )}
                         </div>
                       </div>
                     ))}
@@ -590,34 +699,62 @@ const SubmitGraduationProjectPage = () => {
               </div>
             )}
 
-            {/* Navigation Buttons */}
-            <div className="flex justify-between items-center mt-12 pt-6 border-t border-slate-100">
-              <button
-                type="button"
-                onClick={prevStep}
-                disabled={currentStep === 1}
-                className={`flex items-center gap-2 px-6 py-3 rounded-xl font-black transition-colors ${currentStep === 1 ? 'bg-slate-100 text-slate-400 cursor-not-allowed' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'}`}
-              >
-                <ArrowRight className="w-5 h-5" /> السابق
-              </button>
+             {/* Submit Status Messages */}
+             {submitError && (
+               <div className="mt-6 p-4 bg-red-50 border border-red-200 text-red-700 rounded-2xl font-bold text-center">
+                 {submitError}
+               </div>
+             )}
 
-              {currentStep < 14 ? (
-                <button
-                  type="button"
-                  onClick={nextStep}
-                  className="flex items-center gap-2 bg-[#26462C] text-[#F4A217] px-8 py-3 rounded-xl font-black hover:bg-[#1e3622] transition-colors shadow-md"
-                >
-                  التالي <ArrowLeft className="w-5 h-5" />
-                </button>
-              ) : (
-                <button
-                  type="submit"
-                  className="flex items-center gap-2 bg-[#F4A217] text-[#26462C] px-10 py-4 rounded-xl font-black text-lg hover:bg-yellow-400 transition-colors shadow-[0_0_20px_rgba(244,162,23,0.3)] animate-pulse"
-                >
-                  <Send className="w-5 h-5" /> إرسال المشروع للمراجعة
-                </button>
-              )}
-            </div>
+             {submitSuccess ? (
+               <div className="mt-8 text-center p-8 bg-green-50 border border-green-200 rounded-3xl animate-fade-in">
+                 <CheckCircle className="w-16 h-16 text-green-600 mx-auto mb-4" />
+                 <h3 className="text-2xl font-black text-green-800 mb-2">تم تقديم المشروع بنجاح!</h3>
+                 <p className="text-green-700 font-bold mb-6">شكراً لتقديمك. تم حفظ بيانات مشروع التخرج والملفات المرفقة بنجاح.</p>
+                 <Link to="/graduation-projects" className="inline-flex items-center gap-2 bg-[#26462C] text-white px-8 py-3 rounded-xl font-black hover:bg-[#1e3622] transition-colors">
+                   <ArrowRight className="w-5 h-5" /> العودة لصفحة المشروعات
+                 </Link>
+               </div>
+             ) : (
+               /* Navigation Buttons */
+               <div className="flex justify-between items-center mt-12 pt-6 border-t border-slate-100">
+                 <button
+                   type="button"
+                   onClick={prevStep}
+                   disabled={currentStep === 1 || isSubmitting}
+                   className={`flex items-center gap-2 px-6 py-3 rounded-xl font-black transition-colors ${currentStep === 1 || isSubmitting ? 'bg-slate-100 text-slate-400 cursor-not-allowed' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'}`}
+                 >
+                   <ArrowRight className="w-5 h-5" /> السابق
+                 </button>
+
+                 {currentStep < 14 ? (
+                   <button
+                     type="button"
+                     onClick={nextStep}
+                     className="flex items-center gap-2 bg-[#26462C] text-[#F4A217] px-8 py-3 rounded-xl font-black hover:bg-[#1e3622] transition-colors shadow-md"
+                   >
+                     التالي <ArrowLeft className="w-5 h-5" />
+                   </button>
+                 ) : (
+                   <button
+                     type="submit"
+                     disabled={isSubmitting}
+                     className={`flex items-center gap-2 bg-[#F4A217] text-[#26462C] px-10 py-4 rounded-xl font-black text-lg hover:bg-yellow-400 transition-colors shadow-[0_0_20px_rgba(244,162,23,0.3)] ${isSubmitting ? 'opacity-70 cursor-wait' : 'animate-pulse'}`}
+                   >
+                     {isSubmitting ? (
+                       <>
+                         <span className="w-5 h-5 border-2 border-[#26462C] border-t-transparent rounded-full animate-spin"></span>
+                         جاري رفع الملفات وحفظ المشروع...
+                       </>
+                     ) : (
+                       <>
+                         <Send className="w-5 h-5" /> إرسال المشروع للمراجعة
+                       </>
+                     )}
+                   </button>
+                 )}
+               </div>
+             )}
             
           </form>
         </div>

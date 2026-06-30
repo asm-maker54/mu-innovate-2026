@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useSearchParams, Link } from 'react-router-dom';
 import { ArrowRight, CheckCircle2, UploadCloud, FileText, X, AlertCircle } from 'lucide-react';
+import { supabase, isSupabaseConfigured } from '../supabaseClient';
 
 const TermsModal = ({ isOpen, onClose }) => {
   if (!isOpen) return null;
@@ -43,6 +44,8 @@ const RegisterPage = () => {
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [isTermsOpen, setIsTermsOpen] = useState(false);
   const [errors, setErrors] = useState({});
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState('');
 
   const [formData, setFormData] = useState({
     // Step 1: All
@@ -226,11 +229,64 @@ const RegisterPage = () => {
     if (step > 1) setStep(step - 1);
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (validateStep3()) {
-      console.log('Submitted Data:', formData);
-      setIsSubmitted(true);
+      setIsSubmitting(true);
+      setSubmitError('');
+
+      try {
+        let cvUrl = '';
+
+        if (formData.attachment && isSupabaseConfigured) {
+          const file = formData.attachment;
+          const fileExt = file.name.split('.').pop();
+          const fileName = `${Date.now()}_cv.${fileExt}`;
+          const filePath = `cvs/${fileName}`;
+
+          const { data, error } = await supabase.storage
+            .from('project-attachments')
+            .upload(filePath, file, { cacheControl: '3600', upsert: true });
+
+          if (error) throw error;
+
+          const { data: publicUrlData } = supabase.storage
+            .from('project-attachments')
+            .getPublicUrl(filePath);
+
+          cvUrl = publicUrlData.publicUrl;
+        }
+
+        if (isSupabaseConfigured) {
+          const { fullName, email, phone, organization, attachment, acceptTerms, ...otherDetails } = formData;
+          
+          const { data, error } = await supabase
+            .from('registrations')
+            .insert([
+              {
+                full_name: fullName,
+                email,
+                phone,
+                organization,
+                role: safeRole,
+                cv_url: cvUrl,
+                details: otherDetails
+              }
+            ]);
+
+          if (error) throw error;
+        } else {
+          console.warn("Supabase is not configured. Mocking registration submission...");
+          await new Promise(resolve => setTimeout(resolve, 2000));
+        }
+
+        setIsSubmitted(true);
+      } catch (err) {
+        console.error(err);
+        setSubmitError(err.message || 'حدث خطأ أثناء حفظ البيانات. يرجى المحاولة مرة أخرى.');
+      } finally {
+        setIsSubmitting(false);
+      }
     }
   };
 
@@ -647,10 +703,17 @@ const RegisterPage = () => {
                 </div>
               )}
 
+              {/* Submit Error Message */}
+              {submitError && (
+                <div className="mt-6 p-4 bg-red-50 border border-red-200 text-red-700 rounded-2xl font-bold text-center">
+                  {submitError}
+                </div>
+              )}
+
               {/* Navigation Buttons */}
               <div className="flex gap-4 pt-6 mt-6 border-t border-slate-100">
                 {step > 1 && (
-                  <button type="button" onClick={handleBack} className="px-6 py-4 bg-slate-100 text-slate-700 rounded-xl font-bold hover:bg-slate-200 transition-colors w-1/3">
+                  <button type="button" onClick={handleBack} disabled={isSubmitting} className="px-6 py-4 bg-slate-100 text-slate-700 rounded-xl font-bold hover:bg-slate-200 transition-colors w-1/3 disabled:opacity-50">
                     السابق
                   </button>
                 )}
@@ -660,8 +723,15 @@ const RegisterPage = () => {
                     التالي
                   </button>
                 ) : (
-                  <button type="submit" className={`py-4 bg-blue-600 text-white rounded-xl font-bold hover:bg-blue-700 transition-colors hover:shadow-lg hover:shadow-blue-600/30 flex-1`}>
-                    تأكيد التسجيل النهائي
+                  <button type="submit" disabled={isSubmitting} className={`py-4 bg-blue-600 text-white rounded-xl font-bold hover:bg-blue-700 transition-colors hover:shadow-lg hover:shadow-blue-600/30 flex-1 flex items-center justify-center gap-2 ${isSubmitting ? 'opacity-70 cursor-wait' : ''}`}>
+                    {isSubmitting ? (
+                      <>
+                        <span className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
+                        جاري إرسال الطلب...
+                      </>
+                    ) : (
+                      <>تأكيد التسجيل النهائي</>
+                    )}
                   </button>
                 )}
               </div>
