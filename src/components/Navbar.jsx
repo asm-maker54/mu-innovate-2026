@@ -147,20 +147,20 @@ const Navbar = () => {
 
         {/* Left Actions */}
         <div className="hidden lg:flex items-center gap-5 pl-2 h-full">
-          <button 
-            onClick={toggleLanguage}
-            className={`flex items-center gap-1.5 font-bold text-xs transition-colors text-gray-500 hover:text-[#111827]`}
-          >
-            <span>{isRtl ? 'EN' : 'عربي'}</span>
-            <Globe className="w-4 h-4" />
-          </button>
-
           <Link 
             to="/contact"
             className="flex items-center gap-2 px-5 py-2 rounded-full font-bold text-xs transition-all bg-[#ea580c] text-white hover:bg-[#c2410c] shadow-md whitespace-nowrap hidden sm:flex"
           >
             <span>{isRtl ? 'تواصل معنا' : 'Contact Us'}</span>
           </Link>
+
+          <button 
+            onClick={toggleLanguage}
+            className="flex items-center gap-1.5 px-4 py-2 rounded-full font-bold text-xs transition-all bg-[#26462C]/10 text-[#26462C] hover:bg-[#26462C] hover:text-[#F4A217] border border-[#26462C]/20 shadow-sm whitespace-nowrap"
+          >
+            <span>{isRtl ? 'English' : 'عربي'}</span>
+            <Globe className="w-3.5 h-3.5" />
+          </button>
         </div>
 
         {/* Mobile Menu Button */}
