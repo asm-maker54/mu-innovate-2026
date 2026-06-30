@@ -117,7 +117,55 @@ const SubmitResearchPage = () => {
           <div className="animate-fade-in">
             <h2 className="text-2xl font-black text-[#183059] mb-6 border-b pb-4">الخطوة 1: بيانات الباحث الرئيسي</h2>
             <Input label="الاسم بالكامل" name="piName" />
-            <Select label="الكلية" name="piFaculty" options={['الطب', 'الهندسة', 'العلوم', 'الحاسبات', 'الزراعة', 'أخرى']} />
+            <div className="mb-4">
+              <label className="block text-sm font-bold text-gray-700 mb-2">الكلية *</label>
+              <select name="piFaculty" value={formData.piFaculty} onChange={handleChange} className="w-full border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-blue-500 transition-all text-sm">
+                <option value="">اختر الكلية...</option>
+                <optgroup label="جامعة المنيا (حكومية) - القطاع الطبي والصحي">
+                  <option value="الطب البشري (حكومية)">كلية الطب البشري</option>
+                  <option value="طب الأسنان (حكومية)">كلية طب الأسنان</option>
+                  <option value="الصيدلة (حكومية)">كلية الصيدلة</option>
+                  <option value="التمريض (حكومية)">كلية التمريض</option>
+                </optgroup>
+                <optgroup label="جامعة المنيا (حكومية) - القطاع العلمي والهندسي">
+                  <option value="الهندسة (حكومية)">كلية الهندسة</option>
+                  <option value="الحاسبات والمعلومات (حكومية)">كلية الحاسبات والمعلومات</option>
+                  <option value="العلوم (حكومية)">كلية العلوم</option>
+                  <option value="الزراعة (حكومية)">كلية الزراعة</option>
+                  <option value="الطب البيطري (حكومية)">كلية الطب البيطري</option>
+                </optgroup>
+                <optgroup label="جامعة المنيا (حكومية) - العلوم الإنسانية والاجتماعية">
+                  <option value="الآداب (حكومية)">كلية الآداب</option>
+                  <option value="الحقوق (حكومية)">كلية الحقوق</option>
+                  <option value="الألسن (حكومية)">كلية الألسن</option>
+                  <option value="دار العلوم (حكومية)">كلية دار العلوم</option>
+                  <option value="السياحة والفنادق (حكومية)">كلية السياحة والفنادق</option>
+                </optgroup>
+                <optgroup label="جامعة المنيا (حكومية) - القطاع التربوي والفني">
+                  <option value="التربية (حكومية)">كلية التربية</option>
+                  <option value="التربية النوعية (حكومية)">كلية التربية النوعية</option>
+                  <option value="التربية للطفولة المبكرة (حكومية)">كلية التربية للطفولة المبكرة</option>
+                  <option value="التربية الرياضية (حكومية)">كلية التربية الرياضية</option>
+                  <option value="التربية الفنية (حكومية)">كلية التربية الفنية</option>
+                  <option value="الفنون الجميلة (حكومية)">كلية الفنون الجميلة</option>
+                </optgroup>
+                <optgroup label="ثانياً: جامعة المنيا الأهلية (7 كليات)">
+                  <option value="الطب البشري (أهلية)">كلية الطب البشري</option>
+                  <option value="طب الأسنان (أهلية)">كلية طب الأسنان</option>
+                  <option value="الصيدلة - إكلينيكية (أهلية)">كلية الصيدلة (برنامج الصيدلة الإكلينيكية)</option>
+                  <option value="العلاج الطبيعي (أهلية)">كلية العلاج الطبيعي</option>
+                  <option value="الهندسة - ميكاترونيات (أهلية)">كلية الهندسة (برنامج هندسة الميكاترونيات والروبوتات الصناعية)</option>
+                  <option value="الحاسبات والذكاء الاصطناعي (أهلية)">كلية الحاسبات والذكاء الاصطناعي</option>
+                  <option value="العلاقات العامة وإدارة الأعمال (أهلية)">كلية العلاقات العامة وإدارة الأعمال</option>
+                </optgroup>
+                <optgroup label="ثالثاً: جامعة دراية الخاصة (4 كليات)">
+                  <option value="الصيدلة (دراية)">كلية الصيدلة</option>
+                  <option value="طب الفم والأسنان (دراية)">كلية طب الفم والأسنان</option>
+                  <option value="العلاج الطبيعي (دراية)">كلية العلاج الطبيعي</option>
+                  <option value="إدارة الأعمال (دراية)">كلية إدارة الأعمال</option>
+                </optgroup>
+              </select>
+            </div>
             <Input label="القسم العلمي" name="piDept" />
             <Select label="الدرجة العلمية / الوظيفة" name="piRank" options={['مدرس مساعد', 'مدرس', 'أستاذ مساعد', 'أستاذ', 'باحث', 'طالب دراسات عليا', 'أخرى']} />
             <Input label="البريد الإلكتروني الجامعي" name="piEmail" type="email" />
