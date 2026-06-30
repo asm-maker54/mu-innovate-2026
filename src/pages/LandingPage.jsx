@@ -29,6 +29,12 @@ const LandingPage = () => {
   const [currentSlide, setCurrentSlide] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
 
+  // Countdown State
+  const [days, setDays] = useState(0);
+  const [hours, setHours] = useState(0);
+  const [minutes, setMinutes] = useState(0);
+  const [seconds, setSeconds] = useState(0);
+
   useEffect(() => {
     if (isPaused) return;
     const timer = setInterval(() => {
@@ -36,6 +42,20 @@ const LandingPage = () => {
     }, 5000);
     return () => clearInterval(timer);
   }, [isPaused, heroImages.length]);
+
+  useEffect(() => {
+    const target = new Date('2026-11-01T09:00:00');
+    const timer = setInterval(() => {
+      const now = new Date();
+      const diff = target - now;
+      if (diff <= 0) { clearInterval(timer); return; }
+      setDays(Math.floor(diff / (1000 * 60 * 60 * 24)));
+      setHours(Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)));
+      setMinutes(Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60)));
+      setSeconds(Math.floor((diff % (1000 * 60)) / 1000));
+    }, 1000);
+    return () => clearInterval(timer);
+  }, []);
 
   return (
     <div className="flex flex-col min-h-screen">
@@ -117,6 +137,40 @@ const LandingPage = () => {
                     <p className="text-blue-200/80 text-sm leading-relaxed mb-6">
                       قمة جامعة المنيا للابتكار وريادة الأعمال 2026. انضم إلينا في نوفمبر 2026.
                     </p>
+                  </div>
+
+                  {/* Countdown Timer */}
+                  <div className="bg-slate-900/40 border border-white/10 rounded-2xl p-4 flex flex-col items-center gap-3">
+                    <span className="text-amber-400 font-black text-sm">العد التنازلي للقمة:</span>
+                    <div className="flex items-center gap-3" dir="ltr">
+                      <div className="flex flex-col items-center">
+                        <div className="w-12 h-12 bg-slate-950/80 rounded-xl flex items-center justify-center text-white font-black text-xl shadow-lg border border-white/5 tabular-nums">
+                          {String(days).padStart(2, '0')}
+                        </div>
+                        <span className="text-blue-200/60 text-xs mt-1.5 font-bold">يوم</span>
+                      </div>
+                      <span className="text-white/30 text-lg font-bold mb-5">:</span>
+                      <div className="flex flex-col items-center">
+                        <div className="w-12 h-12 bg-slate-950/80 rounded-xl flex items-center justify-center text-white font-black text-xl shadow-lg border border-white/5 tabular-nums">
+                          {String(hours).padStart(2, '0')}
+                        </div>
+                        <span className="text-blue-200/60 text-xs mt-1.5 font-bold">ساعة</span>
+                      </div>
+                      <span className="text-white/30 text-lg font-bold mb-5">:</span>
+                      <div className="flex flex-col items-center">
+                        <div className="w-12 h-12 bg-slate-950/80 rounded-xl flex items-center justify-center text-white font-black text-xl shadow-lg border border-white/5 tabular-nums">
+                          {String(minutes).padStart(2, '0')}
+                        </div>
+                        <span className="text-blue-200/60 text-xs mt-1.5 font-bold">دقيقة</span>
+                      </div>
+                      <span className="text-white/30 text-lg font-bold mb-5">:</span>
+                      <div className="flex flex-col items-center">
+                        <div className="w-12 h-12 bg-slate-950/80 rounded-xl flex items-center justify-center text-white font-black text-xl shadow-lg border border-white/5 tabular-nums">
+                          {String(seconds).padStart(2, '0')}
+                        </div>
+                        <span className="text-blue-200/60 text-xs mt-1.5 font-bold">ثانية</span>
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>
