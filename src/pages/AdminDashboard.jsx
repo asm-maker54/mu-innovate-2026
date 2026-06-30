@@ -705,7 +705,19 @@ const AdminDashboard = () => {
                             <span className="text-xs text-slate-400 font-bold">لا توجد ملفات مرفوعة</span>
                           ) : (
                             Object.entries(selectedItem.files).map(([key, url]) => (
-                              <a href={url} target="_blank" key={key} className="flex items-center justify-between p-3 bg-white hover:bg-slate-100 rounded-xl border border-slate-200 text-sm font-bold text-slate-700 transition-colors">
+                              <a 
+                                href={url !== '#' ? url : undefined} 
+                                onClick={(e) => {
+                                  if (url === '#') {
+                                    e.preventDefault();
+                                    alert('عذراً، هذا الملف غير متوفر حالياً.');
+                                  }
+                                }}
+                                target="_blank" 
+                                rel="noreferrer"
+                                key={key} 
+                                className="flex items-center justify-between p-3 bg-white hover:bg-slate-100 rounded-xl border border-slate-200 text-sm font-bold text-slate-700 transition-colors cursor-pointer"
+                              >
                                 <span className="flex items-center gap-2">
                                   <FileText className="w-4 h-4 text-red-500" />
                                   {key === 'summaryPdf' ? 'ملخص المشروع PDF' :
@@ -766,7 +778,19 @@ const AdminDashboard = () => {
                             <span className="text-xs text-slate-400 font-bold">لا توجد ملفات مرفوعة</span>
                           ) : (
                             Object.entries(selectedItem.files).map(([key, url]) => (
-                              <a href={url} target="_blank" key={key} className="flex items-center justify-between p-3 bg-white hover:bg-slate-100 rounded-xl border border-slate-200 text-sm font-bold text-slate-700 transition-colors">
+                              <a 
+                                href={url !== '#' ? url : undefined} 
+                                onClick={(e) => {
+                                  if (url === '#') {
+                                    e.preventDefault();
+                                    alert('عذراً، هذا الملف غير متوفر حالياً.');
+                                  }
+                                }}
+                                target="_blank" 
+                                rel="noreferrer"
+                                key={key} 
+                                className="flex items-center justify-between p-3 bg-white hover:bg-slate-100 rounded-xl border border-slate-200 text-sm font-bold text-slate-700 transition-colors cursor-pointer"
+                              >
                                 <span className="flex items-center gap-2">
                                   <FileText className="w-4 h-4 text-red-500" />
                                   {key === 'researchPdf' ? 'ملف البحث الرئيسي' :
