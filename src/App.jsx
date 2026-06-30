@@ -22,6 +22,7 @@ import DigitalMentorsPage from './pages/DigitalMentorsPage';
 import EmploymentFairPage from './pages/EmploymentFairPage';
 import AlumniFairPage from './pages/AlumniFairPage';
 import GraduationProjectsPage from './pages/GraduationProjectsPage';
+import SubmitGraduationProjectPage from './pages/SubmitGraduationProjectPage';
 import GreenInnovationPage from './pages/GreenInnovationPage';
 import Chatbot from './components/Chatbot';
 
@@ -59,6 +60,7 @@ function App() {
             <Route path="/employment-fair" element={<EmploymentFairPage />} />
             <Route path="/alumni-fair" element={<AlumniFairPage />} />
             <Route path="/graduation-projects" element={<GraduationProjectsPage />} />
+            <Route path="/submit-graduation-project" element={<SubmitGraduationProjectPage />} />
             <Route path="/green-innovation" element={<GreenInnovationPage />} />
           </Routes>
         </main>
