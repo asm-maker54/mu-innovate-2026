@@ -207,8 +207,15 @@ const SubmitGraduationProjectPage = () => {
                         <option value="العلاج الطبيعي (دراية)">كلية العلاج الطبيعي</option>
                         <option value="إدارة الأعمال (دراية)">كلية إدارة الأعمال</option>
                       </optgroup>
+                      <option value="أخرى">أخرى...</option>
                     </select>
                   </div>
+                  {formData.college === 'أخرى' && (
+                    <div className="md:col-span-2">
+                      <label className="block text-sm font-bold text-slate-700 mb-2">يرجى كتابة اسم الكلية والجامعة الأخرى *</label>
+                      <input type="text" name="customCollege" value={formData.customCollege || ''} onChange={handleInputChange} className="w-full border-slate-200 rounded-xl p-3 focus:ring-[#26462C] focus:border-[#26462C]" required />
+                    </div>
+                  )}
                   <div>
                     <label className="block text-sm font-bold text-slate-700 mb-2">القسم / البرنامج الأكاديمي *</label>
                     <input type="text" name="department" value={formData.department} onChange={handleInputChange} className="w-full border-slate-200 rounded-xl p-3 focus:ring-[#26462C] focus:border-[#26462C]" required />

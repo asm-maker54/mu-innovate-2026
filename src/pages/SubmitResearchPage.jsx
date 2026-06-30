@@ -164,8 +164,15 @@ const SubmitResearchPage = () => {
                   <option value="العلاج الطبيعي (دراية)">كلية العلاج الطبيعي</option>
                   <option value="إدارة الأعمال (دراية)">كلية إدارة الأعمال</option>
                 </optgroup>
+                <option value="أخرى">أخرى...</option>
               </select>
             </div>
+            {formData.piFaculty === 'أخرى' && (
+              <div className="mb-4">
+                <label className="block text-sm font-bold text-gray-700 mb-2">يرجى كتابة اسم الكلية والجامعة الأخرى *</label>
+                <input type="text" name="customFaculty" value={formData.customFaculty || ''} onChange={handleChange} className="w-full border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all text-sm" required />
+              </div>
+            )}
             <Input label="القسم العلمي" name="piDept" />
             <Select label="الدرجة العلمية / الوظيفة" name="piRank" options={['مدرس مساعد', 'مدرس', 'أستاذ مساعد', 'أستاذ', 'باحث', 'طالب دراسات عليا', 'أخرى']} />
             <Input label="البريد الإلكتروني الجامعي" name="piEmail" type="email" />
