@@ -155,21 +155,11 @@ const Navbar = () => {
             <Globe className="w-4 h-4" />
           </button>
 
-          <a 
-            href="/#registration"
-            className={`flex items-center gap-2 px-5 py-2 rounded-full font-bold text-xs transition-all bg-[#ea580c] text-white hover:bg-[#c2410c] shadow-md whitespace-nowrap hidden sm:flex`}
-          >
-            <span>{isRtl ? 'سجل الآن' : 'Register Now'}</span>
-          </a>
-
           <Link 
-            to="/auth" 
-            target="_blank"
-            rel="noopener noreferrer"
-            className={`flex items-center gap-2 px-5 py-2 rounded-full font-bold text-xs transition-all bg-[#111827] text-white hover:bg-slate-800 shadow-md whitespace-nowrap`}
+            to="/contact"
+            className="flex items-center gap-2 px-5 py-2 rounded-full font-bold text-xs transition-all bg-[#ea580c] text-white hover:bg-[#c2410c] shadow-md whitespace-nowrap hidden sm:flex"
           >
-            <span>{isRtl ? 'تسجيل الدخول' : 'Login'}</span>
-            <User className="w-4 h-4" />
+            <span>{isRtl ? 'تواصل معنا' : 'Contact Us'}</span>
           </Link>
         </div>
 
@@ -229,13 +219,11 @@ const Navbar = () => {
               {isRtl ? 'English' : 'عربي'}
             </button>
             <Link 
-              to="/auth" 
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex items-center justify-center gap-2 w-full py-4 bg-[#111827] text-white rounded-xl font-bold text-lg"
+              to="/contact" 
+              onClick={() => setMobileMenuOpen(false)}
+              className="flex items-center justify-center gap-2 w-full py-4 bg-[#ea580c] text-white rounded-xl font-bold text-lg hover:bg-[#c2410c] transition-colors"
             >
-              <User className="w-5 h-5" />
-              {isRtl ? 'تسجيل الدخول' : 'Login'}
+              {isRtl ? 'تواصل معنا' : 'Contact Us'}
             </Link>
           </div>
         </div>
