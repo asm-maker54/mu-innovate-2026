@@ -154,6 +154,14 @@ const Navbar = () => {
             <span>{isRtl ? 'تواصل معنا' : 'Contact Us'}</span>
           </Link>
 
+          <Link 
+            to="/auth"
+            className="flex items-center gap-1.5 p-2 rounded-full font-bold text-xs transition-all bg-slate-100 text-slate-700 hover:bg-[#26462C] hover:text-[#F4A217] border border-slate-200 shadow-sm"
+            title={isRtl ? 'تسجيل الدخول / إنشاء حساب' : 'Login / Sign Up'}
+          >
+            <User className="w-4 h-4" />
+          </Link>
+
           <button 
             onClick={toggleLanguage}
             className="flex items-center gap-1.5 px-4 py-2 rounded-full font-bold text-xs transition-all bg-[#26462C]/10 text-[#26462C] hover:bg-[#26462C] hover:text-[#F4A217] border border-[#26462C]/20 shadow-sm whitespace-nowrap"
@@ -218,6 +226,14 @@ const Navbar = () => {
               <Globe className="w-5 h-5" />
               {isRtl ? 'English' : 'عربي'}
             </button>
+            <Link 
+              to="/auth" 
+              onClick={() => setMobileMenuOpen(false)}
+              className="flex items-center justify-center gap-2 w-full py-4 bg-[#111827] text-white rounded-xl font-bold text-lg hover:bg-slate-800 transition-colors"
+            >
+              <User className="w-5 h-5" />
+              {isRtl ? 'تسجيل الدخول / إنشاء حساب' : 'Login / Sign Up'}
+            </Link>
             <Link 
               to="/contact" 
               onClick={() => setMobileMenuOpen(false)}

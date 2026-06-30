@@ -37,7 +37,7 @@ const TermsModal = ({ isOpen, onClose }) => {
 const RegisterPage = () => {
   const [searchParams] = useSearchParams();
   const role = searchParams.get('role') || 'speaker';
-  const roleTypes = ['speaker', 'startup', 'investor', 'mentor'];
+  const roleTypes = ['speaker', 'startup', 'investor', 'mentor', 'partner'];
   const urlRole = roleTypes.includes(role) ? role : 'speaker';
 
   const [step, setStep] = useState(1);
@@ -103,7 +103,8 @@ const RegisterPage = () => {
     speaker: { title: 'تسجيل المتحدثين', description: 'شارك بخبراتك وكن جزءاً من منصة المتحدثين.', attachmentLabel: 'السيرة الذاتية (CV)', requiresAttachment: true },
     startup: { title: 'تسجيل الشركات الناشئة', description: 'سجل شركتك الناشئة واعرض ابتكارك للعالم.', attachmentLabel: 'العرض التقديمي (Pitch Deck)', requiresAttachment: true },
     investor: { title: 'تسجيل المستثمرين', description: 'انضم لشبكة مستثمري قمة الابتكار.', attachmentLabel: 'ملف تعريفي (اختياري)', requiresAttachment: false },
-    mentor: { title: 'تسجيل المدربين', description: 'كن مدرباً لرواد الأعمال وساعدهم في رحلتهم.', attachmentLabel: 'السيرة الذاتية (CV)', requiresAttachment: true }
+    mentor: { title: 'تسجيل المدربين', description: 'كن مدرباً لرواد الأعمال وساعدهم في رحلتهم.', attachmentLabel: 'السيرة الذاتية (CV)', requiresAttachment: true },
+    partner: { title: 'تسجيل الشركاء', description: 'نرحب بشراكتكم لبناء مستقبل ريادة الأعمال.', attachmentLabel: 'ملف الشركة (Company Profile)', requiresAttachment: true }
   };
   const currentRole = roleDetails[selectedRole];
 
@@ -364,6 +365,7 @@ const RegisterPage = () => {
                         <option value="startup">شركة ناشئة (Startup)</option>
                         <option value="investor">مستثمر (Investor)</option>
                         <option value="mentor">مدرب / موجه (Mentor)</option>
+                        <option value="partner">شريك (Partner)</option>
                       </select>
                       <ArrowRight className="w-4 h-4 text-slate-400 absolute left-4 top-1/2 -translate-y-1/2 rotate-90 pointer-events-none" />
                     </div>
