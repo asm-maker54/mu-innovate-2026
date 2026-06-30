@@ -36,14 +36,15 @@ const TermsModal = ({ isOpen, onClose }) => {
 
 const RegisterPage = () => {
   const [searchParams] = useSearchParams();
-  const role = searchParams.get('role') || 'volunteer';
-  const roleTypes = ['speaker', 'partner', 'startup', 'investor', 'mentor', 'volunteer', 'researcher'];
-  const safeRole = roleTypes.includes(role) ? role : 'volunteer';
+  const role = searchParams.get('role') || 'speaker';
+  const roleTypes = ['speaker', 'startup', 'investor', 'mentor'];
+  const urlRole = roleTypes.includes(role) ? role : 'speaker';
 
   const [step, setStep] = useState(1);
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [isTermsOpen, setIsTermsOpen] = useState(false);
   const [errors, setErrors] = useState({});
+  const [selectedRole, setSelectedRole] = useState(urlRole);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState('');
 
@@ -100,14 +101,11 @@ const RegisterPage = () => {
 
   const roleDetails = {
     speaker: { title: 'تسجيل المتحدثين', description: 'شارك بخبراتك وكن جزءاً من منصة المتحدثين.', attachmentLabel: 'السيرة الذاتية (CV)', requiresAttachment: true },
-    partner: { title: 'تسجيل الشركاء', description: 'نرحب بشراكتكم لبناء مستقبل ريادة الأعمال.', attachmentLabel: 'ملف الشركة (Company Profile)', requiresAttachment: true },
     startup: { title: 'تسجيل الشركات الناشئة', description: 'سجل شركتك الناشئة واعرض ابتكارك للعالم.', attachmentLabel: 'العرض التقديمي (Pitch Deck)', requiresAttachment: true },
     investor: { title: 'تسجيل المستثمرين', description: 'انضم لشبكة مستثمري قمة الابتكار.', attachmentLabel: 'ملف تعريفي (اختياري)', requiresAttachment: false },
-    mentor: { title: 'تسجيل المدربين', description: 'كن مدرباً لرواد الأعمال وساعدهم في رحلتهم.', attachmentLabel: 'السيرة الذاتية (CV)', requiresAttachment: true },
-    volunteer: { title: 'تسجيل المتطوعين', description: 'انضم لفريق المتطوعين الرائع وصنع الفارق.', attachmentLabel: '', requiresAttachment: false },
-    researcher: { title: 'تسجيل البحوث التطبيقية', description: 'ارفع فكرة بحثك التطبيقي وشاركه للتسويق التجاري.', attachmentLabel: 'ملف البحث (PDF)', requiresAttachment: true },
+    mentor: { title: 'تسجيل المدربين', description: 'كن مدرباً لرواد الأعمال وساعدهم في رحلتهم.', attachmentLabel: 'السيرة الذاتية (CV)', requiresAttachment: true }
   };
-  const currentRole = roleDetails[safeRole];
+  const currentRole = roleDetails[selectedRole];
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -162,7 +160,7 @@ const RegisterPage = () => {
   const validateStep2 = () => {
     const newErrors = {};
     
-    if (safeRole === 'startup') {
+    if (selectedRole === 'startup') {
       if (!formData.startupName.trim()) newErrors.startupName = 'اسم المشروع مطلوب';
       if (!formData.industry) newErrors.industry = 'يرجى اختيار قطاع المشروع';
       if (!formData.stage) newErrors.stage = 'يرجى اختيار مرحلة المشروع';
@@ -172,29 +170,29 @@ const RegisterPage = () => {
         newErrors.elevatorPitch = 'الوصف يجب ألا يتجاوز 100 كلمة';
       }
     } 
-    else if (safeRole === 'speaker') {
+    else if (selectedRole === 'speaker') {
       if (!formData.speechTopic.trim()) newErrors.speechTopic = 'موضوع التحدث مطلوب';
       if (!formData.speakerExpertise) newErrors.speakerExpertise = 'مجال الخبرة مطلوب';
       if (!formData.speakerBio.trim()) newErrors.speakerBio = 'النبذة المختصرة مطلوبة';
       else if (formData.speakerBio.trim().split(/\s+/).length > 100) newErrors.speakerBio = 'النبذة يجب ألا تتجاوز 100 كلمة';
     }
-    else if (safeRole === 'partner') {
+    else if (selectedRole === 'partner') {
       if (!formData.companyName.trim()) newErrors.companyName = 'اسم المؤسسة مطلوب';
       if (!formData.partnerType) newErrors.partnerType = 'نوع الشراكة مطلوب';
     }
-    else if (safeRole === 'investor') {
+    else if (selectedRole === 'investor') {
       if (!formData.investmentType) newErrors.investmentType = 'نوع الاستثمار المفضل مطلوب';
       if (!formData.ticketSize) newErrors.ticketSize = 'حجم الاستثمار المستهدف مطلوب';
     }
-    else if (safeRole === 'mentor') {
+    else if (selectedRole === 'mentor') {
       if (!formData.mentorExpertise) newErrors.mentorExpertise = 'مجال التدريب مطلوب';
       if (!formData.yearsExperience) newErrors.yearsExperience = 'سنوات الخبرة مطلوبة';
     }
-    else if (safeRole === 'volunteer') {
+    else if (selectedRole === 'volunteer') {
       if (!formData.volunteerCommittee) newErrors.volunteerCommittee = 'لجنة التطوع المفضلة مطلوبة';
       if (!formData.hasVolunteerExperience) newErrors.hasVolunteerExperience = 'يرجى تحديد ما إذا كان لديك خبرة';
     }
-    else if (safeRole === 'researcher') {
+    else if (selectedRole === 'researcher') {
       if (!formData.researchTitle.trim()) newErrors.researchTitle = 'عنوان البحث مطلوب';
       if (!formData.researchIdea.trim()) newErrors.researchIdea = 'فكرة البحث مطلوبة';
       else if (formData.researchIdea.trim().split(/\s+/).length > 150) newErrors.researchIdea = 'فكرة البحث يجب ألا تتجاوز 150 كلمة';
@@ -268,7 +266,7 @@ const RegisterPage = () => {
                 email,
                 phone,
                 organization,
-                role: safeRole,
+                role: selectedRole,
                 cv_url: cvUrl,
                 details: otherDetails
               }
@@ -354,6 +352,23 @@ const RegisterPage = () => {
                 <div className="space-y-5 animate-in fade-in slide-in-from-right-4">
                   <h3 className="text-xl font-bold text-slate-900 mb-6 pb-2 border-b border-slate-100">البيانات الشخصية</h3>
                   <div>
+                    <label className="block text-sm font-bold text-slate-700 mb-2">نوع التسجيل *</label>
+                    <div className="relative">
+                      <select 
+                        name="registrationRole" 
+                        value={selectedRole} 
+                        onChange={(e) => setSelectedRole(e.target.value)} 
+                        className="w-full px-5 py-3.5 rounded-xl border border-slate-200 bg-slate-50 focus:ring-2 focus:ring-blue-600 focus:border-transparent transition-all outline-none appearance-none font-bold text-slate-700"
+                      >
+                        <option value="speaker">متحدث (Speaker)</option>
+                        <option value="startup">شركة ناشئة (Startup)</option>
+                        <option value="investor">مستثمر (Investor)</option>
+                        <option value="mentor">مدرب / موجه (Mentor)</option>
+                      </select>
+                      <ArrowRight className="w-4 h-4 text-slate-400 absolute left-4 top-1/2 -translate-y-1/2 rotate-90 pointer-events-none" />
+                    </div>
+                  </div>
+                  <div>
                     <label className="block text-sm font-bold text-slate-700 mb-2">الاسم الكامل *</label>
                     <input type="text" name="fullName" value={formData.fullName} onChange={handleChange} className={getInputClass('fullName')} placeholder="أدخل اسمك ثلاثي" />
                     {renderInputError('fullName')}
@@ -390,15 +405,15 @@ const RegisterPage = () => {
               {step === 2 && (
                 <div className="space-y-5 animate-in fade-in slide-in-from-right-4">
                   <h3 className="text-xl font-bold text-slate-900 mb-6 pb-2 border-b border-slate-100">
-                    {safeRole === 'startup' ? 'بيانات الشركة الناشئة' : 
-                     safeRole === 'speaker' ? 'تفاصيل المشاركة (متحدث)' :
-                     safeRole === 'partner' ? 'تفاصيل الشراكة المقترحة' :
-                     safeRole === 'investor' ? 'البيانات الاستثمارية' :
-                     safeRole === 'mentor' ? 'مجالات الإرشاد' : 'بيانات التطوع'}
+                    {selectedRole === 'startup' ? 'بيانات الشركة الناشئة' : 
+                     selectedRole === 'speaker' ? 'تفاصيل المشاركة (متحدث)' :
+                     selectedRole === 'partner' ? 'تفاصيل الشراكة المقترحة' :
+                     selectedRole === 'investor' ? 'البيانات الاستثمارية' :
+                     selectedRole === 'mentor' ? 'مجالات الإرشاد' : 'بيانات التطوع'}
                   </h3>
 
                   {/* STARTUP */}
-                  {safeRole === 'startup' && (
+                  {selectedRole === 'startup' && (
                     <>
                       <div>
                         <label className="block text-sm font-bold text-slate-700 mb-2">اسم الشركة / المشروع *</label>
@@ -444,7 +459,7 @@ const RegisterPage = () => {
                   )}
 
                   {/* SPEAKER */}
-                  {safeRole === 'speaker' && (
+                  {selectedRole === 'speaker' && (
                     <>
                       <div>
                         <label className="block text-sm font-bold text-slate-700 mb-2">موضوع التحدث المقترح *</label>
@@ -479,7 +494,7 @@ const RegisterPage = () => {
                   )}
 
                   {/* PARTNER */}
-                  {safeRole === 'partner' && (
+                  {selectedRole === 'partner' && (
                     <>
                       <div>
                         <label className="block text-sm font-bold text-slate-700 mb-2">اسم الشركة / المؤسسة *</label>
@@ -512,7 +527,7 @@ const RegisterPage = () => {
                   )}
 
                   {/* INVESTOR */}
-                  {safeRole === 'investor' && (
+                  {selectedRole === 'investor' && (
                     <>
                       <div>
                         <label className="block text-sm font-bold text-slate-700 mb-2">اسم الجهة الاستثمارية (إن وجدت)</label>
@@ -553,7 +568,7 @@ const RegisterPage = () => {
                   )}
 
                   {/* MENTOR */}
-                  {safeRole === 'mentor' && (
+                  {selectedRole === 'mentor' && (
                     <>
                       <div>
                         <label className="block text-sm font-bold text-slate-700 mb-2">مجال التدريب (Expertise) *</label>
@@ -583,7 +598,7 @@ const RegisterPage = () => {
                   )}
 
                   {/* VOLUNTEER */}
-                  {safeRole === 'volunteer' && (
+                  {selectedRole === 'volunteer' && (
                     <>
                       <div>
                         <label className="block text-sm font-bold text-slate-700 mb-2">لجنة التطوع المفضلة *</label>
@@ -619,7 +634,7 @@ const RegisterPage = () => {
                   )}
 
                   {/* RESEARCHER */}
-                  {safeRole === 'researcher' && (
+                  {selectedRole === 'researcher' && (
                     <>
                       <div>
                         <label className="block text-sm font-bold text-slate-700 mb-2">عنوان البحث التطبيقي *</label>
