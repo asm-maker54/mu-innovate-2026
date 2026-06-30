@@ -77,7 +77,7 @@ const Speakers = () => {
   ];
 
   return (
-    <section className="py-24 bg-[#0a0f1c] relative overflow-hidden" dir="rtl">
+    <section className="py-10 md:py-12 bg-[#0a0f1c] relative overflow-hidden" dir="rtl">
       {/* Background Decor */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-blue-600/10 rounded-full blur-[120px] mix-blend-screen" />

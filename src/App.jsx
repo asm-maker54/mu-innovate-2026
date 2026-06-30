@@ -17,6 +17,7 @@ import SuccessStoriesPage from './pages/SuccessStoriesPage';
 import JoinUsPage from './pages/JoinUsPage';
 import StakeholdersPage from './pages/StakeholdersPage';
 import AppliedResearchPage from './pages/AppliedResearchPage';
+import SubmitResearchPage from './pages/SubmitResearchPage';
 import DigitalMentorsPage from './pages/DigitalMentorsPage';
 import EmploymentFairPage from './pages/EmploymentFairPage';
 import AlumniFairPage from './pages/AlumniFairPage';
@@ -37,7 +38,7 @@ function App() {
     <Router>
       <div className="min-h-screen bg-background text-text-primary">
         <Navbar />
-        <main className="pt-20"> {/* pt-20 to account for fixed navbar */}
+        <main>
           <Routes>
             <Route path="/" element={<LandingPage />} />
             <Route path="/auth" element={<AuthPage />} />
@@ -53,6 +54,7 @@ function App() {
             <Route path="/join" element={<JoinUsPage />} />
             <Route path="/stakeholders" element={<StakeholdersPage />} />
             <Route path="/applied-research" element={<AppliedResearchPage />} />
+            <Route path="/submit-research" element={<SubmitResearchPage />} />
             <Route path="/digital-mentors" element={<DigitalMentorsPage />} />
             <Route path="/employment-fair" element={<EmploymentFairPage />} />
             <Route path="/alumni-fair" element={<AlumniFairPage />} />

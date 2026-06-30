@@ -1,116 +1,155 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
-import { Lightbulb, ArrowLeft } from 'lucide-react';
+import { Lightbulb, Trophy, GraduationCap, Store, Briefcase, Handshake, ArrowLeft } from 'lucide-react';
 
 const ExhibitionTracks = () => {
-  const exhibitions = [
+  const tracks = [
     {
       id: 1,
-      title: 'معرض الابتكارات الرقمية',
-      subtitle: '',
-      image: 'https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&q=80&w=800',
-      description: 'إبراز التطبيقات، المنصات الرقمية، مشروعات الذكاء الاصطناعي، الأمن السيبراني، ولوحات البيانات المصممة بأيدي الطلاب.',
-      color: 'bg-[#3b125b]',
-      lightColor: 'bg-[#3b125b]/5'
+      title: 'المبادرات والبرامج',
+      icon: Lightbulb,
+      description: 'برنامج رواد جامعة المنيا، شبكة المدربين الرقمية، مبادرة الابتكار الأخضر والاستدامة، شركة نماء، برامج التدريب والاحتضان.',
+      colors: {
+        bg: 'bg-[#f4f8fb]',
+        blob: 'bg-[#e2f0fa]',
+        icon: 'text-[#3ea8e5]',
+        hex: '#3ea8e5'
+      }
     },
     {
       id: 2,
-      title: 'معرض الوحدات الإنتاجية',
-      subtitle: '',
-      image: 'https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?auto=format&fit=crop&q=80&w=800',
-      description: 'حصر وعرض ما بين 100 إلى 150 منتجاً وخدمة جامعية، وربطها ببطاقات تسويقية موحدة (توضح السعر، التكلفة، وجاهزية قنوات البيع).',
-      color: 'bg-[#0d47a1]',
-      lightColor: 'bg-[#0d47a1]/5'
+      title: 'المسابقات والعروض',
+      icon: Trophy,
+      description: 'Pitching Day، أفضل رائد أعمال، أفضل مشروع طلابي، رفع العروض والملفات، التحكيم وإعلان النتائج.',
+      colors: {
+        bg: 'bg-[#fff5f6]',
+        blob: 'bg-[#ffe4e8]',
+        icon: 'text-[#fc778a]',
+        hex: '#fc778a'
+      }
     },
     {
       id: 3,
-      title: 'كتالوج المنتجات والخدمات',
-      subtitle: '',
-      image: 'https://images.unsplash.com/photo-1542744173-8e7e53415bb0?auto=format&fit=crop&q=80&w=800',
-      description: 'استعرض كتالوج شامل يضم كافة المنتجات والخدمات المبتكرة التي تقدمها وحدات الجامعة المختلفة وتفاصيلها.',
-      color: 'bg-[#0f766e]',
-      lightColor: 'bg-[#0f766e]/5'
+      title: 'البحوث ومشروعات التخرج',
+      icon: GraduationCap,
+      description: 'تقديم البحوث التطبيقية، Technology Offer Book، تسويق مشروعات التخرج، تقييم الجاهزية، طلبات التعاون والتمويل.',
+      colors: {
+        bg: 'bg-[#f6f5fb]',
+        blob: 'bg-[#ebe7f9]',
+        icon: 'text-[#876ce3]',
+        hex: '#876ce3'
+      }
     },
     {
       id: 4,
-      title: 'الحجز والمشاركة',
-      subtitle: '',
-      image: 'https://images.unsplash.com/photo-1515169067868-5387ec356754?auto=format&fit=crop&q=80&w=800',
-      description: 'بادر بحجز مساحتك الخاصة للمشاركة في المعارض القادمة وعرض منتجاتك وابتكاراتك أمام آلاف الزوار والمهتمين.',
-      color: 'bg-[#b91c1c]',
-      lightColor: 'bg-[#b91c1c]/5'
+      title: 'المعارض والمنتجات',
+      icon: Store,
+      description: 'معرض الابتكارات الرقمية، معرض الوحدات الإنتاجية، كتالوج المنتجات والخدمات، الحجز والمشاركة، عرض الصور والفيديوهات.',
+      colors: {
+        bg: 'bg-[#fef9f1]',
+        blob: 'bg-[#fdf0dc]',
+        icon: 'text-[#f5a841]',
+        hex: '#f5a841'
+      }
     },
     {
       id: 5,
-      title: 'عرض الصور والفيديوهات',
-      subtitle: '',
-      image: 'https://images.unsplash.com/photo-1600132806370-bf17e65e942f?auto=format&fit=crop&q=80&w=800',
-      description: 'مكتبة وسائط مرئية غنية توثق فعاليات المعارض والابتكارات من خلال الصور والفيديوهات الحصرية للقمة.',
-      color: 'bg-[#a21caf]',
-      lightColor: 'bg-[#a21caf]/5'
+      title: 'التوظيف والتدريب والشركاء',
+      icon: Briefcase,
+      description: 'ملتقى التوظيف، الوظائف والتدريب، Minia Talent Pool، الشركات المشاركة، طلب المقابلات.',
+      colors: {
+        bg: 'bg-[#f2fcf6]',
+        blob: 'bg-[#e0f8e9]',
+        icon: 'text-[#36c975]',
+        hex: '#36c975'
+      }
+    },
+    {
+      id: 6,
+      title: 'الاستثمار والملكية الفكرية',
+      icon: Handshake,
+      description: 'Investor Matchmaking، Founder Services Pavilion، Startup Readiness Desk، عيادة الملكية الفكرية، طلب اجتماع أو استشارة.',
+      colors: {
+        bg: 'bg-[#fff6f4]',
+        blob: 'bg-[#ffeae6]',
+        icon: 'text-[#f97e64]',
+        hex: '#f97e64'
+      }
     }
   ];
 
   return (
-    <section id="tracks" className="py-24 bg-gray-50 relative" dir="rtl">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <section id="tracks" className="py-10 md:py-12 bg-white relative font-cairo overflow-hidden" dir="rtl">
+      
+      <div className="max-w-[85rem] mx-auto px-4 sm:px-6 lg:px-8">
         
-        {/* Section Title matched from Slide */}
-        <div className="mb-14 text-center sm:text-right">
-          <div className="inline-flex items-center gap-3 bg-[#0a4d3c] text-white px-6 py-4 rounded-2xl shadow-lg w-full sm:w-auto justify-center sm:justify-start">
-            <h2 className="text-2xl sm:text-3xl font-bold">
-              المعارض والمنتجات
-            </h2>
-            <Lightbulb className="w-8 h-8 text-yellow-300" />
-          </div>
+        <div className="text-center mb-16 flex flex-col items-center relative">
+          <h2 className="text-4xl md:text-5xl font-black text-transparent bg-clip-text bg-gradient-to-r from-pink-600 to-pink-400 mb-4 pb-2 inline-block leading-normal">
+            محاور القمة
+          </h2>
+          <div className="w-24 h-1.5 bg-gradient-to-r from-pink-400 to-pink-300 mx-auto rounded-full mb-6" />
+          <p className="text-xl font-bold text-gray-600 max-w-3xl leading-relaxed">
+            منظومة موحدة لربط الطلاب والباحثين والخريجين والشركات والمستثمرين والشركاء
+          </p>
         </div>
 
-        {/* Exhibition Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 xl:gap-10">
-          {exhibitions.map((exhibition) => (
+        {/* Custom Animations */}
+        <style>{`
+          @keyframes float-card {
+            0% { transform: translateY(0px); }
+            100% { transform: translateY(-10px); }
+          }
+          @keyframes glow-pulse {
+            0%, 100% { opacity: 0.3; }
+            50% { opacity: 0.8; }
+          }
+        `}</style>
+
+        {/* Cards Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
+          {tracks.map((track) => (
             <div 
-              key={exhibition.id} 
-              className="bg-white rounded-3xl rounded-tl-[4rem] overflow-hidden shadow-lg shadow-gray-200/50 border border-gray-100 flex flex-col group hover:-translate-y-2 transition-all duration-300 pb-2"
+              key={track.id}
+              className={`${track.colors.bg} rounded-[2.5rem] p-10 flex flex-col items-center text-center transition-all duration-500 hover:scale-[1.03] group cursor-pointer relative shadow-lg hover:shadow-2xl z-10`}
+              style={{
+                animation: `float-card ${3 + (track.id % 3) * 0.5}s ease-in-out infinite alternate`
+              }}
             >
-              {/* Image Container with Floating Category */}
-              <div className="relative h-64 overflow-hidden rounded-tl-[4rem]">
-                <img 
-                  src={exhibition.image} 
-                  alt={exhibition.title}
-                  className="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-700"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent opacity-60" />
-                
-                {/* Floating Tag */}
-                <div className="absolute bottom-4 right-4 bg-[#0a192f] text-white text-sm font-bold py-1.5 px-4 rounded-lg shadow-md">
-                  {exhibition.title}
-                </div>
+              
+              {/* Continuous Glowing Colored Border Effect */}
+              <div 
+                className="absolute inset-0 rounded-[2.5rem] pointer-events-none"
+                style={{ 
+                  border: `2px solid ${track.colors.hex}`,
+                  boxShadow: `0 0 15px ${track.colors.hex}40, inset 0 0 15px ${track.colors.hex}20`,
+                  animation: `glow-pulse ${2.5 + (track.id % 3) * 0.5}s ease-in-out infinite` 
+                }}
+              />
+              
+              {/* Glossy overlay effect on hover */}
+              <div className="absolute inset-0 bg-gradient-to-b from-white/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none rounded-[2.5rem]" />
+
+              {/* Icon Blob */}
+              <div 
+                className={`w-24 h-24 ${track.colors.blob} flex items-center justify-center mb-8 transition-all duration-500 group-hover:scale-110 group-hover:rotate-6 shadow-sm group-hover:shadow-md relative z-10`}
+                style={{ borderRadius: '53% 47% 52% 48% / 46% 54% 47% 53%' }}
+              >
+                <track.icon className={`w-10 h-10 ${track.colors.icon} transition-transform duration-500 group-hover:-translate-y-1`} strokeWidth={2} />
               </div>
 
-              {/* Card Body */}
-              <div className="p-6 xl:p-8 flex-1 flex flex-col">
-                <h3 className="font-black text-xl lg:text-2xl text-[#0a192f] mb-3 leading-snug group-hover:text-[#ea580c] transition-colors">
-                  {exhibition.title}
-                </h3>
-                
-                <p className="text-gray-500 font-medium leading-relaxed mb-8 flex-1 text-[15px]">
-                  {exhibition.description}
-                </p>
-                
-                {/* Read More Link */}
-                <div className="mt-auto">
-                  <Link 
-                    to={exhibition.id === 3 ? "/applied-research" : `/exhibition/${exhibition.id}`}
-                    className="inline-flex items-center gap-2 text-[#ea580c] font-bold text-[15px] hover:text-[#c2410c] transition-colors group/link"
-                  >
-                    <span>التفاصيل</span>
-                    <ArrowLeft className="w-4 h-4 transform group-hover/link:-translate-x-1 transition-transform" />
-                  </Link>
-                </div>
-              </div>
+              {/* Text */}
+              <h3 className="text-2xl font-black text-gray-900 mb-4 transition-colors duration-300 relative z-10 group-hover:text-gray-800">
+                {track.title}
+              </h3>
               
-              {/* Bottom Orange Border Accent */}
-              <div className="h-1 w-0 bg-[#ea580c] group-hover:w-full transition-all duration-500 mx-auto rounded-full" />
+              <p className="text-gray-600 font-bold leading-relaxed mb-8 flex-grow relative z-10">
+                {track.description}
+              </p>
+
+              {/* Animated Link */}
+              <div className={`inline-flex items-center gap-2 font-black text-sm uppercase tracking-widest transition-all duration-300 relative z-10 ${track.colors.icon}`}>
+                <span>التفاصيل والمزيد</span>
+                <ArrowLeft className="w-5 h-5 transform transition-transform duration-500 group-hover:-translate-x-2" />
+              </div>
             </div>
           ))}
         </div>

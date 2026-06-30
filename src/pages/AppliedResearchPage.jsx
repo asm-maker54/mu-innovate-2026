@@ -42,7 +42,12 @@ const AppliedResearchPage = () => {
           <h1 className="text-4xl md:text-5xl lg:text-6xl font-black text-[#183059] mb-4">منصة تسويق البحوث التطبيقية</h1>
           <h2 className="text-xl md:text-2xl font-bold text-[#2b6cb0] mb-8">من البحث إلى فرصة سوقية قابلة للتطبيق</h2>
           
-          <div className="flex flex-wrap justify-center items-center gap-2 md:gap-4 text-sm md:text-base font-bold text-[#183059] bg-white py-3 px-6 rounded-2xl shadow-sm border border-slate-200 inline-flex">
+          <a href="/submit-research" className="inline-flex items-center gap-3 bg-[#ea580c] text-white px-8 py-4 rounded-2xl font-black text-lg md:text-xl shadow-lg hover:bg-[#c2410c] hover:-translate-y-1 transition-all mb-12">
+            <FileText className="w-6 h-6" />
+            تقديم البحث التطبيقي
+          </a>
+
+          <div className="flex flex-wrap justify-center items-center gap-2 md:gap-4 text-sm md:text-base font-bold text-[#183059] bg-white py-3 px-6 rounded-2xl shadow-sm border border-slate-200 inline-flex mx-auto">
             <span>بحث تطبيقي</span> <ArrowLeft className="w-4 h-4 text-[#2b6cb0]" />
             <span>تقييم الجاهزية</span> <ArrowLeft className="w-4 h-4 text-[#2b6cb0]" />
             <span>حماية فكرية</span> <ArrowLeft className="w-4 h-4 text-[#2b6cb0]" />

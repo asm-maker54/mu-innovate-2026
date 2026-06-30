@@ -90,7 +90,7 @@ const DigitalPlatform = () => {
         {/* Title */}
         <div className="text-center mb-20 relative">
           <h2 className="text-4xl md:text-5xl font-black text-transparent bg-clip-text bg-gradient-to-r from-[#1e3a8a] to-[#3b82f6] mb-4 inline-block drop-shadow-sm">
-            {isRtl ? 'المنصة الرقمية' : 'Digital Platform'}
+            {isRtl ? 'محاور القمة' : 'Summit Pillars'}
           </h2>
           <p className="text-xl font-bold text-slate-600 max-w-2xl mx-auto">
             {isRtl ? 'منظومة موحدة لربط الطلاب والباحثين والخريجين والشركات والمستثمرين والشركاء' : 'Unified system connecting students, researchers, alumni, companies, investors, and partners'}

@@ -55,44 +55,36 @@ const Navbar = () => {
       href: '/namaa'
     },
     {
-      title: 'تسويق البحوث',
-      titleEn: 'Applied Research',
-      href: '/applied-research'
-    },
-    {
-      title: 'البرامج',
-      titleEn: 'Programs',
-      href: '/programs'
-    },
-    {
-      title: 'المبادرات',
-      titleEn: 'Initiatives',
+      title: 'تسويق البحوث ومشروعات التخرج',
+      titleEn: 'Research & Graduation Projects',
       dropdown: [
-        { label: 'شبكة المدربين الرقمية', labelEn: 'Digital Mentors', href: '/digital-mentors' },
-        { label: 'مبادرة الابتكار الأخضر والاستدامة', labelEn: 'Green Innovation & Sustainability', href: '/green-innovation' }
+        { label: 'تسويق البحوث', labelEn: 'Applied Research', href: '/applied-research' },
+        { label: 'مشروعات التخرج', labelEn: 'Graduation Projects', href: '/graduation-projects' }
       ]
     },
     {
-      title: 'الملتقيات',
-      titleEn: 'Fairs & Forums',
+      title: 'المبادرات والبرامج',
+      titleEn: 'Programs & Initiatives',
+      dropdown: [
+        { label: 'البرامج', labelEn: 'Programs', href: '/programs' },
+        { label: 'شبكة المدربين الرقمية', labelEn: 'Digital Mentors', href: '/digital-mentors' },
+        { label: 'الابتكار الأخضر', labelEn: 'Green Innovation', href: '/green-innovation' }
+      ]
+    },
+    {
+      title: 'الفعاليات والمعارض',
+      titleEn: 'Events & Exhibitions',
       dropdown: [
         { label: 'ملتقى التوظيف', labelEn: 'Employment Fair', href: '/employment-fair' },
         { label: 'ملتقى الخريجين', labelEn: 'Alumni Fair', href: '/alumni-fair' },
-        { label: 'ملتقى مشروعات التخرج', labelEn: 'Graduation Projects', href: '/graduation-projects' }
-      ]
-    },
-    {
-      title: 'المعارض',
-      titleEn: 'Exhibitions',
-      dropdown: [
-        { label: 'معرض الابتكارات الرقمية', labelEn: 'Digital Innovations Expo', href: '/exhibition/1' },
-        { label: 'معرض منتجات الوحدات الإنتاجية', labelEn: 'Productive Units Expo', href: '/exhibition/4' }
+        { label: 'معرض الابتكارات', labelEn: 'Digital Expo', href: '/exhibition/1' },
+        { label: 'معرض الوحدات', labelEn: 'Productive Units', href: '/exhibition/4' }
       ]
     }
   ];
 
   return (
-    <nav className={`fixed w-full z-50 transition-all duration-300 bg-white shadow-md ${
+    <nav className={`sticky top-0 w-full z-50 transition-all duration-300 bg-white shadow-md ${
       isScrolled ? 'h-20' : 'h-24'
     } border-b border-gray-200`} dir={isRtl ? 'rtl' : 'ltr'}>
       
@@ -104,10 +96,10 @@ const Navbar = () => {
         <Link to="/" className="flex items-center gap-3 h-full pt-1 pb-1">
           <img src="/mina.png" alt="Minia University Logo" className="w-12 h-12 md:w-16 md:h-16 xl:w-20 xl:h-20 object-contain drop-shadow-md" />
           <div className="flex flex-col justify-center text-[#111827]">
-            <span className={`font-black text-sm md:text-base xl:text-lg leading-tight whitespace-nowrap`}>
+            <span className={`font-black text-xs md:text-sm xl:text-base leading-tight whitespace-nowrap`}>
               {isRtl ? 'منصة جامعة المنيا' : 'Minia University Platform'}
             </span>
-            <span className={`font-bold text-sm md:text-base xl:text-lg leading-tight text-gray-600 whitespace-nowrap`}>
+            <span className={`font-bold text-xs md:text-sm xl:text-base leading-tight text-gray-600 whitespace-nowrap`}>
               {isRtl ? 'للابتكار وريادة الأعمال' : 'Innovation & Entrepreneurship'}
             </span>
           </div>
@@ -119,15 +111,15 @@ const Navbar = () => {
             <div key={idx} className="relative group h-full flex items-center">
               {/* Button Header */}
               {link.dropdown ? (
-                <div className="px-3 xl:px-4 py-2.5 bg-white border border-gray-200 rounded-xl flex items-center gap-1 cursor-pointer transition-all duration-300 hover:bg-gradient-to-r hover:from-blue-600 hover:to-indigo-600 hover:border-transparent hover:shadow-md hover:-translate-y-0.5 shadow-sm group/btn">
-                  <span className="font-bold text-xs xl:text-[15px] text-[#111827] group-hover/btn:text-white transition-colors whitespace-nowrap">
+                <div className="px-1 xl:px-2 py-2 flex items-center gap-1 cursor-pointer transition-colors duration-300 group/btn">
+                  <span className="font-bold text-[11px] xl:text-[13px] text-gray-700 group-hover/btn:text-blue-600 whitespace-nowrap">
                     {isRtl ? link.title : link.titleEn}
                   </span>
-                  <ChevronDown className="w-3 h-3 xl:w-4 xl:h-4 text-gray-500 group-hover/btn:text-white group-hover/btn:rotate-180 transition-all duration-300" />
+                  <ChevronDown className="w-3 h-3 text-gray-400 group-hover/btn:text-blue-600 group-hover/btn:rotate-180 transition-all duration-300" />
                 </div>
               ) : (
-                <a href={link.href} className="px-3 xl:px-4 py-2.5 bg-white border border-gray-200 rounded-xl flex items-center gap-1 cursor-pointer transition-all duration-300 hover:bg-gradient-to-r hover:from-blue-600 hover:to-indigo-600 hover:border-transparent hover:shadow-md hover:-translate-y-0.5 shadow-sm group/btn">
-                  <span className="font-bold text-xs xl:text-[15px] text-[#111827] group-hover/btn:text-white transition-colors whitespace-nowrap">
+                <a href={link.href} className="px-1 xl:px-2 py-2 flex items-center gap-1 cursor-pointer transition-colors duration-300 group/btn">
+                  <span className="font-bold text-[11px] xl:text-[13px] text-gray-700 group-hover/btn:text-blue-600 whitespace-nowrap">
                     {isRtl ? link.title : link.titleEn}
                   </span>
                 </a>
@@ -157,17 +149,24 @@ const Navbar = () => {
         <div className="hidden lg:flex items-center gap-5 pl-2 h-full">
           <button 
             onClick={toggleLanguage}
-            className={`flex items-center gap-1.5 font-bold text-sm transition-colors text-gray-500 hover:text-[#111827]`}
+            className={`flex items-center gap-1.5 font-bold text-xs transition-colors text-gray-500 hover:text-[#111827]`}
           >
             <span>{isRtl ? 'EN' : 'عربي'}</span>
             <Globe className="w-4 h-4" />
           </button>
 
+          <a 
+            href="/#registration"
+            className={`flex items-center gap-2 px-5 py-2 rounded-full font-bold text-xs transition-all bg-[#ea580c] text-white hover:bg-[#c2410c] shadow-md whitespace-nowrap hidden sm:flex`}
+          >
+            <span>{isRtl ? 'سجل الآن' : 'Register Now'}</span>
+          </a>
+
           <Link 
             to="/auth" 
             target="_blank"
             rel="noopener noreferrer"
-            className={`flex items-center gap-2 px-5 py-2.5 rounded-full font-bold text-sm transition-all bg-[#111827] text-white hover:bg-slate-800 shadow-md whitespace-nowrap`}
+            className={`flex items-center gap-2 px-5 py-2 rounded-full font-bold text-xs transition-all bg-[#111827] text-white hover:bg-slate-800 shadow-md whitespace-nowrap`}
           >
             <span>{isRtl ? 'تسجيل الدخول' : 'Login'}</span>
             <User className="w-4 h-4" />
@@ -176,29 +175,45 @@ const Navbar = () => {
 
         {/* Mobile Menu Button */}
         <button 
-          className="lg:hidden z-50 p-2 text-white"
+          className="lg:hidden z-50 p-2 text-gray-900"
           onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
         >
           {mobileMenuOpen ? (
-            <X className={`w-7 h-7 ${mobileMenuOpen ? 'text-gray-900' : 'text-white'}`} />
+            <X className="w-7 h-7 text-gray-900" />
           ) : (
-            <Menu className={`w-7 h-7 text-white`} />
+            <Menu className="w-7 h-7 text-gray-900" />
           )}
         </button>
       </div>
 
       {/* Mobile Menu Overlay */}
-      <div className={`fixed inset-0 bg-white z-40 transition-transform duration-500 lg:hidden flex flex-col pt-24 px-6 ${
+      <div className={`fixed inset-0 bg-white z-[60] transition-transform duration-500 lg:hidden flex flex-col pt-24 px-6 ${
         mobileMenuOpen ? 'translate-x-0' : 'translate-x-full'
       }`}>
+        {/* Dedicated Close Button inside Overlay */}
+        <button 
+          className="absolute top-6 left-6 p-2 bg-gray-100 rounded-full text-gray-900 hover:bg-gray-200 transition-colors z-[70] shadow-sm"
+          onClick={() => setMobileMenuOpen(false)}
+        >
+          <X className="w-8 h-8" />
+        </button>
+
         <div className="flex flex-col gap-6 overflow-y-auto pb-20">
           {navLinks.map((link, idx) => (
             <div key={idx} className="flex flex-col border-b border-gray-100 pb-4">
-              <span className="font-black text-2xl text-gray-900 mb-4">{isRtl ? link.title : link.titleEn}</span>
+              {link.href && !link.dropdown ? (
+                <a href={link.href} onClick={() => setMobileMenuOpen(false)} className="font-black text-2xl text-gray-900 mb-4 block">
+                  {isRtl ? link.title : link.titleEn}
+                </a>
+              ) : (
+                <span className="font-black text-2xl text-gray-900 mb-4 block">
+                  {isRtl ? link.title : link.titleEn}
+                </span>
+              )}
               {link.dropdown && (
                 <div className="flex flex-col gap-3 pl-4 border-l-2 border-blue-100 ml-2">
                   {link.dropdown.map((item, i) => (
-                    <a key={i} href={item.href} className="flex items-center gap-3 text-gray-600 font-bold text-lg hover:text-blue-600">
+                    <a key={i} href={item.href} onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-3 text-gray-600 font-bold text-lg hover:text-blue-600">
                       {item.icon && <item.icon className="w-5 h-5 text-blue-500" />}
                       <span>{isRtl ? item.label : item.labelEn}</span>
                     </a>

@@ -2,14 +2,15 @@ import { useTranslation } from 'react-i18next';
 import { ArrowRight, Play, Pause, Maximize2 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useState, useEffect } from 'react';
-import ExhibitionTracks from '../components/ExhibitionTracks';
+import VisionMission from '../components/VisionMission';
+import ComingSoonBanner from '../components/ComingSoonBanner';
+import NewsSection from '../components/NewsSection';
+import SponsorsSection from '../components/SponsorsSection';
 import Speakers from '../components/Speakers';
 import JoinUs from '../components/JoinUs';
 import LeadershipSpeeches from '../components/LeadershipSpeeches';
-import DigitalPlatform from '../components/DigitalPlatform';
-import InnovationCenters from '../components/InnovationCenters';
-import Statistics from '../components/Statistics';
-import FeaturesBanner from '../components/FeaturesBanner';
+import ExhibitionTracks from '../components/ExhibitionTracks';
+import RegistrationForm from '../components/RegistrationForm';
 
 const LandingPage = () => {
   const { t, i18n } = useTranslation();
@@ -38,108 +39,140 @@ const LandingPage = () => {
 
   return (
     <div className="flex flex-col min-h-screen">
-      {/* Hero Section - Chic Poster Style */}
-      <section className="relative pt-24 pb-12 overflow-hidden bg-[#0f172a] min-h-[90vh] flex items-center justify-center font-cairo">
-        {/* Dynamic Background Slideshow */}
-        <div className="absolute inset-0 z-0">
-          {heroImages.map((img, idx) => (
-            <img
-              key={idx}
-              src={img}
-              alt={`Background ${idx + 1}`}
-              className={`absolute inset-0 w-full h-full object-cover transition-all duration-[2000ms] ease-in-out transform ${
-                currentSlide === idx ? 'opacity-40 scale-100' : 'opacity-0 scale-110'
-              }`}
-            />
-          ))}
-          {/* Dark Gradient Overlay for text readability */}
-          <div className="absolute inset-0 bg-gradient-to-b from-[#0f172a]/90 via-[#0f172a]/60 to-[#0f172a]" />
-        </div>
+      {/* Hero Section - Slideshow + Info Card */}
+      <section className="relative py-8 overflow-hidden bg-gradient-to-br from-[#0a1628] via-[#0f2847] to-[#1a1040]">
+        <div className="absolute top-20 left-1/4 w-96 h-96 bg-blue-500/20 rounded-full blur-3xl animate-pulse pointer-events-none" />
+        <div className="absolute bottom-10 right-1/4 w-80 h-80 bg-purple-500/15 rounded-full blur-3xl animate-pulse pointer-events-none" style={{ animationDelay: '2s' }} />
 
-        {/* Animated Glow Orbs */}
-        <div className="absolute top-1/4 right-1/4 w-96 h-96 bg-blue-600/30 rounded-full blur-[100px] animate-pulse z-0" />
-        <div className="absolute bottom-1/4 left-1/4 w-96 h-96 bg-purple-600/30 rounded-full blur-[100px] animate-pulse z-0" style={{ animationDelay: '2s' }} />
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[400px] bg-yellow-500/10 rounded-full blur-[120px] animate-pulse z-0" style={{ animationDelay: '1s' }} />
+        <div className="max-w-[95rem] mx-auto px-3 sm:px-4 lg:px-6 relative z-10">
+          <div className="flex flex-col lg:flex-row-reverse gap-4 items-stretch">
+            
+            {/* Left: Main Showcase Slideshow */}
+            <div className="flex-1 lg:flex-[3] relative group">
+              <div className="relative rounded-2xl overflow-hidden shadow-2xl shadow-black/40 aspect-[16/9] bg-gray-900">
+                {heroImages.map((img, idx) => (
+                  <img
+                    key={idx}
+                    src={img}
+                    alt={`Summit slide ${idx + 1}`}
+                    className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-1000 ${
+                      currentSlide === idx ? 'opacity-100' : 'opacity-0'
+                    }`}
+                  />
+                ))}
+                {/* Overlay gradient */}
+                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
+                
+                {/* Bottom controls */}
+                <div className="absolute bottom-4 right-4 flex items-center gap-2 z-20">
+                  <button
+                    onClick={() => setIsPaused(!isPaused)}
+                    className="w-10 h-10 rounded-full bg-white/20 backdrop-blur-md text-white flex items-center justify-center hover:bg-white/30 transition-colors"
+                  >
+                    {isPaused ? <Play className="w-4 h-4" /> : <Pause className="w-4 h-4" />}
+                  </button>
+                </div>
 
-        <div className="relative z-10 w-full max-w-[1400px] mx-auto px-4 md:px-8 flex flex-col items-center text-center">
-          
-          {/* Animated Badge */}
-          <div className="mb-6 animate-[bounce_3s_infinite]">
-            <span className="bg-white/10 backdrop-blur-md border border-white/20 text-blue-200 px-6 py-2 rounded-full font-bold tracking-wider uppercase text-sm shadow-xl flex items-center gap-2">
-              <span className="w-2.5 h-2.5 rounded-full bg-blue-400 animate-ping" />
-              {isRtl ? 'بوابة المستقبل' : 'The Gateway to the Future'}
-            </span>
-          </div>
+                {/* Slide dots */}
+                <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2 z-20">
+                  {heroImages.map((_, idx) => (
+                    <button
+                      key={idx}
+                      onClick={() => setCurrentSlide(idx)}
+                      className={`w-2.5 h-2.5 rounded-full transition-all ${
+                        currentSlide === idx ? 'bg-white w-8' : 'bg-white/40'
+                      }`}
+                    />
+                  ))}
+                </div>
 
-          {/* Main Title with Gradient & Animations */}
-          <h1 className="text-5xl md:text-6xl lg:text-[5rem] font-black mb-6 leading-[1.2] drop-shadow-2xl cursor-default group">
-            <div className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-white to-purple-400 transition-transform duration-700 group-hover:scale-105 inline-block">
-              {isRtl ? 'منصة جامعة المنيا' : 'Minia University Platform'}
+                {/* Branding overlay */}
+                <div className="absolute top-6 right-6 z-20">
+                  <div className="bg-white/10 backdrop-blur-md rounded-xl px-4 py-2 border border-white/20">
+                    <span className="text-white font-bold text-sm">MU Innovate 2026</span>
+                  </div>
+                </div>
+              </div>
             </div>
-            <br/>
-            <div className="text-4xl md:text-5xl lg:text-6xl text-transparent bg-clip-text bg-gradient-to-r from-yellow-300 via-yellow-100 to-yellow-500 mt-2 transition-transform duration-700 delay-75 group-hover:scale-105 inline-block">
-              {isRtl ? 'للابتكار وريادة الأعمال' : 'For Innovation & Entrepreneurship'}
+
+            {/* Right: Info Card */}
+            <div className="flex-1 flex flex-col">
+              <div className="bg-white/5 backdrop-blur-md border border-white/10 rounded-3xl overflow-hidden flex flex-col h-full">
+                {/* Card Image */}
+                <div className="relative h-48 overflow-hidden">
+                  <img
+                    src="/summit_community.png"
+                    alt="Summit Community"
+                    className="w-full h-full object-cover"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-[#0a1628] to-transparent" />
+                </div>
+
+                {/* Card Content */}
+                <div className="p-6 flex flex-col flex-1 justify-between" dir="rtl">
+                  <div>
+                    <h1 className="text-white text-2xl md:text-3xl font-bold leading-snug mb-3">
+                      أول قمة للابتكار وريادة الأعمال في صعيد مصر
+                    </h1>
+                    <p className="text-blue-200/80 text-sm leading-relaxed mb-6">
+                      قمة جامعة المنيا للابتكار وريادة الأعمال 2026. انضم إلينا في نوفمبر 2026.
+                    </p>
+                  </div>
+
+                  <div className="flex flex-col gap-3">
+                    <Link
+                      to="/join"
+                      className="w-full px-6 py-3.5 bg-gradient-to-r from-green-500 to-emerald-600 text-white rounded-full font-bold text-center hover:from-green-600 hover:to-emerald-700 hover:shadow-lg hover:shadow-green-500/30 transition-all flex items-center justify-center gap-2"
+                    >
+                      انضم إلى شبكتنا
+                      <ArrowRight className="h-5 w-5 rotate-180" />
+                    </Link>
+                    <Link
+                      to="/dashboard"
+                      className="w-full px-6 py-3.5 bg-transparent text-white border border-white/30 rounded-full font-bold text-center hover:bg-white/10 transition-all"
+                    >
+                      استكشف الابتكار
+                    </Link>
+                  </div>
+                </div>
+              </div>
             </div>
-          </h1>
 
-          {/* Subtitle */}
-          <p className="text-lg md:text-2xl text-blue-100/90 font-bold max-w-4xl mb-12 leading-relaxed drop-shadow-md">
-            {isRtl 
-              ? 'الوجهة الأولى لاحتضان أفكارك، تطوير مشاريعك، وربطك مع عالم الأعمال والصناعة لتحويل الحلم إلى واقع ملموس.'
-              : 'The premier destination to incubate your ideas, develop your projects, and connect you with the business world to turn dreams into reality.'}
-          </p>
-
-          {/* Action Buttons */}
-          <div className="flex flex-col sm:flex-row gap-4 items-center justify-center w-full sm:w-auto">
-            <Link
-              to="/join"
-              className="w-full sm:w-auto px-8 py-4 bg-gradient-to-r from-blue-600 to-blue-400 text-white rounded-full font-black text-lg hover:from-blue-500 hover:to-blue-300 hover:scale-105 hover:shadow-[0_0_40px_-10px_rgba(59,130,246,0.6)] transition-all duration-300 flex items-center justify-center gap-3 border border-blue-400/30"
-            >
-              {isRtl ? 'انضم إلى المنصة الآن' : 'Join the Platform Now'}
-              <ArrowRight className={`w-6 h-6 ${isRtl ? 'rotate-180' : ''}`} />
-            </Link>
-            <Link
-              to="/dashboard"
-              className="w-full sm:w-auto px-8 py-4 bg-white/10 backdrop-blur-md border border-white/30 text-white rounded-full font-bold text-lg hover:bg-white/20 hover:scale-105 hover:shadow-[0_0_40px_-10px_rgba(255,255,255,0.2)] transition-all duration-300 flex items-center justify-center gap-3"
-            >
-              <Play className="w-5 h-5 text-yellow-300" />
-              {isRtl ? 'استكشف الفرص' : 'Explore Opportunities'}
-            </Link>
           </div>
-
-          {/* Slideshow Controls (Subtle) */}
-          <div className="mt-16 flex items-center gap-4 bg-white/5 backdrop-blur-md px-6 py-3 rounded-full border border-white/10 shadow-xl">
-            <button onClick={() => setIsPaused(!isPaused)} className="text-white/70 hover:text-white transition-colors">
-              {isPaused ? <Play className="w-5 h-5" /> : <Pause className="w-5 h-5" />}
-            </button>
-            <div className="w-px h-6 bg-white/20" />
-            <div className="flex gap-2">
-              {heroImages.map((_, idx) => (
-                <button
-                  key={idx}
-                  onClick={() => setCurrentSlide(idx)}
-                  className={`h-2 rounded-full transition-all duration-500 ${
-                    currentSlide === idx ? 'bg-blue-400 w-8 shadow-[0_0_10px_rgba(96,165,250,0.8)]' : 'bg-white/30 w-2 hover:bg-white/50'
-                  }`}
-                />
-              ))}
-            </div>
-          </div>
-
         </div>
       </section>
 
 
 
 
+      {/* Join Us Section (Overlapping Hero) */}
+      <div id="join-us" className="relative z-20">
+        <JoinUs />
+      </div>
+
+      {/* Vision & Mission Section */}
+      <div id="vision-mission">
+        <VisionMission />
+      </div>
+
+      {/* Coming Soon Banner */}
+      <div id="coming-soon">
+        <ComingSoonBanner />
+      </div>
+
+      {/* News & Announcements Section */}
+      <div id="news-section">
+        <NewsSection />
+      </div>
+
+      {/* Sponsors Section */}
+      <div id="sponsors-section">
+        <SponsorsSection />
+      </div>
+
       {/* Leadership Speeches Section */}
       <div id="leadership-speeches">
         <LeadershipSpeeches />
-      </div>
-
-      {/* Digital Platform Section */}
-      <div id="digital-platform">
-        <DigitalPlatform />
       </div>
 
       {/* Speakers Section */}
@@ -147,29 +180,14 @@ const LandingPage = () => {
         <Speakers />
       </div>
 
-      {/* Join Us Section */}
-      <div id="join-us">
-        <JoinUs />
-      </div>
-
-      {/* Statistics Section */}
-      <div id="statistics">
-        <Statistics />
-      </div>
-
       {/* Exhibition Tracks Section */}
       <div id="tracks">
         <ExhibitionTracks />
       </div>
 
-      {/* Features Banner Section */}
-      <div id="features">
-        <FeaturesBanner />
-      </div>
-
-      {/* Innovation Centers Section */}
-      <div id="innovation-centers">
-        <InnovationCenters />
+      {/* Registration & Contact Form */}
+      <div id="registration">
+        <RegistrationForm />
       </div>
 
     </div>
