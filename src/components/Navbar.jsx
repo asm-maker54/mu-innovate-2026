@@ -45,8 +45,7 @@ const Navbar = () => {
         { label: 'مخرجات القمة', labelEn: 'Summit Outputs', href: '/about#outputs' },
         { label: 'قصص النجاح', labelEn: 'Success Stories', href: '/success-stories' },
         { label: 'شركاء النجاح', labelEn: 'Stakeholders', href: '/stakeholders' },
-        { label: 'الأجندة', labelEn: 'Agenda', href: '/agenda' },
-        { label: 'مجتمعنا', labelEn: 'Our Community', href: '/join' }
+        { label: 'الأجندة', labelEn: 'Agenda', href: '/agenda' }
       ]
     },
     {

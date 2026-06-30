@@ -118,22 +118,6 @@ const LandingPage = () => {
                       قمة جامعة المنيا للابتكار وريادة الأعمال 2026. انضم إلينا في نوفمبر 2026.
                     </p>
                   </div>
-
-                  <div className="flex flex-col gap-3">
-                    <Link
-                      to="/join"
-                      className="w-full px-6 py-3.5 bg-gradient-to-r from-green-500 to-emerald-600 text-white rounded-full font-bold text-center hover:from-green-600 hover:to-emerald-700 hover:shadow-lg hover:shadow-green-500/30 transition-all flex items-center justify-center gap-2"
-                    >
-                      انضم إلى شبكتنا
-                      <ArrowRight className="h-5 w-5 rotate-180" />
-                    </Link>
-                    <Link
-                      to="/dashboard"
-                      className="w-full px-6 py-3.5 bg-transparent text-white border border-white/30 rounded-full font-bold text-center hover:bg-white/10 transition-all"
-                    >
-                      استكشف الابتكار
-                    </Link>
-                  </div>
                 </div>
               </div>
             </div>

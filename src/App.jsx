@@ -5,7 +5,6 @@ import Navbar from './components/Navbar';
 import Footer from './components/Footer';
 import LandingPage from './pages/LandingPage';
 import AuthPage from './pages/AuthPage';
-import StudentDashboard from './pages/StudentDashboard';
 import RegisterPage from './pages/RegisterPage';
 import ExhibitionDetails from './pages/ExhibitionDetails';
 import AboutPage from './pages/AboutPage';
@@ -14,7 +13,6 @@ import ContactPage from './pages/ContactPage';
 import TeamPage from './pages/TeamPage';
 import AgendaPage from './pages/AgendaPage';
 import SuccessStoriesPage from './pages/SuccessStoriesPage';
-import JoinUsPage from './pages/JoinUsPage';
 import StakeholdersPage from './pages/StakeholdersPage';
 import AppliedResearchPage from './pages/AppliedResearchPage';
 import SubmitResearchPage from './pages/SubmitResearchPage';
@@ -45,7 +43,6 @@ function App() {
             <Route path="/" element={<LandingPage />} />
             <Route path="/auth" element={<AuthPage />} />
             <Route path="/register" element={<RegisterPage />} />
-            <Route path="/dashboard" element={<StudentDashboard />} />
             <Route path="/exhibition/:id" element={<ExhibitionDetails />} />
             <Route path="/about" element={<AboutPage />} />
             <Route path="/about-us" element={<AboutUsPage />} />
@@ -53,7 +50,6 @@ function App() {
             <Route path="/team" element={<TeamPage />} />
             <Route path="/agenda" element={<AgendaPage />} />
             <Route path="/success-stories" element={<SuccessStoriesPage />} />
-            <Route path="/join" element={<JoinUsPage />} />
             <Route path="/stakeholders" element={<StakeholdersPage />} />
             <Route path="/applied-research" element={<AppliedResearchPage />} />
             <Route path="/submit-research" element={<SubmitResearchPage />} />
