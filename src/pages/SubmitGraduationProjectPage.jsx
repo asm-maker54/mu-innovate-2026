@@ -99,7 +99,7 @@ const SubmitGraduationProjectPage = () => {
   const CheckboxGroup = ({ name, options }) => (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mt-2">
       {options.map((opt, i) => (
-        <label key={i} className="flex items-center gap-3 p-3 border border-slate-200 rounded-xl hover:bg-slate-50 cursor-pointer">
+        <label key={i} className="flex items-center gap-3 p-3 border border-slate-300 rounded-xl hover:bg-slate-50 cursor-pointer">
           <input type="checkbox" name={name} value={opt} checked={formData[name]?.includes(opt)} onChange={handleInputChange} className="w-5 h-5 text-[#26462C] focus:ring-[#26462C] rounded" />
           <span className="text-slate-700 font-bold text-sm">{opt}</span>
         </label>
@@ -154,15 +154,15 @@ const SubmitGraduationProjectPage = () => {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
                     <label className="block text-sm font-bold text-slate-700 mb-2">اسم المشروع باللغة العربية *</label>
-                    <input type="text" name="projectNameAr" value={formData.projectNameAr} onChange={handleInputChange} className="w-full border-slate-200 rounded-xl p-3 focus:ring-[#26462C] focus:border-[#26462C]" required />
+                    <input type="text" name="projectNameAr" value={formData.projectNameAr} onChange={handleInputChange} className="w-full border border-slate-300 rounded-xl p-3 focus:ring-[#26462C] focus:border-[#26462C]" required />
                   </div>
                   <div>
                     <label className="block text-sm font-bold text-slate-700 mb-2">اسم المشروع باللغة الإنجليزية *</label>
-                    <input type="text" name="projectNameEn" value={formData.projectNameEn} onChange={handleInputChange} className="w-full border-slate-200 rounded-xl p-3 focus:ring-[#26462C] focus:border-[#26462C]" required dir="ltr" />
+                    <input type="text" name="projectNameEn" value={formData.projectNameEn} onChange={handleInputChange} className="w-full border border-slate-300 rounded-xl p-3 focus:ring-[#26462C] focus:border-[#26462C]" required dir="ltr" />
                   </div>
                   <div>
                     <label className="block text-sm font-bold text-slate-700 mb-2">الكلية *</label>
-                    <select name="college" value={formData.college} onChange={handleInputChange} className="w-full border-slate-200 rounded-xl p-3 focus:ring-[#26462C] focus:border-[#26462C]">
+                    <select name="college" value={formData.college} onChange={handleInputChange} className="w-full border border-slate-300 rounded-xl p-3 focus:ring-[#26462C] focus:border-[#26462C]">
                       <option value="">اختر الكلية...</option>
                       <optgroup label="جامعة المنيا (حكومية) - القطاع الطبي والصحي">
                         <option value="الطب البشري (حكومية)">كلية الطب البشري</option>
@@ -213,20 +213,20 @@ const SubmitGraduationProjectPage = () => {
                   {formData.college === 'أخرى' && (
                     <div className="md:col-span-2">
                       <label className="block text-sm font-bold text-slate-700 mb-2">يرجى كتابة اسم الكلية والجامعة الأخرى *</label>
-                      <input type="text" name="customCollege" value={formData.customCollege || ''} onChange={handleInputChange} className="w-full border-slate-200 rounded-xl p-3 focus:ring-[#26462C] focus:border-[#26462C]" required />
+                      <input type="text" name="customCollege" value={formData.customCollege || ''} onChange={handleInputChange} className="w-full border border-slate-300 rounded-xl p-3 focus:ring-[#26462C] focus:border-[#26462C]" required />
                     </div>
                   )}
                   <div>
                     <label className="block text-sm font-bold text-slate-700 mb-2">القسم / البرنامج الأكاديمي *</label>
-                    <input type="text" name="department" value={formData.department} onChange={handleInputChange} className="w-full border-slate-200 rounded-xl p-3 focus:ring-[#26462C] focus:border-[#26462C]" required />
+                    <input type="text" name="department" value={formData.department} onChange={handleInputChange} className="w-full border border-slate-300 rounded-xl p-3 focus:ring-[#26462C] focus:border-[#26462C]" required />
                   </div>
                   <div>
                     <label className="block text-sm font-bold text-slate-700 mb-2">العام الجامعي وسنة التخرج *</label>
-                    <input type="text" name="year" value={formData.year} onChange={handleInputChange} placeholder="مثال: 2025/2026" className="w-full border-slate-200 rounded-xl p-3 focus:ring-[#26462C]" required />
+                    <input type="text" name="year" value={formData.year} onChange={handleInputChange} placeholder="مثال: 2025/2026" className="w-full border border-slate-300 rounded-xl p-3 focus:ring-[#26462C]" required />
                   </div>
                   <div>
                     <label className="block text-sm font-bold text-slate-700 mb-2">اسم المقرر أو مسار المشروع (إن وجد)</label>
-                    <input type="text" name="courseName" value={formData.courseName} onChange={handleInputChange} className="w-full border-slate-200 rounded-xl p-3 focus:ring-[#26462C]" />
+                    <input type="text" name="courseName" value={formData.courseName} onChange={handleInputChange} className="w-full border border-slate-300 rounded-xl p-3 focus:ring-[#26462C]" />
                   </div>
                 </div>
                 <RadioGroup name="projectType" label="هل المشروع فردي أم جماعي؟" options={['فردي', 'جماعي']} />
@@ -238,7 +238,7 @@ const SubmitGraduationProjectPage = () => {
               <div className="space-y-6 animate-fade-in">
                 <h2 className="text-2xl font-black text-[#26462C] mb-6 pb-2 border-b-2 border-[#F4A217] inline-block">الخطوة 2: بيانات فريق المشروع</h2>
                 
-                <div className="mb-6 flex justify-between items-center bg-slate-50 p-4 rounded-xl border border-slate-200">
+                <div className="mb-6 flex justify-between items-center bg-slate-50 p-4 rounded-xl border border-slate-300">
                   <div className="font-bold text-[#26462C]">عدد أعضاء الفريق: {formData.teamMembersCount}</div>
                   <button type="button" onClick={addTeamMember} className="flex items-center gap-2 bg-[#26462C] text-white px-4 py-2 rounded-lg font-bold text-sm hover:bg-[#1e3622]">
                     <Plus className="w-4 h-4" /> إضافة طالب
@@ -246,7 +246,7 @@ const SubmitGraduationProjectPage = () => {
                 </div>
 
                 {formData.teamMembers.map((member, index) => (
-                  <div key={index} className="bg-white border border-slate-200 rounded-2xl p-5 mb-4 relative shadow-sm">
+                  <div key={index} className="bg-white border border-slate-300 rounded-2xl p-5 mb-4 relative shadow-sm">
                     <div className="absolute top-4 left-4">
                       {index > 0 && (
                         <button type="button" onClick={() => removeTeamMember(index)} className="text-red-500 hover:bg-red-50 p-2 rounded-lg">
@@ -258,27 +258,27 @@ const SubmitGraduationProjectPage = () => {
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                       <div>
                         <label className="block text-xs font-bold text-slate-700 mb-1">الاسم</label>
-                        <input type="text" value={member.name} onChange={(e) => handleTeamMemberChange(index, 'name', e.target.value)} className="w-full text-sm border-slate-200 rounded-lg p-2" required />
+                        <input type="text" value={member.name} onChange={(e) => handleTeamMemberChange(index, 'name', e.target.value)} className="w-full text-sm border border-slate-300 rounded-lg p-2" required />
                       </div>
                       <div>
                         <label className="block text-xs font-bold text-slate-700 mb-1">الرقم الجامعي</label>
-                        <input type="text" value={member.id} onChange={(e) => handleTeamMemberChange(index, 'id', e.target.value)} className="w-full text-sm border-slate-200 rounded-lg p-2" />
+                        <input type="text" value={member.id} onChange={(e) => handleTeamMemberChange(index, 'id', e.target.value)} className="w-full text-sm border border-slate-300 rounded-lg p-2" />
                       </div>
                       <div>
                         <label className="block text-xs font-bold text-slate-700 mb-1">الكلية / القسم</label>
-                        <input type="text" value={member.college} onChange={(e) => handleTeamMemberChange(index, 'college', e.target.value)} className="w-full text-sm border-slate-200 rounded-lg p-2" />
+                        <input type="text" value={member.college} onChange={(e) => handleTeamMemberChange(index, 'college', e.target.value)} className="w-full text-sm border border-slate-300 rounded-lg p-2" />
                       </div>
                       <div>
                         <label className="block text-xs font-bold text-slate-700 mb-1">البريد الإلكتروني</label>
-                        <input type="email" value={member.email} onChange={(e) => handleTeamMemberChange(index, 'email', e.target.value)} className="w-full text-sm border-slate-200 rounded-lg p-2" />
+                        <input type="email" value={member.email} onChange={(e) => handleTeamMemberChange(index, 'email', e.target.value)} className="w-full text-sm border border-slate-300 rounded-lg p-2" />
                       </div>
                       <div>
                         <label className="block text-xs font-bold text-slate-700 mb-1">رقم الهاتف</label>
-                        <input type="tel" value={member.phone} onChange={(e) => handleTeamMemberChange(index, 'phone', e.target.value)} className="w-full text-sm border-slate-200 rounded-lg p-2" />
+                        <input type="tel" value={member.phone} onChange={(e) => handleTeamMemberChange(index, 'phone', e.target.value)} className="w-full text-sm border border-slate-300 rounded-lg p-2" />
                       </div>
                       <div>
                         <label className="block text-xs font-bold text-slate-700 mb-1">الدور داخل المشروع</label>
-                        <input type="text" value={member.role} onChange={(e) => handleTeamMemberChange(index, 'role', e.target.value)} className="w-full text-sm border-slate-200 rounded-lg p-2" />
+                        <input type="text" value={member.role} onChange={(e) => handleTeamMemberChange(index, 'role', e.target.value)} className="w-full text-sm border border-slate-300 rounded-lg p-2" />
                       </div>
                     </div>
                   </div>
@@ -288,7 +288,7 @@ const SubmitGraduationProjectPage = () => {
                 {formData.isMultiCollege === 'نعم' && (
                   <div>
                     <label className="block text-sm font-bold text-slate-700 mb-2">يرجى توضيح التخصصات المشاركة</label>
-                    <textarea name="multiCollegeDetails" value={formData.multiCollegeDetails} onChange={handleInputChange} className="w-full border-slate-200 rounded-xl p-3 h-20"></textarea>
+                    <textarea name="multiCollegeDetails" value={formData.multiCollegeDetails} onChange={handleInputChange} className="w-full border border-slate-300 rounded-xl p-3 h-20"></textarea>
                   </div>
                 )}
               </div>
@@ -301,23 +301,23 @@ const SubmitGraduationProjectPage = () => {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
                     <label className="block text-sm font-bold text-slate-700 mb-2">اسم المشرف الرئيسي</label>
-                    <input type="text" name="supervisorName" value={formData.supervisorName} onChange={handleInputChange} className="w-full border-slate-200 rounded-xl p-3" />
+                    <input type="text" name="supervisorName" value={formData.supervisorName} onChange={handleInputChange} className="w-full border border-slate-300 rounded-xl p-3" />
                   </div>
                   <div>
                     <label className="block text-sm font-bold text-slate-700 mb-2">الكلية / القسم</label>
-                    <input type="text" name="supervisorCollege" value={formData.supervisorCollege} onChange={handleInputChange} className="w-full border-slate-200 rounded-xl p-3" />
+                    <input type="text" name="supervisorCollege" value={formData.supervisorCollege} onChange={handleInputChange} className="w-full border border-slate-300 rounded-xl p-3" />
                   </div>
                   <div>
                     <label className="block text-sm font-bold text-slate-700 mb-2">الدرجة العلمية / الوظيفة</label>
-                    <input type="text" name="supervisorDegree" value={formData.supervisorDegree} onChange={handleInputChange} className="w-full border-slate-200 rounded-xl p-3" />
+                    <input type="text" name="supervisorDegree" value={formData.supervisorDegree} onChange={handleInputChange} className="w-full border border-slate-300 rounded-xl p-3" />
                   </div>
                   <div>
                     <label className="block text-sm font-bold text-slate-700 mb-2">البريد الإلكتروني</label>
-                    <input type="email" name="supervisorEmail" value={formData.supervisorEmail} onChange={handleInputChange} className="w-full border-slate-200 rounded-xl p-3" />
+                    <input type="email" name="supervisorEmail" value={formData.supervisorEmail} onChange={handleInputChange} className="w-full border border-slate-300 rounded-xl p-3" />
                   </div>
                   <div>
                     <label className="block text-sm font-bold text-slate-700 mb-2">رقم الهاتف</label>
-                    <input type="tel" name="supervisorPhone" value={formData.supervisorPhone} onChange={handleInputChange} className="w-full border-slate-200 rounded-xl p-3" />
+                    <input type="tel" name="supervisorPhone" value={formData.supervisorPhone} onChange={handleInputChange} className="w-full border border-slate-300 rounded-xl p-3" />
                   </div>
                 </div>
                 <RadioGroup name="hasCoSupervisors" label="هل يوجد مشرفون مشاركون؟" options={['نعم', 'لا']} />
@@ -362,23 +362,23 @@ const SubmitGraduationProjectPage = () => {
                 <h2 className="text-2xl font-black text-[#26462C] mb-6 pb-2 border-b-2 border-[#F4A217] inline-block">الخطوة 6: وصف المشروع</h2>
                 <div>
                   <label className="block text-sm font-bold text-slate-700 mb-2">ملخص المشروع (150 إلى 250 كلمة يوضح الفكرة والمشكلة والحل)</label>
-                  <textarea name="projectSummary" value={formData.projectSummary} onChange={handleInputChange} className="w-full border-slate-200 rounded-xl p-3 h-32"></textarea>
+                  <textarea name="projectSummary" value={formData.projectSummary} onChange={handleInputChange} className="w-full border border-slate-300 rounded-xl p-3 h-32"></textarea>
                 </div>
                 <div>
                   <label className="block text-sm font-bold text-slate-700 mb-2">ما المشكلة التي يعالجها المشروع؟</label>
-                  <textarea name="problemAddressed" value={formData.problemAddressed} onChange={handleInputChange} className="w-full border-slate-200 rounded-xl p-3 h-20"></textarea>
+                  <textarea name="problemAddressed" value={formData.problemAddressed} onChange={handleInputChange} className="w-full border border-slate-300 rounded-xl p-3 h-20"></textarea>
                 </div>
                 <div>
                   <label className="block text-sm font-bold text-slate-700 mb-2">من الفئة المستفيدة من المشروع؟ (طلاب، خريجون، أطفال، إلخ)</label>
-                  <input type="text" name="targetAudience" value={formData.targetAudience} onChange={handleInputChange} className="w-full border-slate-200 rounded-xl p-3" />
+                  <input type="text" name="targetAudience" value={formData.targetAudience} onChange={handleInputChange} className="w-full border border-slate-300 rounded-xl p-3" />
                 </div>
                 <div>
                   <label className="block text-sm font-bold text-slate-700 mb-2">ما الحل الذي يقدمه المشروع؟</label>
-                  <textarea name="solutionProvided" value={formData.solutionProvided} onChange={handleInputChange} className="w-full border-slate-200 rounded-xl p-3 h-20"></textarea>
+                  <textarea name="solutionProvided" value={formData.solutionProvided} onChange={handleInputChange} className="w-full border border-slate-300 rounded-xl p-3 h-20"></textarea>
                 </div>
                 <div>
                   <label className="block text-sm font-bold text-slate-700 mb-2">ما وجه الابتكار أو التميز في المشروع؟</label>
-                  <textarea name="innovationAspect" value={formData.innovationAspect} onChange={handleInputChange} className="w-full border-slate-200 rounded-xl p-3 h-20"></textarea>
+                  <textarea name="innovationAspect" value={formData.innovationAspect} onChange={handleInputChange} className="w-full border border-slate-300 rounded-xl p-3 h-20"></textarea>
                 </div>
                 <div className="mt-6">
                   <label className="block text-sm font-bold text-[#26462C] mb-3">القيمة التي يقدمها المشروع:</label>
@@ -408,11 +408,11 @@ const SubmitGraduationProjectPage = () => {
                 <RadioGroup name="hasBeenTested" label="هل تم اختبار المشروع؟" options={['داخل الكلية', 'مع مستخدمين فعليين', 'مع جهة خارجية', 'لا', 'قيد الاختبار']} />
                 <div>
                   <label className="block text-sm font-bold text-slate-700 mb-2">يرجى وصف ما تم إنجازه فعليًا</label>
-                  <textarea name="completedWorkDescription" value={formData.completedWorkDescription} onChange={handleInputChange} className="w-full border-slate-200 rounded-xl p-3 h-24"></textarea>
+                  <textarea name="completedWorkDescription" value={formData.completedWorkDescription} onChange={handleInputChange} className="w-full border border-slate-300 rounded-xl p-3 h-24"></textarea>
                 </div>
                 <div>
                   <label className="block text-sm font-bold text-slate-700 mb-2">ما أهم التحديات التي تواجه المشروع حاليًا؟</label>
-                  <textarea name="currentChallenges" value={formData.currentChallenges} onChange={handleInputChange} className="w-full border-slate-200 rounded-xl p-3 h-24"></textarea>
+                  <textarea name="currentChallenges" value={formData.currentChallenges} onChange={handleInputChange} className="w-full border border-slate-300 rounded-xl p-3 h-24"></textarea>
                 </div>
               </div>
             )}
@@ -470,7 +470,7 @@ const SubmitGraduationProjectPage = () => {
                 ]} />
                 <div className="mt-6">
                   <label className="block text-sm font-bold text-slate-700 mb-2">صف بدقة ما يحتاجه المشروع في المرحلة القادمة</label>
-                  <textarea name="supportDescription" value={formData.supportDescription} onChange={handleInputChange} className="w-full border-slate-200 rounded-xl p-3 h-32"></textarea>
+                  <textarea name="supportDescription" value={formData.supportDescription} onChange={handleInputChange} className="w-full border border-slate-300 rounded-xl p-3 h-32"></textarea>
                 </div>
               </div>
             )}
@@ -486,7 +486,7 @@ const SubmitGraduationProjectPage = () => {
                 ]} />
                 <div className="mt-6">
                   <label className="block text-sm font-bold text-slate-700 mb-2">ما النتيجة التي يتمنى الفريق الوصول إليها؟</label>
-                  <textarea name="desiredResult" value={formData.desiredResult} onChange={handleInputChange} className="w-full border-slate-200 rounded-xl p-3 h-32"></textarea>
+                  <textarea name="desiredResult" value={formData.desiredResult} onChange={handleInputChange} className="w-full border border-slate-300 rounded-xl p-3 h-32"></textarea>
                 </div>
               </div>
             )}
@@ -500,7 +500,7 @@ const SubmitGraduationProjectPage = () => {
                   <h3 className="font-black text-[#F4A217] mb-4">مرفقات إلزامية</h3>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     {['ملخص المشروع PDF', 'عرض تقديمي Pitch Deck', 'صورة لقطة شاشة للمشروع', 'بيانات الفريق والمشرف'].map((item, i) => (
-                      <div key={i} className="flex items-center gap-4 bg-white p-3 rounded-xl border border-slate-200">
+                      <div key={i} className="flex items-center gap-4 bg-white p-3 rounded-xl border border-slate-300">
                         <Upload className="w-5 h-5 text-slate-400" />
                         <div className="flex-1">
                           <div className="text-sm font-bold text-slate-700">{item}</div>
@@ -511,7 +511,7 @@ const SubmitGraduationProjectPage = () => {
                   </div>
                 </div>
 
-                <div className="bg-slate-50 p-6 rounded-2xl border border-slate-200">
+                <div className="bg-slate-50 p-6 rounded-2xl border border-slate-300">
                   <h3 className="font-black text-slate-600 mb-4">مرفقات اختيارية</h3>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     {[
@@ -519,7 +519,7 @@ const SubmitGraduationProjectPage = () => {
                       'فيديو Demo', 'دراسة جدوى', 'نموذج عمل', 'خطة تسويق',
                       'خطاب المشرف', 'شهادة مشاركة', 'إثبات اختبار', 'موافقة ملكية'
                     ].map((item, i) => (
-                      <div key={i} className="flex items-center gap-4 bg-white p-3 rounded-xl border border-slate-200">
+                      <div key={i} className="flex items-center gap-4 bg-white p-3 rounded-xl border border-slate-300">
                         <Upload className="w-5 h-5 text-slate-400" />
                         <div className="flex-1">
                           <div className="text-sm font-bold text-slate-700">{item}</div>
@@ -573,14 +573,14 @@ const SubmitGraduationProjectPage = () => {
                     'تحديد نوع الدعم المطلوب', 'توضيح حالة الملكية الفكرية',
                     'رفع ملخص المشروع', 'رفع العرض التقديمي', 'الموافقة على الإقرارات'
                   ].map((item, i) => (
-                    <div key={i} className="flex items-center gap-3 bg-slate-50 p-3 rounded-xl border border-slate-200">
+                    <div key={i} className="flex items-center gap-3 bg-slate-50 p-3 rounded-xl border border-slate-300">
                       <CheckCircle className="w-5 h-5 text-green-500" />
                       <span className="font-bold text-slate-700 text-sm">{item}</span>
                     </div>
                   ))}
                 </div>
 
-                <div className="bg-slate-100 p-6 rounded-2xl border border-slate-200">
+                <div className="bg-slate-100 p-6 rounded-2xl border border-slate-300">
                   <h4 className="font-black text-[#26462C] mb-3">حالة الطلب بعد الإرسال ستكون:</h4>
                   <ul className="list-disc list-inside text-sm font-semibold text-slate-600 space-y-1">
                     <li>تم استلام المشروع</li>
