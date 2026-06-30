@@ -106,7 +106,7 @@ const GraduationProjectsPage = () => {
           
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {/* Box 1 */}
-            <div className="bg-[#f8fafc] rounded-3xl p-8 hover:shadow-xl transition-shadow duration-300 border border-slate-100 group">
+            <div className="bg-[#f8fafc] rounded-3xl p-8 hover:shadow-xl transition-shadow duration-300 border-2 border-[#F4A217] group">
               <div className="w-14 h-14 bg-white rounded-2xl flex items-center justify-center mb-6 shadow-sm group-hover:bg-[#F4A217] group-hover:text-white transition-colors">
                 <ClipboardCheck className="w-7 h-7 text-[#26462C] group-hover:text-white transition-colors" />
               </div>
@@ -122,7 +122,7 @@ const GraduationProjectsPage = () => {
             </div>
 
             {/* Box 2 */}
-            <div className="bg-[#f8fafc] rounded-3xl p-8 hover:shadow-xl transition-shadow duration-300 border border-slate-100 group">
+            <div className="bg-[#f8fafc] rounded-3xl p-8 hover:shadow-xl transition-shadow duration-300 border-2 border-[#F4A217] group">
               <div className="w-14 h-14 bg-white rounded-2xl flex items-center justify-center mb-6 shadow-sm group-hover:bg-[#F4A217] transition-colors">
                 <Settings className="w-7 h-7 text-[#26462C] group-hover:text-white transition-colors" />
               </div>
@@ -145,7 +145,7 @@ const GraduationProjectsPage = () => {
             </div>
 
             {/* Box 3 */}
-            <div className="bg-[#f8fafc] rounded-3xl p-8 hover:shadow-xl transition-shadow duration-300 border border-slate-100 group">
+            <div className="bg-[#f8fafc] rounded-3xl p-8 hover:shadow-xl transition-shadow duration-300 border-2 border-[#F4A217] group">
               <div className="w-14 h-14 bg-white rounded-2xl flex items-center justify-center mb-6 shadow-sm group-hover:bg-[#F4A217] transition-colors">
                 <Globe className="w-7 h-7 text-[#26462C] group-hover:text-white transition-colors" />
               </div>
@@ -175,7 +175,7 @@ const GraduationProjectsPage = () => {
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
             {/* Box 4 & 5 Combined Layout */}
-            <div className="bg-white rounded-3xl p-8 shadow-sm border border-slate-100 relative overflow-hidden">
+            <div className="bg-white rounded-3xl p-8 shadow-sm border-2 border-[#F4A217] relative overflow-hidden">
               <div className="absolute top-0 left-0 w-32 h-32 bg-[#F4A217] opacity-5 rounded-br-full"></div>
               
               <div className="flex items-center gap-4 mb-6">
@@ -219,7 +219,7 @@ const GraduationProjectsPage = () => {
             <div className="grid grid-cols-1 gap-8">
               
               {/* Box 7: IP */}
-              <div className="bg-white rounded-3xl p-8 shadow-sm border border-slate-100 flex flex-col justify-between group hover:border-[#26462C] transition-colors">
+              <div className="bg-white rounded-3xl p-8 shadow-sm border-2 border-[#F4A217] flex flex-col justify-between group hover:border-[#26462C] transition-colors">
                 <div>
                   <div className="flex items-center gap-4 mb-6">
                     <div className="w-12 h-12 bg-[#26462C] rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform">
@@ -247,7 +247,7 @@ const GraduationProjectsPage = () => {
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-8">
                 {/* Box 6: Files */}
-                <div className="bg-white rounded-3xl p-6 shadow-sm border border-slate-100">
+                <div className="bg-white rounded-3xl p-6 shadow-sm border-2 border-[#F4A217]">
                   <h3 className="text-xl font-black text-[#26462C] mb-4 border-b pb-2">الملفات المطلوبة</h3>
                   <div className="space-y-4">
                     <div>
@@ -272,7 +272,7 @@ const GraduationProjectsPage = () => {
                 </div>
 
                 {/* Box 8: Support */}
-                <div className="bg-white rounded-3xl p-6 shadow-sm border border-slate-100">
+                <div className="bg-white rounded-3xl p-6 shadow-sm border-2 border-[#F4A217]">
                   <h3 className="text-xl font-black text-[#26462C] mb-4 border-b pb-2">نوع الدعم</h3>
                   <div className="flex flex-wrap gap-2 text-xs font-bold text-slate-600">
                     {[
@@ -345,7 +345,7 @@ const GraduationProjectsPage = () => {
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8 items-center mt-12">
             
             {/* Card 1 (Dark) */}
-            <div className="bg-[#1e3622] rounded-[2rem] p-8 border border-white/10 shadow-2xl flex flex-col h-full transform transition-transform hover:-translate-y-2">
+            <div className="bg-[#1e3622] rounded-[2rem] p-8 border-2 border-[#F4A217] shadow-2xl flex flex-col h-full transform transition-transform hover:-translate-y-2">
               <div className="text-[#F4A217] mb-6">
                 <MonitorSmartphone className="w-12 h-12" />
               </div>
@@ -397,7 +397,7 @@ const GraduationProjectsPage = () => {
             </div>
 
             {/* Card 3 (Dark) */}
-            <div className="bg-[#1e3622] rounded-[2rem] p-8 border border-white/10 shadow-2xl flex flex-col h-full transform transition-transform hover:-translate-y-2">
+            <div className="bg-[#1e3622] rounded-[2rem] p-8 border-2 border-[#F4A217] shadow-2xl flex flex-col h-full transform transition-transform hover:-translate-y-2">
               <div className="text-[#F4A217] mb-6 flex justify-between items-center">
                 <ClipboardCheck className="w-12 h-12" />
                 <div className="text-3xl font-black text-white/50">100</div>
