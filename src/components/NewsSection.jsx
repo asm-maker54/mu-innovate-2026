@@ -1,33 +1,10 @@
 import React from 'react';
 import { ArrowLeft, Calendar, ChevronRight, Newspaper } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { initialMockNews } from '../data/mockNews';
 
 const NewsSection = () => {
-  const news = [
-    {
-      id: 1,
-      title: 'جامعة المنيا تعلن عن موعد انطلاق أول قمة للابتكار في صعيد مصر',
-      date: '15 أكتوبر 2026',
-      category: 'إعلانات هامة',
-      image: '/summit_pitch.png',
-      excerpt: 'تحت رعاية رئيس الجامعة، تنطلق فعاليات القمة الأكبر من نوعها لدعم الأفكار والمشاريع الناشئة بمشاركة أكثر من 50 شركة وجهة استثمارية.'
-    },
-    {
-      id: 2,
-      title: 'فتح باب التسجيل لبرنامج رواد جامعة المنيا الدفعة الأولى',
-      date: '10 أكتوبر 2026',
-      category: 'برامج وتدريب',
-      image: '/summit_workshop.png',
-      excerpt: 'فرصة ذهبية للطلاب والخريجين للانضمام لبرنامج مكثف يشمل تدريبات متخصصة في ريادة الأعمال والابتكار التكنولوجي.'
-    },
-    {
-      id: 3,
-      title: 'شراكة استراتيجية مع "نماء" لدعم مشروعات التخرج المتميزة',
-      date: '05 أكتوبر 2026',
-      category: 'شراكات',
-      image: '/summit_networking.png',
-      excerpt: 'توقيع بروتوكول تعاون لدعم وتحويل مشاريع التخرج الواعدة إلى شركات ناشئة عبر توفير التمويل والتوجيه اللازم.'
-    }
-  ];
+  const news = initialMockNews;
 
   return (
     <section className="py-10 md:py-12 bg-slate-50 relative overflow-hidden font-cairo" dir="rtl">
@@ -57,28 +34,37 @@ const NewsSection = () => {
         {/* News Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           {news.map((item) => (
-            <div 
+            <Link 
+              to={`/news/${item.id}`}
               key={item.id} 
               className="bg-white rounded-[2rem] overflow-hidden shadow-sm hover:shadow-xl border border-slate-100 transition-all duration-300 group flex flex-col"
             >
               {/* Image Container */}
               <div className="relative h-56 overflow-hidden">
-                <img 
-                  src={item.image} 
-                  alt={item.title}
-                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                />
+                {item.image_url ? (
+                  <img 
+                    src={item.image_url} 
+                    alt={item.title}
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                  />
+                ) : (
+                  <div className="w-full h-full bg-slate-200 flex items-center justify-center text-slate-400">
+                    <Newspaper className="w-10 h-10 opacity-50" />
+                  </div>
+                )}
                 <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
                 <div className="absolute top-4 right-4 bg-white/90 backdrop-blur-sm px-3 py-1.5 rounded-full text-xs font-bold text-blue-700">
-                  {item.category}
+                  إعلانات هامة
                 </div>
               </div>
 
               {/* Content */}
               <div className="p-6 md:p-8 flex flex-col flex-1">
-                <div className="flex items-center gap-2 text-slate-500 text-sm font-medium mb-3">
-                  <Calendar className="w-4 h-4" />
-                  {item.date}
+                <div className="flex justify-between items-center text-slate-500 text-sm font-medium mb-3">
+                  <div className="flex items-center gap-2">
+                    <Calendar className="w-4 h-4" />
+                    {new Date(item.created_at).toLocaleDateString('ar-EG')}
+                  </div>
                 </div>
                 
                 <h3 className="text-xl font-bold text-slate-800 mb-3 leading-snug group-hover:text-blue-600 transition-colors line-clamp-2">
@@ -86,15 +72,15 @@ const NewsSection = () => {
                 </h3>
                 
                 <p className="text-slate-600 text-sm leading-relaxed mb-6 line-clamp-3 flex-1">
-                  {item.excerpt}
+                  {item.content}
                 </p>
 
-                <button className="flex items-center gap-2 text-blue-600 font-bold hover:text-blue-800 transition-colors mt-auto w-fit">
+                <div className="flex items-center gap-2 text-blue-600 font-bold hover:text-blue-800 transition-colors mt-auto w-fit">
                   اقرأ المزيد
                   <ChevronRight className="w-4 h-4 rotate-180" />
-                </button>
+                </div>
               </div>
-            </div>
+            </Link>
           ))}
         </div>
 

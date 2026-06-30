@@ -3,9 +3,10 @@ import { Link } from 'react-router-dom';
 import { 
   Users, Award, BookOpen, Download, Search, CheckCircle, Clock, 
   AlertTriangle, Eye, ArrowLeft, RefreshCw, KeyRound, BarChart2,
-  FileText, Briefcase, GraduationCap, Presentation
+  FileText, Briefcase, GraduationCap, Presentation, Newspaper
 } from 'lucide-react';
 import { supabase, isSupabaseConfigured } from '../supabaseClient';
+import { initialMockNews } from '../data/mockNews';
 
 // Mock Data for Fallback
 const mockGraduationProjects = [
@@ -107,6 +108,7 @@ const AdminDashboard = () => {
   const [gradProjects, setGradProjects] = useState([]);
   const [appliedResearch, setAppliedResearch] = useState([]);
   const [registrants, setRegistrants] = useState([]);
+  const [newsList, setNewsList] = useState(initialMockNews);
   const [loading, setLoading] = useState(false);
   
   // Selection details modal
@@ -362,6 +364,7 @@ const AdminDashboard = () => {
         <div className="flex gap-2 overflow-x-auto pb-4 mb-6 scrollbar-none border-b border-slate-200">
           {[
             { id: 'overview', label: 'نظرة عامة', icon: BarChart2 },
+            { id: 'news', label: `الأخبار (${newsList.length})`, icon: Newspaper },
             { id: 'graduation', label: `مشروعات التخرج (${stats.totalGP})`, icon: GraduationCap },
             { id: 'research', label: `البحوث التطبيقية (${stats.totalAR})`, icon: BookOpen },
             { id: 'speakers', label: `المتحدثون (${stats.totalSpeakers})`, icon: Presentation },
@@ -470,6 +473,56 @@ const AdminDashboard = () => {
                       </div>
                     </div>
                   </div>
+                </div>
+              )}
+
+              {/* --- NEWS TAB --- */}
+              {activeTab === 'news' && !selectedItem && (
+                <div className="space-y-6 animate-fade-in">
+                  <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-slate-50 p-6 rounded-2xl border border-slate-200">
+                    <div>
+                      <h3 className="text-xl font-black text-[#26462C] mb-1">إدارة الأخبار</h3>
+                      <p className="text-sm text-slate-500 font-bold">إضافة وتعديل وحذف الأخبار المعروضة في الصفحة الرئيسية.</p>
+                    </div>
+                    <button className="bg-[#26462C] hover:bg-[#1a301e] text-[#F4A217] px-6 py-3 rounded-xl font-bold flex items-center gap-2 transition-colors shadow-sm shrink-0">
+                      + إضافة خبر جديد
+                    </button>
+                  </div>
+
+                  {newsList.length === 0 ? (
+                    <div className="py-20 text-center text-slate-500 font-bold bg-slate-50 rounded-3xl border border-slate-200 border-dashed">
+                      لا توجد أخبار مضافة حتى الآن.
+                    </div>
+                  ) : (
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                      {newsList.map(newsItem => (
+                        <div key={newsItem.id} className="bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-shadow flex flex-col group">
+                          <div className="h-48 bg-slate-100 relative overflow-hidden">
+                            {newsItem.image_url ? (
+                              <img src={newsItem.image_url} alt={newsItem.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                            ) : (
+                              <div className="flex flex-col items-center justify-center w-full h-full text-slate-400 bg-slate-100">
+                                <Newspaper className="w-10 h-10 mb-2 opacity-50" />
+                                <span className="text-xs font-bold">لا توجد صورة</span>
+                              </div>
+                            )}
+                          </div>
+                          <div className="p-5 flex-1 flex flex-col">
+                            <h4 className="font-black text-slate-800 text-lg mb-2 line-clamp-2">{newsItem.title}</h4>
+                            <p className="text-slate-500 text-sm line-clamp-3 flex-1 mb-4 leading-relaxed">{newsItem.content}</p>
+                            <div className="flex justify-between items-center text-xs font-bold text-slate-400 border-t border-slate-100 pt-4 mt-auto">
+                              <div className="flex items-center gap-1"><Clock className="w-3.5 h-3.5"/> {new Date(newsItem.created_at).toLocaleDateString('ar-EG')}</div>
+                              <div className="flex items-center gap-1"><Users className="w-3.5 h-3.5"/> {newsItem.uploader_name}</div>
+                            </div>
+                            <div className="flex gap-2 mt-4 pt-4 border-t border-slate-100">
+                               <button className="flex-1 py-2 bg-blue-50 text-blue-600 rounded-lg font-bold text-xs hover:bg-blue-100 transition-colors">تعديل</button>
+                               <button className="flex-1 py-2 bg-red-50 text-red-600 rounded-lg font-bold text-xs hover:bg-red-100 transition-colors">حذف</button>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
                 </div>
               )}
 
