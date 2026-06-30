@@ -52,7 +52,7 @@ const ContactPage = () => {
                   </div>
                   <div>
                     <h3 className="text-white font-bold mb-1">الهاتف</h3>
-                    <p className="text-gray-400" dir="ltr">+20 86 234 2331</p>
+                    <p className="text-gray-400" dir="ltr">0100000000</p>
                   </div>
                 </div>
               </div>
