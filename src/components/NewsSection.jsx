@@ -25,10 +25,10 @@ const NewsSection = () => {
               الأخبار والإعلانات
             </h2>
           </div>
-          <button className="flex items-center gap-2 text-blue-600 font-bold hover:text-blue-800 transition-colors group bg-white px-6 py-3 rounded-full shadow-sm hover:shadow-md border border-slate-100">
+          <Link to="/news" className="flex items-center gap-2 text-blue-600 font-bold hover:text-blue-800 transition-colors group bg-white px-6 py-3 rounded-full shadow-sm hover:shadow-md border border-slate-100">
             تصفح كل الأخبار
             <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
-          </button>
+          </Link>
         </div>
 
         {/* News Grid */}

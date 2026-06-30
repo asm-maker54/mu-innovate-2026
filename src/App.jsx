@@ -24,6 +24,7 @@ import SubmitGraduationProjectPage from './pages/SubmitGraduationProjectPage';
 import GreenInnovationPage from './pages/GreenInnovationPage';
 import AdminDashboard from './pages/AdminDashboard';
 import NewsDetails from './pages/NewsDetails';
+import NewsListPage from './pages/NewsListPage';
 import Chatbot from './components/Chatbot';
 
 function App() {
@@ -45,6 +46,7 @@ function App() {
             <Route path="/auth" element={<AuthPage />} />
             <Route path="/register" element={<RegisterPage />} />
             <Route path="/exhibition/:id" element={<ExhibitionDetails />} />
+            <Route path="/news" element={<NewsListPage />} />
             <Route path="/news/:id" element={<NewsDetails />} />
             <Route path="/about" element={<AboutPage />} />
             <Route path="/about-us" element={<AboutUsPage />} />
