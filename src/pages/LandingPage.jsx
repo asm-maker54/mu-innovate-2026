@@ -140,35 +140,67 @@ const LandingPage = () => {
                   </div>
 
                   {/* Countdown Timer */}
-                  <div className="bg-slate-900/40 border border-white/10 rounded-2xl p-4 flex flex-col items-center gap-3">
-                    <span className="text-amber-400 font-black text-sm">العد التنازلي للقمة:</span>
-                    <div className="flex items-center gap-3" dir="ltr">
-                      <div className="flex flex-col items-center">
-                        <div className="w-12 h-12 bg-slate-950/80 rounded-xl flex items-center justify-center text-white font-black text-xl shadow-lg border border-white/5 tabular-nums">
-                          {String(days).padStart(2, '0')}
+                  <div className="mt-2 p-5 bg-[#0b1121]/80 backdrop-blur-xl border border-white/10 rounded-2xl flex flex-col items-center gap-4 relative overflow-hidden shadow-2xl">
+                    {/* Decorative glow */}
+                    <div className="absolute -top-10 left-1/2 -translate-x-1/2 w-40 h-20 bg-blue-500/30 blur-[40px] rounded-full pointer-events-none"></div>
+                    
+                    <div className="flex items-center gap-2 relative z-10">
+                      <div className="w-2 h-2 rounded-full bg-blue-400 animate-pulse"></div>
+                      <span className="text-blue-100 font-bold text-sm tracking-wide">
+                        العد التنازلي للقمة
+                      </span>
+                      <div className="w-2 h-2 rounded-full bg-blue-400 animate-pulse"></div>
+                    </div>
+                    
+                    <div className="flex items-center gap-2 sm:gap-4 relative z-10" dir="ltr">
+                      {/* Days */}
+                      <div className="flex flex-col items-center gap-2">
+                        <div className="w-14 h-14 sm:w-16 sm:h-16 bg-gradient-to-br from-slate-800 to-slate-900 rounded-xl flex items-center justify-center border border-white/10 shadow-inner relative overflow-hidden group">
+                          <div className="absolute inset-0 bg-blue-500/10 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                          <span className="text-transparent bg-clip-text bg-gradient-to-b from-white to-blue-200 font-black text-2xl sm:text-3xl tabular-nums">
+                            {String(days).padStart(2, '0')}
+                          </span>
                         </div>
-                        <span className="text-blue-200/60 text-xs mt-1.5 font-bold">يوم</span>
+                        <span className="text-blue-300/80 text-[11px] sm:text-xs font-bold uppercase tracking-wider">يوم</span>
                       </div>
-                      <span className="text-white/30 text-lg font-bold mb-5">:</span>
-                      <div className="flex flex-col items-center">
-                        <div className="w-12 h-12 bg-slate-950/80 rounded-xl flex items-center justify-center text-white font-black text-xl shadow-lg border border-white/5 tabular-nums">
-                          {String(hours).padStart(2, '0')}
+
+                      <span className="text-blue-500/50 text-2xl sm:text-3xl font-black mb-6 animate-pulse">:</span>
+
+                      {/* Hours */}
+                      <div className="flex flex-col items-center gap-2">
+                        <div className="w-14 h-14 sm:w-16 sm:h-16 bg-gradient-to-br from-slate-800 to-slate-900 rounded-xl flex items-center justify-center border border-white/10 shadow-inner relative overflow-hidden group">
+                          <div className="absolute inset-0 bg-blue-500/10 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                          <span className="text-transparent bg-clip-text bg-gradient-to-b from-white to-blue-200 font-black text-2xl sm:text-3xl tabular-nums">
+                            {String(hours).padStart(2, '0')}
+                          </span>
                         </div>
-                        <span className="text-blue-200/60 text-xs mt-1.5 font-bold">ساعة</span>
+                        <span className="text-blue-300/80 text-[11px] sm:text-xs font-bold uppercase tracking-wider">ساعة</span>
                       </div>
-                      <span className="text-white/30 text-lg font-bold mb-5">:</span>
-                      <div className="flex flex-col items-center">
-                        <div className="w-12 h-12 bg-slate-950/80 rounded-xl flex items-center justify-center text-white font-black text-xl shadow-lg border border-white/5 tabular-nums">
-                          {String(minutes).padStart(2, '0')}
+
+                      <span className="text-blue-500/50 text-2xl sm:text-3xl font-black mb-6 animate-pulse">:</span>
+
+                      {/* Minutes */}
+                      <div className="flex flex-col items-center gap-2">
+                        <div className="w-14 h-14 sm:w-16 sm:h-16 bg-gradient-to-br from-slate-800 to-slate-900 rounded-xl flex items-center justify-center border border-white/10 shadow-inner relative overflow-hidden group">
+                          <div className="absolute inset-0 bg-blue-500/10 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                          <span className="text-transparent bg-clip-text bg-gradient-to-b from-white to-blue-200 font-black text-2xl sm:text-3xl tabular-nums">
+                            {String(minutes).padStart(2, '0')}
+                          </span>
                         </div>
-                        <span className="text-blue-200/60 text-xs mt-1.5 font-bold">دقيقة</span>
+                        <span className="text-blue-300/80 text-[11px] sm:text-xs font-bold uppercase tracking-wider">دقيقة</span>
                       </div>
-                      <span className="text-white/30 text-lg font-bold mb-5">:</span>
-                      <div className="flex flex-col items-center">
-                        <div className="w-12 h-12 bg-slate-950/80 rounded-xl flex items-center justify-center text-white font-black text-xl shadow-lg border border-white/5 tabular-nums">
-                          {String(seconds).padStart(2, '0')}
+
+                      <span className="text-blue-500/50 text-2xl sm:text-3xl font-black mb-6 animate-pulse">:</span>
+
+                      {/* Seconds */}
+                      <div className="flex flex-col items-center gap-2">
+                        <div className="w-14 h-14 sm:w-16 sm:h-16 bg-gradient-to-br from-blue-600/20 to-slate-900 rounded-xl flex items-center justify-center border border-blue-500/30 shadow-[0_0_15px_rgba(59,130,246,0.15)] relative overflow-hidden group">
+                          <div className="absolute inset-0 bg-blue-400/10"></div>
+                          <span className="text-blue-400 font-black text-2xl sm:text-3xl tabular-nums drop-shadow-[0_0_8px_rgba(96,165,250,0.5)]">
+                            {String(seconds).padStart(2, '0')}
+                          </span>
                         </div>
-                        <span className="text-blue-200/60 text-xs mt-1.5 font-bold">ثانية</span>
+                        <span className="text-blue-300/80 text-[11px] sm:text-xs font-bold uppercase tracking-wider">ثانية</span>
                       </div>
                     </div>
                   </div>
