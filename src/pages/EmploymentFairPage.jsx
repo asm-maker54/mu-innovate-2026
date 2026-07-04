@@ -92,14 +92,14 @@ const EmploymentFairPage = () => {
             {/* Right Side: Text & Actions (In RTL, sits right) */}
             <div className="w-full lg:w-1/2 text-center lg:text-right space-y-6">
               
-              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-red-50 border border-red-100 text-red-650 text-xs sm:text-sm font-black animate-pulse">
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-red-50 border border-red-100 text-red-600 text-xs sm:text-sm font-black animate-pulse">
                 <Sparkles className="w-4 h-4" />
                 <span>ملتقى التوظيف السنوي والوظائف</span>
               </div>
               
               <h1 className="text-3xl sm:text-5xl lg:text-[4rem] font-black leading-tight text-slate-900">
                 بوابتك المهنية <br />
-                <span className="text-transparent bg-clip-text bg-gradient-to-l from-red-650 to-orange-500">
+                <span className="text-transparent bg-clip-text bg-gradient-to-l from-red-600 to-orange-500">
                   للانطلاق والتميز
                 </span>
               </h1>
@@ -110,7 +110,7 @@ const EmploymentFairPage = () => {
 
               {/* Floating search input with button (Matches screenshot) */}
               <div className="pt-2 max-w-md mx-auto lg:mx-0">
-                <div className="bg-white border border-slate-200 rounded-2xl p-1.5 flex items-center shadow-lg shadow-slate-100/80 focus-within:border-red-650 focus-within:ring-2 focus-within:ring-red-500/10 transition-all">
+                <div className="bg-white border border-slate-200 rounded-2xl p-1.5 flex items-center shadow-lg shadow-slate-100/80 focus-within:border-red-600 focus-within:ring-2 focus-within:ring-red-500/10 transition-all">
                   <Search className="w-5 h-5 text-slate-400 mr-3 shrink-0" />
                   <input 
                     type="text" 
@@ -129,7 +129,7 @@ const EmploymentFairPage = () => {
               </div>
 
               {/* Phone contact text below it (Matches screenshot) */}
-              <div className="flex items-center justify-center lg:justify-start gap-2 text-xs sm:text-sm font-black text-slate-650 pt-2">
+              <div className="flex items-center justify-center lg:justify-start gap-2 text-xs sm:text-sm font-black text-slate-500 pt-2">
                 <Phone className="w-4 h-4 text-orange-500" />
                 <span>تواصل معنا للاستفسار:</span>
                 <a href="tel:0100000000" className="text-slate-900 hover:underline">0100000000</a>
@@ -183,11 +183,11 @@ const EmploymentFairPage = () => {
       <section className="py-8 bg-slate-50 border-t border-b border-slate-100">
         <div className="max-w-[95rem] mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex flex-wrap items-center justify-center gap-8 sm:gap-16 text-slate-400 font-bold text-xs sm:text-sm tracking-wider uppercase">
-            <span className="hover:text-slate-650 transition-colors">مصنع القناة للسكر</span>
-            <span className="hover:text-slate-650 transition-colors">مسرعة الأعمال أثر</span>
-            <span className="hover:text-slate-650 transition-colors">شركة برمودة للتدوير</span>
-            <span className="hover:text-slate-650 transition-colors">جهاز تنمية المشروعات</span>
-            <span className="hover:text-slate-650 transition-colors">منصة Plug & Play العالمية</span>
+            <span className="hover:text-slate-600 transition-colors">مصنع القناة للسكر</span>
+            <span className="hover:text-slate-600 transition-colors">مسرعة الأعمال أثر</span>
+            <span className="hover:text-slate-600 transition-colors">شركة برمودة للتدوير</span>
+            <span className="hover:text-slate-600 transition-colors">جهاز تنمية المشروعات</span>
+            <span className="hover:text-slate-600 transition-colors">منصة Plug & Play العالمية</span>
           </div>
         </div>
       </section>
@@ -307,7 +307,7 @@ const EmploymentFairPage = () => {
                         <span className="bg-blue-600/80 px-2 py-0.5 rounded text-[8px]">عرض</span>
                         <div>
                           <p className="font-bold">{item.title}</p>
-                          <p className="text-slate-450">{item.comp}</p>
+                          <p className="text-slate-500">{item.comp}</p>
                         </div>
                       </div>
                     ))}
@@ -411,7 +411,7 @@ const EmploymentFairPage = () => {
                     </div>
 
                     <div className="flex flex-wrap gap-2 mb-4 text-[10px] sm:text-xs">
-                      <span className="px-2.5 py-1 bg-slate-100 text-slate-650 font-bold rounded-lg flex items-center gap-1">
+                      <span className="px-2.5 py-1 bg-slate-100 text-slate-500 font-bold rounded-lg flex items-center gap-1">
                         <MapPin className="w-3.5 h-3.5" />
                         {job.location}
                       </span>
@@ -475,7 +475,7 @@ const EmploymentFairPage = () => {
               
               {/* Stat 1 */}
               <div className="bg-white rounded-3xl p-6 sm:p-8 shadow-xl border border-slate-150 text-right space-y-2">
-                <span className="text-3xl sm:text-4xl font-black text-red-650 block">+350</span>
+                <span className="text-3xl sm:text-4xl font-black text-red-600 block">+350</span>
                 <span className="text-xs sm:text-sm font-black text-slate-800 block">فرصة وظيفة معلنة</span>
                 <p className="text-[10px] text-slate-500 font-bold leading-normal">
                   تحديث حصر الفرص بالتعاون مع 48 شركة ومصنع شريك بالتحالف.
