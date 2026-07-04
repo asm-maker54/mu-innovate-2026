@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { 
   Briefcase, Building2, MapPin, Clock, Search, ExternalLink, 
   ChevronLeft, Target, Phone, ArrowLeft, CheckCircle, Star, Users,
-  BookOpen, Sparkles, UserCheck, TrendingUp
+  BookOpen, Sparkles, UserCheck, TrendingUp, Send
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
