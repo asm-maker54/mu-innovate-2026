@@ -2,7 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { 
   BookOpen, Users, Video, Calendar, Star, GraduationCap, ChevronLeft, 
   Search, Phone, Play, Send, Award, Laptop, Monitor, Sparkles, 
-  CheckCircle, ArrowLeft, ArrowUpRight
+  CheckCircle, ArrowLeft, ArrowUpRight, List, Grid, ArrowUpDown, Filter,
+  FileText, CalendarDays
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
@@ -12,6 +13,11 @@ const DigitalMentorsPage = () => {
   }, []);
 
   const [searchQuery, setSearchQuery] = useState('');
+  const [selectedSpecialty, setSelectedSpecialty] = useState('all');
+  const [viewMode, setViewMode] = useState('grid'); // 'grid' or 'table'
+  const [sortBy, setSortBy] = useState('name'); // 'name', 'rating', 'sessions'
+  const [sortOrder, setSortOrder] = useState('asc'); // 'asc' or 'desc'
+  
   const [sessionFormSubmitted, setSessionFormSubmitted] = useState(false);
   const [selectedMentor, setSelectedMentor] = useState(null);
   
@@ -23,37 +29,77 @@ const DigitalMentorsPage = () => {
     message: ''
   });
 
+  // Expanded Mentors List
   const mentors = [
     {
       id: 1,
       name: 'د. أحمد محمود',
       title: 'أستاذ مساعد - كلية الحاسبات والمعلومات',
       specialty: 'الذكاء الاصطناعي وتعلم الآلة',
+      category: 'ai',
       rating: 4.9,
       sessions: 120,
+      email: 'a.mahmoud@minia.edu.eg',
       image: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&q=80&w=400'
     },
     {
       id: 2,
       name: 'م. سارة إبراهيم',
-      title: 'خبيرة تسويق رقمي',
+      title: 'خبيرة تسويق رقمي ومستشارة شركات',
       specialty: 'التسويق الإلكتروني ونمو الشركات',
+      category: 'marketing',
       rating: 4.8,
       sessions: 85,
+      email: 'sara.marketing@minia-hub.com',
       image: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&q=80&w=400'
     },
     {
       id: 3,
       name: 'د. كريم حسن',
-      title: 'مستشار ريادة أعمال',
+      title: 'أستاذ إدارة الأعمال ومستشار ريادي',
       specialty: 'تطوير نماذج الأعمال للمشاريع الناشئة',
+      category: 'business',
       rating: 5.0,
       sessions: 200,
+      email: 'k.hassan@minia.edu.eg',
       image: 'https://images.unsplash.com/photo-1560250097-0b93528c311a?auto=format&fit=crop&q=80&w=400'
+    },
+    {
+      id: 4,
+      name: 'م. خالد عبد الرحمن',
+      title: 'مطور نظم سحابية أول',
+      specialty: 'البرمجة وتطوير الويب والنظم الموزعة',
+      category: 'web',
+      rating: 4.9,
+      sessions: 150,
+      email: 'k.abdulrahman@dev-corp.com',
+      image: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80&w=400'
+    },
+    {
+      id: 5,
+      name: 'د. ليلى عبد العزيز',
+      title: 'أستاذة علوم البيئة والاستدامة',
+      specialty: 'ريادة الأعمال الخضراء والمشاريع البيئية',
+      category: 'sustainability',
+      rating: 5.0,
+      sessions: 95,
+      email: 'laila.eco@minia.edu.eg',
+      image: 'https://images.unsplash.com/photo-1580489944761-15a19d654956?auto=format&fit=crop&q=80&w=400'
+    },
+    {
+      id: 6,
+      name: 'م. عمر شريف',
+      title: 'استشاري تصميم واجهات وتجربة المستخدم',
+      specialty: 'التصميم الرقمي وتجربة المستخدم UI/UX',
+      category: 'design',
+      rating: 4.7,
+      sessions: 110,
+      email: 'omar.ux@creative-studio.com',
+      image: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&q=80&w=400'
     }
   ];
 
-  // Topics and Courses from "Favorite Topics To Learn" in screenshot
+  // Expanded Learning Topics
   const topics = [
     {
       id: 1,
@@ -82,8 +128,66 @@ const DigitalMentorsPage = () => {
       count: '8 مساقات تدريبية',
       image: 'https://images.unsplash.com/photo-1552664730-d307ca884978?w=600&auto=format&fit=crop&q=80',
       icon: Users
+    },
+    {
+      id: 5,
+      title: 'البرمجة وتطوير الويب',
+      count: '5 مساقات تدريبية',
+      image: 'https://images.unsplash.com/photo-1517694712202-14dd9538aa97?w=600&auto=format&fit=crop&q=80',
+      icon: Laptop
+    },
+    {
+      id: 6,
+      title: 'التصميم وتجربة المستخدم UI/UX',
+      count: '3 مساقات تدريبية',
+      image: 'https://images.unsplash.com/photo-1541462608141-2ff580de097e?w=600&auto=format&fit=crop&q=80',
+      icon: Award
+    },
+    {
+      id: 7,
+      title: 'إنترنت الأشياء IoT والأنظمة',
+      count: '3 مساقات تدريبية',
+      image: 'https://images.unsplash.com/photo-1518770660439-4636190af475?w=600&auto=format&fit=crop&q=80',
+      icon: Monitor
+    },
+    {
+      id: 8,
+      title: 'الريادة الخضراء والاستدامة',
+      count: '4 مساقات تدريبية',
+      image: 'https://images.unsplash.com/photo-1473448912268-2022ce9509d8?w=600&auto=format&fit=crop&q=80',
+      icon: Sparkles
     }
   ];
+
+  // Filtering Logic
+  const filteredMentors = mentors
+    .filter(men => {
+      const matchSearch = men.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                          men.specialty.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                          men.title.toLowerCase().includes(searchQuery.toLowerCase());
+      const matchSpecialty = selectedSpecialty === 'all' || men.category === selectedSpecialty;
+      return matchSearch && matchSpecialty;
+    })
+    .sort((a, b) => {
+      let comparison = 0;
+      if (sortBy === 'name') {
+        comparison = a.name.localeCompare(b.name);
+      } else if (sortBy === 'rating') {
+        comparison = b.rating - a.rating;
+      } else if (sortBy === 'sessions') {
+        comparison = b.sessions - a.sessions;
+      }
+      return sortOrder === 'asc' ? comparison : -comparison;
+    });
+
+  const toggleSort = (field) => {
+    if (sortBy === field) {
+      setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
+    } else {
+      setSortBy(field);
+      setSortOrder('desc');
+    }
+  };
 
   const handleBookingSubmit = (e) => {
     e.preventDefault();
@@ -98,7 +202,7 @@ const DigitalMentorsPage = () => {
   return (
     <div className="min-h-screen bg-slate-950 font-cairo text-slate-100" dir="rtl">
       
-      {/* 1. Hero Section (Deep dark blue background, circular image with orange border, custom buttons) */}
+      {/* 1. Hero Section (Deep dark blue background, circular image with orange border) */}
       <section className="relative pt-32 pb-24 bg-[#0a1128] overflow-hidden border-b border-slate-900">
         
         {/* Subtle glowing elements in background */}
@@ -108,7 +212,7 @@ const DigitalMentorsPage = () => {
         <div className="max-w-[95rem] mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
           <div className="flex flex-col lg:flex-row items-center justify-between gap-12">
             
-            {/* Right Side: Text details (In RTL, sits right) */}
+            {/* Right Side: Text details */}
             <div className="w-full lg:w-1/2 text-center lg:text-right space-y-6">
               
               <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-blue-950/80 border border-blue-900 text-blue-400 text-xs sm:text-sm font-black">
@@ -127,7 +231,7 @@ const DigitalMentorsPage = () => {
                 منصتنا التعليمية المتقدمة للتدريب والتوجيه الأكاديمي والمهني عن بُعد. تواصل مع نخبة من الموجهين والأكاديميين لتطوير مهاراتك وبناء مسارك المستقبلي بنجاح.
               </p>
 
-              {/* Action Buttons (Matches screenshot orange and outline blue) */}
+              {/* Action Buttons */}
               <div className="flex flex-wrap items-center justify-center lg:justify-start gap-4 pt-4">
                 <button 
                   onClick={() => document.getElementById('topics-section')?.scrollIntoView({ behavior: 'smooth' })}
@@ -145,7 +249,7 @@ const DigitalMentorsPage = () => {
 
             </div>
 
-            {/* Left Side: Circular masked students group with orange gradient frame (Matches screenshot) */}
+            {/* Left Side: Circular masked students group with orange gradient frame */}
             <div className="w-full lg:w-1/2 flex items-center justify-center relative">
               
               {/* Thin gradient border layout around the mask */}
@@ -162,12 +266,10 @@ const DigitalMentorsPage = () => {
                 />
               </div>
 
-              {/* Dotted decorative circles on sides */}
               <div className="absolute top-4 right-4 sm:right-12 w-10 h-10 rounded-full bg-orange-500 text-white flex items-center justify-center shadow-lg text-xs font-black animate-bounce">
                 <GraduationCap className="w-5 h-5" />
               </div>
 
-              {/* Text tooltip floating next to mask */}
               <div className="absolute bottom-6 right-0 sm:right-6 bg-slate-900/95 backdrop-blur-sm border border-slate-800 rounded-2xl p-3 shadow-xl pointer-events-none text-right">
                 <span className="text-[10px] font-black text-orange-500">ورش تدريب حية</span>
                 <p className="text-xs font-black text-white mt-0.5">انضم إلينا اليوم</p>
@@ -179,7 +281,7 @@ const DigitalMentorsPage = () => {
         </div>
       </section>
 
-      {/* 2. Services Grid (Matches screenshot: 4 dark blue cards with orange icon badge on top) */}
+      {/* 2. Services Grid */}
       <section className="py-20 bg-slate-950 border-b border-slate-900">
         <div className="max-w-[95rem] mx-auto px-4 sm:px-6 lg:px-8">
           
@@ -197,7 +299,7 @@ const DigitalMentorsPage = () => {
                 </p>
               </div>
               <button 
-                onClick={() => document.getElementById('mentors-section')?.scrollIntoView({ behavior: 'smooth' })}
+                onClick={() => document.getElementById('database-section')?.scrollIntoView({ behavior: 'smooth' })}
                 className="text-xs font-black text-orange-500 hover:text-orange-600 inline-flex items-center gap-1 cursor-pointer self-start pt-4"
               >
                 <span>احجز الآن</span>
@@ -257,7 +359,7 @@ const DigitalMentorsPage = () => {
                 </p>
               </div>
               <button 
-                onClick={() => document.getElementById('mentors-section')?.scrollIntoView({ behavior: 'smooth' })}
+                onClick={() => document.getElementById('database-section')?.scrollIntoView({ behavior: 'smooth' })}
                 className="text-xs font-black text-orange-500 hover:text-orange-600 inline-flex items-center gap-1 cursor-pointer self-start pt-4"
               >
                 <span>عرض السجل</span>
@@ -270,16 +372,15 @@ const DigitalMentorsPage = () => {
         </div>
       </section>
 
-      {/* 3. About Section (Matches screenshot: students image left, description & phone float) */}
+      {/* 3. About Section */}
       <section className="py-20 bg-[#0a1128] border-b border-slate-900">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex flex-col lg:flex-row items-center justify-between gap-12 lg:gap-20">
             
-            {/* Right Column: Custom image mask & floating phone button (Left in LTR) */}
+            {/* Right Column */}
             <div className="w-full lg:w-1/2 flex items-center justify-center relative">
               <div className="absolute -bottom-8 -right-8 w-44 h-44 bg-orange-500/10 rounded-full blur-3xl pointer-events-none" />
               
-              {/* Circular image mask */}
               <div className="relative w-80 h-80 sm:w-[420px] sm:h-[420px] rounded-full overflow-hidden shadow-2xl border-4 border-slate-900">
                 <img 
                   src="https://images.unsplash.com/photo-1523240795612-9a054b0db644?w=600&auto=format&fit=crop&q=80" 
@@ -288,7 +389,6 @@ const DigitalMentorsPage = () => {
                 />
               </div>
 
-              {/* Floating Contact Details Badge (Matches screenshot: orange phone icon & number) */}
               <div className="absolute bottom-6 left-2 sm:left-6 bg-slate-900 border border-slate-800 rounded-3xl p-4 shadow-xl flex items-center gap-3.5">
                 <div className="w-10 h-10 rounded-full bg-orange-500 text-white flex items-center justify-center shrink-0">
                   <Phone className="w-5 h-5" />
@@ -301,7 +401,7 @@ const DigitalMentorsPage = () => {
 
             </div>
 
-            {/* Left Column: Creating a Lifelong Learning Best Community text (Right in LTR) */}
+            {/* Left Column */}
             <div className="w-full lg:w-1/2 text-center lg:text-right space-y-6">
               <span className="text-xs font-black text-orange-500 tracking-widest uppercase">عن مجتمعنا التعليمي</span>
               
@@ -345,7 +445,7 @@ const DigitalMentorsPage = () => {
 
               <div className="pt-4">
                 <button 
-                  onClick={() => document.getElementById('mentors-section')?.scrollIntoView({ behavior: 'smooth' })}
+                  onClick={() => document.getElementById('database-section')?.scrollIntoView({ behavior: 'smooth' })}
                   className="px-8 py-3.5 bg-orange-500 hover:bg-orange-600 text-white rounded-2xl font-black text-xs sm:text-sm cursor-pointer shadow-md transition-all inline-block"
                 >
                   اكتشف المزيد من الموجهين
@@ -358,21 +458,21 @@ const DigitalMentorsPage = () => {
         </div>
       </section>
 
-      {/* 4. Favorite Topics Section (Matches screenshot: category title, slider/cards with orange category icon on image) */}
+      {/* 4. Favorite Topics Section (Added more topics in grid) */}
       <section id="topics-section" className="py-20 bg-slate-950 border-b border-slate-900">
         <div className="max-w-[95rem] mx-auto px-4 sm:px-6 lg:px-8">
           
           <div className="text-center max-w-3xl mx-auto mb-16">
-            <span className="text-xs font-black text-orange-500 tracking-widest uppercase">الفئات والمسارات التدريبية</span>
+            <span className="text-xs font-black text-orange-500 tracking-widest uppercase">المجالات والمسارات التدريبية المحدثة</span>
             <h2 className="text-2xl sm:text-4xl font-black text-white mt-2">
               تصفح مجالات التعلم المفضلة
             </h2>
             <p className="text-slate-400 font-bold text-sm sm:text-base mt-2">
-              اختر المسار المعرفي المناسب لك وابدأ مسيرتك فوراً مع أفضل الموجهين المتخصصين.
+              توسعنا في توفير التخصصات لتشمل مجالات الثورة الصناعية الرابعة والاستدامة البيئية والبرمجة الحديثة.
             </p>
           </div>
 
-          {/* Cards slider grid (Matches screenshot styling) */}
+          {/* Expanded Cards slider grid */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {topics.map((top) => {
               const IconComp = top.icon;
@@ -388,7 +488,7 @@ const DigitalMentorsPage = () => {
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/20 to-transparent" />
                     
-                    {/* Orange rounded icon overlay on bottom of the image (Matches screenshot) */}
+                    {/* Orange rounded icon overlay on bottom of the image */}
                     <div className="absolute -bottom-5 right-6 w-10 h-10 rounded-full bg-orange-500 text-white flex items-center justify-center shadow-lg border border-slate-950 z-20 shrink-0">
                       <IconComp className="w-5 h-5" />
                     </div>
@@ -404,10 +504,20 @@ const DigitalMentorsPage = () => {
                     </div>
 
                     <button 
-                      onClick={() => document.getElementById('mentors-section')?.scrollIntoView({ behavior: 'smooth' })}
+                      onClick={() => {
+                        let catMap = 'all';
+                        if (top.id === 2) catMap = 'ai';
+                        else if (top.id === 3) catMap = 'marketing';
+                        else if (top.id === 1) catMap = 'business';
+                        else if (top.id === 5) catMap = 'web';
+                        else if (top.id === 8) catMap = 'sustainability';
+                        else if (top.id === 6) catMap = 'design';
+                        setSelectedSpecialty(catMap);
+                        document.getElementById('database-section')?.scrollIntoView({ behavior: 'smooth' });
+                      }}
                       className="inline-flex items-center gap-1 text-xs font-black text-orange-500 hover:text-orange-600 cursor-pointer self-start"
                     >
-                      <span>تصفح المسار</span>
+                      <span>عرض المدربين</span>
                       <ArrowUpRight className="w-4 h-4" />
                     </button>
                   </div>
@@ -420,81 +530,233 @@ const DigitalMentorsPage = () => {
         </div>
       </section>
 
-      {/* 5. Mentors Section (Listing mentors and their session bookings) */}
-      <section id="mentors-section" className="py-20 bg-[#0a1128] border-b border-slate-900">
+      {/* 5. Mentors Database Explorer (Interactive Dashboard & Grid/Table toggles) */}
+      <section id="database-section" className="py-20 bg-[#0a1128] border-b border-slate-900">
         <div className="max-w-[95rem] mx-auto px-4 sm:px-6 lg:px-8">
           
-          <div className="flex flex-col sm:flex-row items-center justify-between gap-6 mb-12">
-            <div className="text-center sm:text-right">
-              <span className="text-xs font-black text-orange-500 tracking-widest uppercase">المدربون والخبراء</span>
-              <h2 className="text-2xl sm:text-4xl font-black text-white mt-2">نخبة الموجهين والمدربين المعتمدين</h2>
-              <p className="text-slate-400 font-bold text-sm sm:text-base mt-1">تواصل مباشرة لحجز جلسات إرشاد وتوجيه لمشروعك.</p>
-            </div>
-            
-            {/* Search Input for mentors */}
-            <div className="bg-slate-900 border border-slate-800 rounded-full p-1.5 flex items-center shadow-lg w-full max-w-sm shrink-0">
-              <Search className="w-5 h-5 text-slate-500 mr-3 shrink-0" />
-              <input 
-                type="text" 
-                placeholder="ابحث عن مدرب بالاسم أو التخصص..." 
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="bg-transparent border-none focus:ring-0 text-white placeholder-slate-500 w-full text-xs font-bold pr-2" 
-              />
-            </div>
+          <div className="text-center max-w-3xl mx-auto mb-12">
+            <span className="text-xs font-black text-orange-500 tracking-widest uppercase">قاعدة بيانات تفاعلية</span>
+            <h2 className="text-2xl sm:text-4xl font-black text-white mt-2">مستكشف شبكة الموجهين والخبراء</h2>
+            <p className="text-slate-400 font-bold text-sm sm:text-base mt-2">
+              ابحث وفلتر ورتب ملفات الخبراء والأكاديميين المعتمدين بالشبكة من خلال قاعدة البيانات التفاعلية.
+            </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {mentors.filter(men => 
-              men.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-              men.specialty.toLowerCase().includes(searchQuery.toLowerCase()) ||
-              men.title.toLowerCase().includes(searchQuery.toLowerCase())
-            ).map((mentor) => (
-              <div key={mentor.id} className="bg-[#0f162e] rounded-3xl p-6 shadow-xl border border-slate-900 hover:border-slate-800 transition-all flex flex-col justify-between h-full group text-right">
+          {/* Database Controls Toolbar */}
+          <div className="bg-[#0f162e] border border-slate-900 rounded-[2rem] p-6 mb-8 flex flex-col gap-6">
+            
+            {/* Search and view toggle */}
+            <div className="flex flex-col md:flex-row items-center justify-between gap-4">
+              
+              {/* Search bar */}
+              <div className="bg-slate-950 border border-slate-800 rounded-full px-4 py-2.5 flex items-center shadow-inner w-full md:max-w-md shrink-0">
+                <Search className="w-5 h-5 text-slate-500 ml-2.5 shrink-0" />
+                <input 
+                  type="text" 
+                  placeholder="ابحث بالاسم، المسمى المهني، أو البريد..." 
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="bg-transparent border-none focus:ring-0 text-white placeholder-slate-500 w-full text-xs sm:text-sm font-bold pr-1" 
+                />
+              </div>
+
+              {/* View Toggle and Sort controls */}
+              <div className="flex items-center gap-4 w-full md:w-auto justify-end">
                 
-                <div>
-                  <div className="flex items-center gap-4 mb-6">
-                    <div className="w-16 h-16 rounded-2xl overflow-hidden shrink-0 bg-slate-800">
-                      <img src={mentor.image} alt={mentor.name} className="w-full h-full object-cover" />
-                    </div>
-                    <div>
-                      <h3 className="text-base sm:text-lg font-black text-white group-hover:text-orange-500 transition-colors leading-tight">
-                        {mentor.name}
-                      </h3>
-                      <p className="text-xs text-orange-500 font-bold mt-1 leading-snug">{mentor.title}</p>
-                    </div>
-                  </div>
-
-                  <div className="bg-slate-900/50 rounded-2xl p-4 mb-6 border border-slate-900/80">
-                    <span className="text-[10px] text-slate-400 block font-bold mb-1">مجال التخصص والإرشاد:</span>
-                    <span className="text-xs sm:text-sm font-bold text-slate-200">{mentor.specialty}</span>
-                  </div>
-
-                  <div className="flex items-center justify-between text-xs font-bold mb-6 text-slate-400">
-                    <div className="flex items-center gap-1 text-amber-500">
-                      <Star className="w-4 h-4 fill-current" />
-                      <span>{mentor.rating} (تقييم)</span>
-                    </div>
-                    <div className="flex items-center gap-1">
-                      <Users className="w-4 h-4 text-orange-500" />
-                      <span>{mentor.sessions} جلسة إرشادية</span>
-                    </div>
-                  </div>
+                {/* View toggler */}
+                <div className="bg-slate-950 p-1 rounded-xl flex items-center border border-slate-800 shrink-0">
+                  <button 
+                    onClick={() => setViewMode('grid')}
+                    className={`p-2 rounded-lg cursor-pointer transition-all ${viewMode === 'grid' ? 'bg-orange-500 text-white' : 'text-slate-400 hover:text-white'}`}
+                    title="عرض بطاقات"
+                  >
+                    <Grid className="w-4 h-4" />
+                  </button>
+                  <button 
+                    onClick={() => setViewMode('table')}
+                    className={`p-2 rounded-lg cursor-pointer transition-all ${viewMode === 'table' ? 'bg-orange-500 text-white' : 'text-slate-400 hover:text-white'}`}
+                    title="عرض جدول تفاعلي"
+                  >
+                    <List className="w-4 h-4" />
+                  </button>
                 </div>
 
+                {/* Sort Order Toggler */}
                 <button 
-                  onClick={() => {
-                    setSelectedMentor(mentor);
-                    document.getElementById('booking-section')?.scrollIntoView({ behavior: 'smooth' });
-                  }}
-                  className="w-full py-3 bg-slate-900 hover:bg-orange-500 text-white rounded-xl text-xs font-black transition-all cursor-pointer border border-slate-800 hover:border-orange-500 shadow-md"
+                  onClick={() => setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc')}
+                  className="p-3 bg-slate-950 border border-slate-800 rounded-xl hover:text-orange-500 cursor-pointer flex items-center gap-1.5 text-xs font-black"
+                  title="تغيير اتجاه الترتيب"
                 >
-                  حجز جلسة استشارية
+                  <ArrowUpDown className="w-4 h-4" />
+                  <span>{sortOrder === 'asc' ? 'تصاعدي' : 'تنازلي'}</span>
                 </button>
 
               </div>
-            ))}
+
+            </div>
+
+            {/* Specialty Filter Tabs */}
+            <div className="flex flex-wrap gap-2 pt-2 border-t border-slate-900/60">
+              {[
+                { id: 'all', name: 'الكل' },
+                { id: 'ai', name: 'الذكاء الاصطناعي' },
+                { id: 'marketing', name: 'التسويق الرقمي' },
+                { id: 'business', name: 'ريادة الأعمال' },
+                { id: 'web', name: 'تطوير الويب' },
+                { id: 'sustainability', name: 'الاستدامة البيئية' },
+                { id: 'design', name: 'تصميم الواجهات' }
+              ].map((tab) => (
+                <button
+                  key={tab.id}
+                  onClick={() => setSelectedSpecialty(tab.id)}
+                  className={`px-4 py-2 rounded-xl text-xs font-black cursor-pointer transition-all border ${
+                    selectedSpecialty === tab.id
+                      ? 'bg-orange-500 text-white border-orange-500 shadow-md shadow-orange-500/10'
+                      : 'bg-slate-950 text-slate-400 border-slate-800 hover:bg-slate-900 hover:text-white'
+                  }`}
+                >
+                  {tab.name}
+                </button>
+              ))}
+            </div>
+
           </div>
+
+          {/* Interactive Rendering Modes */}
+          {viewMode === 'grid' ? (
+            /* Grid View */
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+              {filteredMentors.map((mentor) => (
+                <div key={mentor.id} className="bg-[#0f162e] rounded-3xl p-6 shadow-xl border border-slate-900 hover:border-slate-800 transition-all flex flex-col justify-between h-full group text-right">
+                  
+                  <div>
+                    <div className="flex items-center gap-4 mb-6">
+                      <div className="w-16 h-16 rounded-2xl overflow-hidden shrink-0 bg-slate-800">
+                        <img src={mentor.image} alt={mentor.name} className="w-full h-full object-cover" />
+                      </div>
+                      <div>
+                        <h3 className="text-base sm:text-lg font-black text-white group-hover:text-orange-500 transition-colors leading-tight">
+                          {mentor.name}
+                        </h3>
+                        <p className="text-xs text-orange-500 font-bold mt-1 leading-snug">{mentor.title}</p>
+                      </div>
+                    </div>
+
+                    <div className="bg-slate-900/50 rounded-2xl p-4 mb-4 border border-slate-900/80">
+                      <span className="text-[10px] text-slate-400 block font-bold mb-1">مجال التخصص والإرشاد:</span>
+                      <span className="text-xs sm:text-sm font-bold text-slate-200">{mentor.specialty}</span>
+                    </div>
+
+                    <div className="bg-slate-900/30 rounded-2xl p-3 mb-6 border border-slate-900/50 flex items-center justify-between text-[11px] font-bold text-slate-400">
+                      <span>البريد الإلكتروني:</span>
+                      <span className="text-slate-350 select-all" dir="ltr">{mentor.email}</span>
+                    </div>
+
+                    <div className="flex items-center justify-between text-xs font-bold mb-6 text-slate-400">
+                      <div className="flex items-center gap-1 text-amber-500">
+                        <Star className="w-4 h-4 fill-current" />
+                        <span>{mentor.rating} (تقييم)</span>
+                      </div>
+                      <div className="flex items-center gap-1">
+                        <Users className="w-4 h-4 text-orange-500" />
+                        <span>{mentor.sessions} جلسة إرشادية</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <button 
+                    onClick={() => {
+                      setSelectedMentor(mentor);
+                      document.getElementById('booking-section')?.scrollIntoView({ behavior: 'smooth' });
+                    }}
+                    className="w-full py-3 bg-slate-900 hover:bg-orange-500 text-white rounded-xl text-xs font-black transition-all cursor-pointer border border-slate-800 hover:border-orange-500 shadow-md"
+                  >
+                    حجز جلسة استشارية
+                  </button>
+
+                </div>
+              ))}
+
+              {filteredMentors.length === 0 && (
+                <div className="col-span-full py-16 text-center bg-[#0f162e] rounded-3xl border border-slate-900 px-4">
+                  <h4 className="text-slate-300 font-black text-base">لا يوجد موجهون يطابقون خيارات البحث</h4>
+                  <p className="text-slate-500 text-xs mt-1 font-bold">جرب تغيير الفئة المحددة أو حذف بعض الكلمات من حقل البحث.</p>
+                </div>
+              )}
+            </div>
+          ) : (
+            /* Table Database View */
+            <div className="overflow-x-auto bg-[#0f162e] border border-slate-900 rounded-[2rem] shadow-xl">
+              <table className="w-full text-right border-collapse text-xs sm:text-sm">
+                <thead>
+                  <tr className="border-b border-slate-900 bg-slate-950/60 text-slate-300 font-black">
+                    <th className="p-4 sm:p-5">الصورة والاسم</th>
+                    <th className="p-4 sm:p-5">المسمى الوظيفي</th>
+                    <th className="p-4 sm:p-5">مجال التخصص</th>
+                    <th className="p-4 sm:p-5 cursor-pointer hover:text-orange-500 transition-colors" onClick={() => toggleSort('rating')}>
+                      <div className="flex items-center gap-1">
+                        <span>التقييم</span>
+                        <ArrowUpDown className="w-3.5 h-3.5" />
+                      </div>
+                    </th>
+                    <th className="p-4 sm:p-5 cursor-pointer hover:text-orange-500 transition-colors" onClick={() => toggleSort('sessions')}>
+                      <div className="flex items-center gap-1">
+                        <span>الجلسات المنفذة</span>
+                        <ArrowUpDown className="w-3.5 h-3.5" />
+                      </div>
+                    </th>
+                    <th className="p-4 sm:p-5">البريد الإلكتروني</th>
+                    <th className="p-4 sm:p-5 text-center">العمليات</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-900/60">
+                  {filteredMentors.map((mentor) => (
+                    <tr key={mentor.id} className="hover:bg-slate-900/40 transition-colors group">
+                      <td className="p-4 sm:p-5">
+                        <div className="flex items-center gap-3">
+                          <img src={mentor.image} alt={mentor.name} className="w-10 h-10 rounded-xl object-cover shrink-0 bg-slate-800" />
+                          <span className="font-black text-white group-hover:text-orange-500 transition-colors">{mentor.name}</span>
+                        </div>
+                      </td>
+                      <td className="p-4 sm:p-5 text-slate-400 font-bold">{mentor.title}</td>
+                      <td className="p-4 sm:p-5">
+                        <span className="px-2.5 py-1 rounded-lg bg-slate-950 text-orange-400 font-bold text-[10px] border border-slate-900">
+                          {mentor.specialty}
+                        </span>
+                      </td>
+                      <td className="p-4 sm:p-5">
+                        <div className="flex items-center gap-1 text-amber-500 font-black">
+                          <Star className="w-4 h-4 fill-current shrink-0" />
+                          <span>{mentor.rating}</span>
+                        </div>
+                      </td>
+                      <td className="p-4 sm:p-5 text-slate-300 font-black">{mentor.sessions} جلسة</td>
+                      <td className="p-4 sm:p-5 text-slate-400 font-bold select-all" dir="ltr">{mentor.email}</td>
+                      <td className="p-4 sm:p-5 text-center">
+                        <button 
+                          onClick={() => {
+                            setSelectedMentor(mentor);
+                            document.getElementById('booking-section')?.scrollIntoView({ behavior: 'smooth' });
+                          }}
+                          className="px-4 py-2 bg-orange-500 hover:bg-orange-600 text-white rounded-xl text-xs font-black transition-all cursor-pointer shadow-md"
+                        >
+                          حجز موعد
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+
+                  {filteredMentors.length === 0 && (
+                    <tr>
+                      <td colSpan="7" className="py-16 text-center text-slate-500 font-bold">
+                        لا يوجد موجهون يطابقون خيارات البحث والفلترة.
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
+          )}
 
         </div>
       </section>
