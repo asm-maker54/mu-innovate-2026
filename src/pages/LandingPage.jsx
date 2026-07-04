@@ -2,6 +2,7 @@ import { useTranslation } from 'react-i18next';
 import { ArrowRight, Play, Pause, Maximize2 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useState, useEffect } from 'react';
+import FadeInView from '../components/FadeInView';
 import VisionMission from '../components/VisionMission';
 import ComingSoonBanner from '../components/ComingSoonBanner';
 import NewsSection from '../components/NewsSection';
@@ -65,7 +66,8 @@ const LandingPage = () => {
         <div className="absolute bottom-10 right-1/4 w-80 h-80 bg-purple-500/15 rounded-full blur-3xl animate-pulse pointer-events-none" style={{ animationDelay: '2s' }} />
 
         <div className="max-w-[95rem] mx-auto px-3 sm:px-4 lg:px-6 relative z-10">
-          <div className="flex flex-col lg:flex-row-reverse gap-4 items-stretch">
+          <FadeInView delay={100} direction="up">
+            <div className="flex flex-col lg:flex-row-reverse gap-4 items-stretch">
             
             {/* Left: Main Showcase Slideshow */}
             <div className="flex-1 lg:flex-[3] relative group">
@@ -209,55 +211,71 @@ const LandingPage = () => {
             </div>
 
           </div>
+          </FadeInView>
         </div>
       </section>
 
-
-
-
       {/* Join Us Section (Overlapping Hero) */}
       <div id="join-us" className="relative z-20">
-        <JoinUs />
+        <FadeInView delay={200}>
+          <JoinUs />
+        </FadeInView>
       </div>
 
       {/* Vision & Mission Section */}
       <div id="vision-mission">
-        <VisionMission />
+        <FadeInView delay={100}>
+          <VisionMission />
+        </FadeInView>
       </div>
 
       {/* Coming Soon Banner */}
       <div id="coming-soon">
-        <ComingSoonBanner />
+        <FadeInView delay={100}>
+          <ComingSoonBanner />
+        </FadeInView>
       </div>
 
       {/* News & Announcements Section */}
       <div id="news-section">
-        <NewsSection />
+        <FadeInView delay={100}>
+          <NewsSection />
+        </FadeInView>
       </div>
 
       {/* Sponsors Section */}
       <div id="sponsors-section">
-        <SponsorsSection />
+        <FadeInView delay={100}>
+          <SponsorsSection />
+        </FadeInView>
       </div>
 
       {/* Leadership Speeches Section */}
       <div id="leadership-speeches">
-        <LeadershipSpeeches />
+        <FadeInView delay={100}>
+          <LeadershipSpeeches />
+        </FadeInView>
       </div>
 
       {/* Speakers Section */}
       <div id="speakers">
-        <Speakers />
+        <FadeInView delay={100}>
+          <Speakers />
+        </FadeInView>
       </div>
 
       {/* Exhibition Tracks Section */}
       <div id="tracks">
-        <ExhibitionTracks />
+        <FadeInView delay={100}>
+          <ExhibitionTracks />
+        </FadeInView>
       </div>
 
       {/* Registration & Contact Form */}
       <div id="registration">
-        <RegistrationForm />
+        <FadeInView delay={100}>
+          <RegistrationForm />
+        </FadeInView>
       </div>
 
     </div>

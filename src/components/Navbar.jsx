@@ -35,6 +35,15 @@ const Navbar = () => {
       href: '/about-us'
     },
     {
+      title: 'مركز الابتكار',
+      titleEn: 'Innovation Center',
+      href: '/center',
+      dropdown: [
+        { label: 'عن المركز', labelEn: 'About the Center', href: '/center' },
+        { label: 'أنشطة المركز', labelEn: 'Center Activities', href: '/activities' }
+      ]
+    },
+    {
       title: 'قمة الابتكار',
       titleEn: 'Innovation Summit',
       href: '/about',
@@ -54,8 +63,8 @@ const Navbar = () => {
       href: '/namaa'
     },
     {
-      title: 'تسويق البحوث ومشروعات التخرج',
-      titleEn: 'Research & Graduation Projects',
+      title: 'تسويق البحوث والمشاريع',
+      titleEn: 'Research & Projects',
       dropdown: [
         { label: 'تسويق البحوث', labelEn: 'Applied Research', href: '/applied-research' },
         { label: 'مشروعات التخرج', labelEn: 'Graduation Projects', href: '/graduation-projects' }
@@ -65,7 +74,6 @@ const Navbar = () => {
       title: 'المبادرات والبرامج',
       titleEn: 'Programs & Initiatives',
       dropdown: [
-        { label: 'البرامج', labelEn: 'Programs', href: '/programs' },
         { label: 'شبكة المدربين الرقمية', labelEn: 'Digital Mentors', href: '/digital-mentors' },
         { label: 'الابتكار الأخضر', labelEn: 'Green Innovation', href: '/green-innovation' }
       ]
@@ -92,33 +100,33 @@ const Navbar = () => {
       <div className="max-w-[95rem] mx-auto px-4 sm:px-6 lg:px-8 h-full flex justify-between items-center relative z-10">
         
         {/* Logo Area */}
-        <Link to="/" className="flex items-center gap-3 h-full pt-1 pb-1">
-          <img src="/mina.png" alt="Minia University Logo" className="w-12 h-12 md:w-16 md:h-16 xl:w-20 xl:h-20 object-contain drop-shadow-md" />
+        <Link to="/" className="flex items-center gap-2 h-full pt-1 pb-1">
+          <img src="/mina.png" alt="Minia University Logo" className="w-10 h-10 md:w-12 md:h-12 xl:w-16 xl:h-16 object-contain drop-shadow-md" />
           <div className="flex flex-col justify-center text-[#111827]">
-            <span className={`font-black text-xs md:text-sm xl:text-base leading-tight whitespace-nowrap`}>
+            <span className={`font-black text-[10px] md:text-xs xl:text-sm leading-tight whitespace-nowrap`}>
               {isRtl ? 'منصة جامعة المنيا' : 'Minia University Platform'}
             </span>
-            <span className={`font-bold text-xs md:text-sm xl:text-base leading-tight text-gray-600 whitespace-nowrap`}>
+            <span className={`font-bold text-[10px] md:text-xs xl:text-sm leading-tight text-gray-600 whitespace-nowrap`}>
               {isRtl ? 'للابتكار وريادة الأعمال' : 'Innovation & Entrepreneurship'}
             </span>
           </div>
         </Link>
 
         {/* Desktop Menu - Buttons */}
-        <div className="hidden lg:flex items-center h-full gap-2 xl:gap-3 flex-1 justify-start lg:ms-12 xl:ms-24 px-4">
+        <div className="hidden lg:flex items-center h-full gap-1.5 xl:gap-2.5 flex-1 justify-start lg:ms-4 xl:ms-12 px-1">
           {navLinks.map((link, idx) => (
             <div key={idx} className="relative group h-full flex items-center">
               {/* Button Header */}
               {link.dropdown ? (
-                <div className="px-1 xl:px-2 py-2 flex items-center gap-1 cursor-pointer transition-colors duration-300 group/btn">
-                  <span className="font-bold text-[11px] xl:text-[13px] text-gray-700 group-hover/btn:text-blue-600 whitespace-nowrap">
+                <div className="px-1 xl:px-1.5 py-1.5 flex items-center gap-0.5 cursor-pointer transition-colors duration-300 group/btn">
+                  <span className="font-bold text-[10px] xl:text-[12px] text-gray-700 group-hover/btn:text-blue-600 whitespace-nowrap">
                     {isRtl ? link.title : link.titleEn}
                   </span>
-                  <ChevronDown className="w-3 h-3 text-gray-400 group-hover/btn:text-blue-600 group-hover/btn:rotate-180 transition-all duration-300" />
+                  <ChevronDown className="w-2.5 h-2.5 text-gray-400 group-hover/btn:text-blue-600 group-hover/btn:rotate-180 transition-all duration-300" />
                 </div>
               ) : (
-                <a href={link.href} className="px-1 xl:px-2 py-2 flex items-center gap-1 cursor-pointer transition-colors duration-300 group/btn">
-                  <span className="font-bold text-[11px] xl:text-[13px] text-gray-700 group-hover/btn:text-blue-600 whitespace-nowrap">
+                <a href={link.href} className="px-1 xl:px-1.5 py-1.5 flex items-center gap-0.5 cursor-pointer transition-colors duration-300 group/btn">
+                  <span className="font-bold text-[10px] xl:text-[12px] text-gray-700 group-hover/btn:text-blue-600 whitespace-nowrap">
                     {isRtl ? link.title : link.titleEn}
                   </span>
                 </a>
@@ -145,20 +153,20 @@ const Navbar = () => {
         </div>
 
         {/* Left Actions */}
-        <div className="hidden lg:flex items-center gap-5 pl-2 h-full">
+        <div className="hidden lg:flex items-center gap-3 pl-1 h-full">
           <Link 
-            to="/contact"
-            className="flex items-center gap-2 px-5 py-2 rounded-full font-bold text-xs transition-all bg-[#ea580c] text-white hover:bg-[#c2410c] shadow-md whitespace-nowrap hidden sm:flex"
+            to="/auth"
+            className="flex items-center gap-1.5 px-4 py-1.5 rounded-full font-bold text-[10px] xl:text-[12px] transition-all bg-[#ea580c] text-white hover:bg-[#c2410c] shadow-md whitespace-nowrap hidden sm:flex"
           >
-            <span>{isRtl ? 'تواصل معنا' : 'Contact Us'}</span>
+            <span>{isRtl ? 'تسجيل الدخول' : 'Login'}</span>
           </Link>
 
           <button 
             onClick={toggleLanguage}
-            className="flex items-center gap-1.5 px-4 py-2 rounded-full font-bold text-xs transition-all bg-[#26462C]/10 text-[#26462C] hover:bg-[#26462C] hover:text-[#F4A217] border border-[#26462C]/20 shadow-sm whitespace-nowrap"
+            className="flex items-center gap-1 px-3 py-1.5 rounded-full font-bold text-[10px] xl:text-[12px] transition-all bg-[#26462C]/10 text-[#26462C] hover:bg-[#26462C] hover:text-[#F4A217] border border-[#26462C]/20 shadow-sm whitespace-nowrap"
           >
             <span>{isRtl ? 'English' : 'عربي'}</span>
-            <Globe className="w-3.5 h-3.5" />
+            <Globe className="w-3 h-3" />
           </button>
         </div>
 
@@ -218,11 +226,11 @@ const Navbar = () => {
               {isRtl ? 'English' : 'عربي'}
             </button>
             <Link 
-              to="/contact" 
+              to="/auth" 
               onClick={() => setMobileMenuOpen(false)}
               className="flex items-center justify-center gap-2 w-full py-4 bg-[#ea580c] text-white rounded-xl font-bold text-lg hover:bg-[#c2410c] transition-colors"
             >
-              {isRtl ? 'تواصل معنا' : 'Contact Us'}
+              {isRtl ? 'تسجيل الدخول' : 'Login'}
             </Link>
           </div>
         </div>

@@ -1,302 +1,358 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { 
   FileText, ShieldCheck, CheckCircle2, ArrowLeft, Check, 
   Settings, Users, Briefcase, Banknote, Search, HeartPulse, Cpu,
   Factory, Shield, Lock, Eye, MonitorSmartphone, GraduationCap,
-  BarChart
+  BarChart, ChevronLeft, Award, Zap, Rocket, Star, Globe, TrendingUp, Lightbulb
 } from 'lucide-react';
-
-const InfoBox = ({ number, title, colorHex, children, className = '' }) => (
-  <div className={`border rounded-xl overflow-hidden bg-white shadow-sm flex flex-col h-full ${className}`} style={{ borderColor: colorHex }}>
-    <div className={`text-white px-4 py-2 flex items-center justify-between shrink-0`} style={{ backgroundColor: colorHex }}>
-      <span className="font-bold text-lg">{title}</span>
-      <span className="bg-white px-2 py-0.5 rounded text-base font-black shadow-sm" style={{ color: colorHex }}>{number}</span>
-    </div>
-    <div className="p-4 flex-1 flex flex-col bg-slate-50/30">
-      {children}
-    </div>
-  </div>
-);
+import { Link } from 'react-router-dom';
 
 const AppliedResearchPage = () => {
   useEffect(() => {
     window.scrollTo(0, 0);
   }, []);
 
+  const [activeStep, setActiveStep] = useState(1);
+
+  // Data Definitions
+  const sectors = ['صحة وطب', 'زراعة ذكية', 'تصنيع غذائي', 'طاقة ومياه وبيئة', 'ذكاء اصطناعي، وتحول رقمي', 'تعليم وتكنولوجيا تعليم', 'سياحة وآثار', 'صناعات إبداعية', 'خدمات مجتمعية', 'هندسة وصناعة'];
+  const outputTypes = ['بحث منشور', 'رسالة علمية', 'مشروع تخرج', 'نموذج أولي', 'منتج قابل للتطوير', 'تطبيق أو منصة', 'خدمة استشارية', 'براءة اختراع'];
+  
+  const stepsData = [
+    {
+      id: '01',
+      title: 'قدم بحثك',
+      desc: 'املأ بيانات بحثك الأساسية',
+      icon: FileText,
+      color: 'bg-blue-100 text-blue-600',
+      items: ['بيانات الباحث الرئيسي والفريق', 'عنوان البحث وملخص علمي وتسويقي', 'القطاع المستهدف ونوع المخرج', 'الملفات والمرفقات الإلزامية']
+    },
+    {
+      id: '02',
+      title: 'حدد مستوى الجاهزية',
+      desc: 'إلى أي مدى وصل بحثك؟',
+      icon: TrendingUp,
+      color: 'bg-green-100 text-green-600',
+      items: ['فكرة تحتاج تطوير', 'نتائج معملية أولية', 'نموذج أولي Prototype', 'جاهز للتطبيق أو التسويق']
+    },
+    {
+      id: '03',
+      title: 'راجع الملكية الفكرية',
+      desc: 'حماية أفكارك قبل النشر',
+      icon: ShieldCheck,
+      color: 'bg-yellow-100 text-yellow-600',
+      items: ['هل توجد براءة اختراع؟', 'هل يحتوي على أسرار فنية؟', 'هل يمكن عرض ملخص غير سري؟']
+    },
+    {
+      id: '04',
+      title: 'ارفع الملفات',
+      desc: 'المرفقات المطلوبة للتقييم',
+      icon: CheckCircle2,
+      color: 'bg-purple-100 text-purple-600',
+      items: ['ملف البحث PDF (إلزامي)', 'ملخص تسويقي (إلزامي)', 'عرض تقديمي Pitch Deck (اختياري)', 'صور وفيديو للنموذج (اختياري)']
+    },
+    {
+      id: '05',
+      title: 'اختر التعاون',
+      desc: 'ماذا تريد من الشركاء؟',
+      icon: Users,
+      color: 'bg-orange-100 text-orange-600',
+      items: ['ترخيص تكنولوجيا أو تصنيع', 'تسويق أو تعاقد بحثي', 'تأسيس شركة أو تمويل']
+    }
+  ];
+
+  const finalOutputs = [
+    { t: 'Technology Offer Book', i: FileText, c: 'text-orange-500', bg: 'bg-orange-50' },
+    { t: 'معرض البحوث', i: MonitorSmartphone, c: 'text-blue-500', bg: 'bg-blue-50' },
+    { t: 'بحوث جاهزة', i: CheckCircle2, c: 'text-green-500', bg: 'bg-green-50' },
+    { t: 'مرشحة لشركة نماء', i: Briefcase, c: 'text-purple-500', bg: 'bg-purple-50' },
+    { t: 'تمويل وشراكات', i: Banknote, c: 'text-yellow-500', bg: 'bg-yellow-50' },
+    { t: 'أثر مجتمعي', i: BarChart, c: 'text-pink-500', bg: 'bg-pink-50' }
+  ];
+
   return (
-    <div className="min-h-screen pt-24 pb-16 bg-[#f8fafc]" dir="rtl" style={{ fontFamily: "'Cairo', sans-serif" }}>
-      {/* Import Cairo Font */}
+    <div className="min-h-screen bg-[#fafbfc] overflow-hidden" dir="rtl" style={{ fontFamily: "'Cairo', sans-serif" }}>
       <style>
         {`
           @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&display=swap');
           .font-cairo { font-family: 'Cairo', sans-serif; }
-          .font-black { font-weight: 900; }
-          .font-bold { font-weight: 700; }
+          .animate-float { animation: float 6s ease-in-out infinite; }
+          .animate-float-delayed { animation: float 6s ease-in-out 3s infinite; }
+          @keyframes float {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-20px); }
+            100% { transform: translateY(0px); }
+          }
+          .glass-panel {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+          }
         `}
       </style>
 
-      <div className="max-w-[1600px] mx-auto px-4 lg:px-8">
+      {/* 1. HERO SECTION */}
+      <section className="relative pt-12 pb-8 lg:pt-16 lg:pb-12 px-4 lg:px-8 max-w-[1600px] mx-auto flex flex-col lg:flex-row items-center gap-8 z-10">
+        {/* Background blobs */}
+        <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-blue-100 rounded-full mix-blend-multiply filter blur-3xl opacity-70 animate-float -z-10 translate-x-1/2 -translate-y-1/4"></div>
+        <div className="absolute top-40 left-0 w-[500px] h-[500px] bg-orange-100 rounded-full mix-blend-multiply filter blur-3xl opacity-70 animate-float-delayed -z-10 -translate-x-1/4"></div>
+
+        {/* Text Content */}
+        <div className="w-full lg:w-1/2 text-center lg:text-right relative z-10">
+          <div className="inline-flex items-center gap-2 bg-blue-50 text-blue-700 px-4 py-2 rounded-full font-bold text-sm mb-6 border border-blue-100">
+            <Award className="w-4 h-4" />
+            قمة جامعة المنيا للابتكار
+          </div>
+          
+          <h1 className="text-5xl md:text-6xl lg:text-7xl font-black text-[#183059] mb-6 leading-tight">
+            منصة تسويق <br />
+            <span className="text-transparent bg-clip-text bg-gradient-to-l from-blue-600 to-[#ea580c]">البحوث التطبيقية</span>
+          </h1>
+          
+          <p className="text-2xl md:text-3xl text-slate-600 font-bold mb-10 leading-relaxed max-w-2xl mx-auto lg:mx-0">
+            بوابتك لتحويل بحثك الأكاديمي إلى فرصة سوقية قابلة للتطبيق. اكتشف الشركاء، احمِ فكرتك، واصنع أثراً حقيقياً.
+          </p>
+          
+          <div className="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-4 mb-12">
+            <Link to="/submit-research" className="w-full sm:w-auto flex items-center justify-center gap-3 bg-[#183059] hover:bg-[#112240] text-white px-8 py-4 rounded-2xl font-black text-xl transition-all shadow-[0_8px_30px_rgb(24,48,89,0.3)] hover:-translate-y-1">
+              <FileText className="w-5 h-5" />
+              تقديم البحث التطبيقي
+            </Link>
+            <a href="#how-it-works" className="w-full sm:w-auto flex items-center justify-center gap-3 bg-white text-[#183059] border-2 border-slate-200 hover:border-[#183059] px-8 py-4 rounded-2xl font-black text-xl transition-all">
+              <Eye className="w-5 h-5" />
+              كيف تعمل المنصة؟
+            </a>
+          </div>
+
+          {/* Process Flow */}
+          <div className="glass-panel p-4 rounded-2xl inline-flex flex-wrap items-center justify-center lg:justify-start gap-2 text-base font-bold text-slate-700">
+            <span className="flex items-center gap-1"><FileText className="w-4 h-4 text-blue-500"/> بحث تطبيقي</span>
+            <ChevronLeft className="w-4 h-4 text-slate-400" />
+            <span className="flex items-center gap-1"><ShieldCheck className="w-4 h-4 text-green-500"/> تقييم الجاهزية</span>
+            <ChevronLeft className="w-4 h-4 text-slate-400" />
+            <span className="flex items-center gap-1"><Lock className="w-4 h-4 text-yellow-500"/> حماية فكرية</span>
+            <ChevronLeft className="w-4 h-4 text-slate-400" />
+            <span className="flex items-center gap-1"><Users className="w-4 h-4 text-orange-500"/> شريك وصناعة</span>
+          </div>
+        </div>
+
+        {/* Hero Visual */}
+        <div className="w-full lg:w-1/2 relative z-10 flex justify-center">
+          <div className="relative w-full max-w-lg">
+            {/* Abstract Graphic representing research & innovation */}
+            <div className="w-full h-[500px] bg-gradient-to-br from-slate-100 to-slate-50 rounded-[40px] border-8 border-white shadow-2xl relative overflow-hidden flex flex-col items-center justify-center p-8 text-center">
+               <div className="absolute inset-0 opacity-20 bg-[radial-gradient(#183059_1px,transparent_1px)] [background-size:20px_20px]"></div>
+               <Lightbulb className="w-32 h-32 text-[#ea580c] mb-6 drop-shadow-xl animate-float" strokeWidth={1} />
+               <h3 className="text-3xl font-black text-[#183059] mb-2">ابتكر مستقبلك</h3>
+               <p className="font-bold text-slate-500">من المختبر إلى السوق العالمي</p>
+               
+               {/* Floating Badges */}
+               <div className="absolute top-12 -right-8 glass-panel px-4 py-3 rounded-2xl flex items-center gap-3 shadow-lg animate-float">
+                  <div className="bg-green-100 p-2 rounded-xl text-green-600"><TrendingUp className="w-5 h-5"/></div>
+                  <div className="text-right">
+                    <div className="font-black text-slate-800 text-lg">أثر اقتصادي</div>
+                    <div className="text-xs font-bold text-slate-500">حلول قابلة للتطبيق</div>
+                  </div>
+               </div>
+
+               <div className="absolute bottom-12 -left-8 glass-panel px-4 py-3 rounded-2xl flex items-center gap-3 shadow-lg animate-float-delayed">
+                  <div className="bg-blue-100 p-2 rounded-xl text-blue-600"><Users className="w-5 h-5"/></div>
+                  <div className="text-right">
+                    <div className="font-black text-slate-800 text-lg">شركاء وصناعة</div>
+                    <div className="text-xs font-bold text-slate-500">تمويل وتعاون</div>
+                  </div>
+               </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* 2. CATEGORIES & STATS (Dark Blue Background) */}
+      <section className="bg-[#0f172a] text-white pt-12 pb-16 relative overflow-hidden">
+        {/* Decorative background pattern */}
+        <div className="absolute inset-0 opacity-10 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAiIGhlaWdodD0iMjAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGNpcmNsZSBjeD0iMSIgY3k9IjEiIHI9IjEiIGZpbGw9IiNmZmZmZmYiLz48L3N2Zz4=')] [background-size:30px_30px]"></div>
         
-        {/* Header section (Spans full width) */}
-        <div className="text-center mb-10 w-full">
-          <h1 className="text-4xl md:text-5xl lg:text-6xl font-black text-[#183059] mb-4">منصة تسويق البحوث التطبيقية</h1>
-          <h2 className="text-xl md:text-2xl font-bold text-[#2b6cb0] mb-8">من البحث إلى فرصة سوقية قابلة للتطبيق</h2>
+        <div className="max-w-[1600px] mx-auto px-4 lg:px-8 relative z-10">
           
-          <a href="/submit-research" className="inline-flex items-center gap-3 bg-[#ea580c] text-white px-8 py-4 rounded-2xl font-black text-lg md:text-xl shadow-lg hover:bg-[#c2410c] hover:-translate-y-1 transition-all mb-12">
-            <FileText className="w-6 h-6" />
-            تقديم البحث التطبيقي
-          </a>
-
-          <div className="flex flex-wrap justify-center items-center gap-2 md:gap-4 text-sm md:text-base font-bold text-[#183059] bg-white py-3 px-6 rounded-2xl shadow-sm border border-slate-200 inline-flex mx-auto">
-            <span>بحث تطبيقي</span> <ArrowLeft className="w-4 h-4 text-[#2b6cb0]" />
-            <span>تقييم الجاهزية</span> <ArrowLeft className="w-4 h-4 text-[#2b6cb0]" />
-            <span>حماية فكرية</span> <ArrowLeft className="w-4 h-4 text-[#2b6cb0]" />
-            <span>عرض تسويقي</span> <ArrowLeft className="w-4 h-4 text-[#2b6cb0]" />
-            <span className="text-[#dd6b20]">شريك أو تمويل أو تعاقد</span>
-          </div>
-        </div>
-
-        {/* 5 Top Boxes */}
-        <div className="flex flex-wrap justify-center gap-4 mb-12 w-full">
-          {[
-            { t: 'باحثون\nومبتكرون', i: Users },
-            { t: 'بحوث\nتطبيقية', i: FileText },
-            { t: 'شركاء\nوصناعة', i: Factory },
-            { t: 'استثمار\nوتمويل', i: Banknote },
-            { t: 'أثر اقتصادي\nومجتمعي', i: HeartPulse }
-          ].map((b, idx) => (
-            <div key={idx} className="bg-[#183059] text-white w-32 h-28 rounded-2xl flex flex-col items-center justify-center text-center text-sm font-bold shadow-md border border-blue-800">
-              <b.i className="w-8 h-8 mb-2 text-blue-200" />
-              <span className="whitespace-pre-line leading-tight">{b.t}</span>
-            </div>
-          ))}
-        </div>
-
-        {/* 3 Column Layout */}
-        <div className="flex flex-col xl:flex-row gap-6 relative items-start">
-          
-          {/* Right Column (RTL) - Boxes 1, 2, 3 */}
-          <div className="w-full xl:w-1/4 flex flex-col gap-6">
-            <InfoBox number="01" title="قدم بحثك" colorHex="#183059">
-              <div className="text-center text-sm font-bold text-[#183059] mb-3 border-b border-[#183059]/20 pb-2">ما المطلوب من الباحث؟</div>
-              <ul className="space-y-3 text-sm font-bold text-slate-700">
-                {['بيانات الباحث الرئيسي', 'بيانات فريق البحث', 'عنوان البحث (عربي / إنجليزي)', 'ملخص علمي مختصر', 'ملخص تسويقي مبسط', 'القطاع المستهدف', 'نوع المخرج البحثي', 'الملفات والمرفقات'].map(t => (
-                  <li key={t} className="flex items-center gap-3">
-                    <div className="w-2 h-2 rounded-full bg-[#183059] shrink-0" /> 
-                    <span className="leading-tight">{t}</span>
-                  </li>
-                ))}
-              </ul>
-            </InfoBox>
-
-            <InfoBox number="02" title="صنّف البحث" colorHex="#2b6cb0">
-              <div className="text-center text-sm font-bold text-[#2b6cb0] mb-3 border-b border-[#2b6cb0]/20 pb-2">اختيارات التصنيف داخل المنصة</div>
-              <div className="flex flex-col gap-4 text-xs font-bold text-slate-700">
-                <div>
-                  <div className="bg-[#e2e8f0] text-[#2b6cb0] text-center py-1.5 mb-2 rounded">القطاع المستهدف</div>
-                  <ul className="space-y-2">
-                    {['صحة وطب', 'زراعة ذكية', 'تصنيع غذائي', 'طاقة ومياه وبيئة', 'ذكاء اصطناعي، وتحول رقمي', 'تعليم وتكنولوجيا تعليم', 'سياحة وآثار', 'صناعات إبداعية', 'خدمات مجتمعية', 'هندسة وصناعة'].map(t => (
-                      <li key={t} className="flex items-start gap-2 leading-tight">
-                        <div className="w-1.5 h-1.5 mt-1 rounded-full bg-[#2b6cb0] shrink-0" /> {t}
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-                <div>
-                  <div className="bg-[#e2e8f0] text-[#2b6cb0] text-center py-1.5 mb-2 rounded">نوع المخرج البحثي</div>
-                  <ul className="space-y-2">
-                    {['بحث منشور', 'رسالة علمية', 'مشروع تخرج', 'نموذج أولي', 'منتج قابل للتطوير', 'تطبيق أو منصة', 'خدمة استشارية', 'براءة اختراع'].map(t => (
-                      <li key={t} className="flex items-start gap-2 leading-tight">
-                        <div className="w-1.5 h-1.5 mt-1 rounded-full bg-[#2b6cb0] shrink-0" /> {t}
-                      </li>
-                    ))}
-                  </ul>
-                </div>
+          {/* Main Stats Overlapping Cards */}
+          <div className="flex flex-wrap justify-center gap-4 mb-16 pt-8">
+            {[
+              { t: 'باحثون ومبتكرون', desc: 'نخبة من أفضل العقول لتقديم حلول مبتكرة ومتقدمة.', i: Users },
+              { t: 'بحوث تطبيقية', desc: 'أبحاث قابلة للتطبيق والتحويل لمنتجات على أرض الواقع.', i: FileText },
+              { t: 'شركاء وصناعة', desc: 'تعاون وثيق ومستمر مع القطاع الصناعي والتجاري.', i: Factory },
+              { t: 'استثمار وتمويل', desc: 'فرص استثمارية واعدة لدعم الابتكار وريادة الأعمال.', i: Banknote },
+              { t: 'أثر مجتمعي', desc: 'تأثير إيجابي فعال يخدم متطلبات المجتمع والبيئة.', i: HeartPulse }
+            ].map((stat, idx) => (
+              <div key={idx} className="bg-[#f8f9fa] p-6 flex flex-col items-center text-center shadow-md w-full sm:w-[220px] transform hover:-translate-y-1 transition-transform duration-300 rounded-lg border-b-4 border-[#ea580c]">
+                <stat.i className="w-12 h-12 text-[#ea580c] mb-4" strokeWidth={1.5} />
+                <h3 className="font-black text-lg text-[#183059] mb-2">{stat.t}</h3>
+                <p className="text-slate-500 text-xs font-bold leading-relaxed mb-6 flex-grow">{stat.desc}</p>
+                <button className="bg-[#183059] text-white w-full py-2 text-sm font-bold hover:bg-[#112240] transition-colors rounded">
+                  المزيد
+                </button>
               </div>
-            </InfoBox>
-
-            <InfoBox number="03" title="حدد مستوى الجاهزية" colorHex="#2f855a">
-              <div className="text-center text-sm font-bold text-[#2f855a] mb-3 border-b border-[#2f855a]/20 pb-2">ما مدى قرب البحث من التطبيق؟</div>
-              <ul className="space-y-3 text-xs font-bold text-slate-700 flex-1">
-                {['فكرة تحتاج تطوير', 'نتائج معملية أولية', 'نموذج أولي Prototype', 'تم اختباره داخل الجامعة', 'تم اختباره مع جهة خارجية', 'جاهز للتطبيق التجريبي', 'جاهز للتسويق أو التعاقد', 'يحتاج حماية ملكية فكرية أولاً'].map(t => (
-                  <li key={t} className="flex items-center gap-2">
-                    <CheckCircle2 className="w-4 h-4 text-[#2f855a] shrink-0" /> {t}
-                  </li>
-                ))}
-              </ul>
-            </InfoBox>
+            ))}
           </div>
 
-          {/* Center Column - Outputs & Boxes 4, 5 */}
-          <div className="w-full xl:w-2/4 flex flex-col gap-6">
-            
-            {/* Outputs Box (Moved up since circle is deleted) */}
-            <div className="w-full bg-white shadow-md rounded-xl overflow-hidden border border-slate-200">
-              <div className="bg-[#183059] text-white text-center py-3 text-lg font-black tracking-wide">
-                المخرجات النهائية
-              </div>
-              <div className="p-6 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-6 text-sm font-bold text-slate-800 text-center">
-                {[
-                  { t: 'Technology Offer Book', i: FileText, c: 'text-[#e7811d]' },
-                  { t: 'معرض البحوث القابلة للتسويق', i: MonitorSmartphone, c: 'text-[#dd6b20]' },
-                  { t: 'بحوث جاهزة للشركاء', i: CheckCircle2, c: 'text-[#dd6b20]' },
-                  { t: 'بحوث مرشحة لشركة نماء', i: Briefcase, c: 'text-[#dd6b20]' },
-                  { t: 'بحوث مرشحة للتمويل', i: Banknote, c: 'text-[#dd6b20]' },
-                  { t: 'اجتماعات مع الشركاء', i: Users, c: 'text-[#dd6b20]' },
-                  { t: 'تقرير أثر بعد القمة', i: BarChart, c: 'text-[#dd6b20]' }
-                ].map((out, idx) => (
-                  <div key={idx} className="flex flex-col items-center">
-                    <div className="w-14 h-14 mb-3 bg-white rounded-2xl shadow border border-slate-100 flex items-center justify-center">
-                      <out.i className={`w-7 h-7 ${out.c}`} />
-                    </div>
-                    <span className="leading-tight">{out.t}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
+          <div className="text-center mb-16">
+            <h2 className="text-3xl md:text-5xl font-black mb-4">اكتشف قطاعات <span className="text-[#ea580c]">البحوث</span></h2>
+            <p className="text-slate-400 font-bold text-lg max-w-2xl mx-auto">تصفح القطاعات المستهدفة للوصول إلى الأبحاث والمخرجات التي تخدم مجالك بدقة.</p>
+          </div>
 
-            <div className="flex flex-col md:flex-row gap-6">
-              <div className="w-full md:w-1/3">
-                <InfoBox number="04" title="راجع الملكية الفكرية" colorHex="#d69e2e">
-                  <div className="text-center text-sm font-bold text-[#d69e2e] mb-3 border-b border-[#d69e2e]/20 pb-2">قبل العرض أو النشر</div>
-                  <div className="flex flex-col items-center gap-4">
-                    <ShieldCheck className="w-12 h-12 text-[#d69e2e]" />
-                    <ul className="space-y-3 text-xs font-bold text-slate-700 w-full">
-                      {['هل البحث منشور؟', 'هل توجد براءة اختراع؟', 'هل تم تقديم طلب براءة؟', 'هل يحتوي على أسرار فنية؟', 'هل يحتاج حماية قبل العرض؟', 'هل يمكن عرض ملخص غير سري؟'].map(t => (
-                        <li key={t} className="flex items-center gap-2">
-                          <div className="w-2.5 h-2.5 rounded-full border-2 border-[#d69e2e] shrink-0" /> 
-                          <span className="leading-tight">{t}</span>
-                        </li>
-                      ))}
-                    </ul>
+          <div className="flex flex-wrap justify-center gap-4">
+            {sectors.map((sector, idx) => (
+              <div key={idx} className="group relative px-6 py-3 bg-[#1e293b]/40 backdrop-blur-sm border border-slate-700/50 hover:border-[#ea580c] rounded-full flex items-center gap-4 cursor-pointer transition-all duration-300 hover:shadow-[0_0_20px_rgba(234,88,12,0.2)] hover:-translate-y-1">
+                <div className="w-8 h-8 shrink-0 rounded-full border border-slate-600 flex items-center justify-center group-hover:border-[#ea580c] transition-colors">
+                  <span className="text-sm text-slate-400 group-hover:text-[#ea580c] font-black">{String(idx + 1).padStart(2, '0')}</span>
+                </div>
+                <span className="font-bold text-base text-slate-300 group-hover:text-white transition-colors">{sector}</span>
+              </div>
+            ))}
+          </div>
+          
+          <div className="mt-20 text-center">
+            <h2 className="text-3xl md:text-5xl font-black mb-10">أنواع المخرجات <span className="text-[#ea580c]">المدعومة</span></h2>
+            <div className="flex flex-wrap justify-center gap-3">
+              {outputTypes.map((type, idx) => (
+                <span key={idx} className="px-5 py-3 bg-[#1e293b]/40 border border-slate-700/50 rounded-xl text-base font-bold text-slate-300 hover:text-white hover:border-[#ea580c] transition-all cursor-pointer">
+                  {type}
+                </span>
+              ))}
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* 3. HOW IT WORKS / STEPS */}
+      <section id="how-it-works" className="py-12 bg-white relative">
+        <div className="max-w-[1600px] mx-auto px-4 lg:px-8">
+          <div className="text-center mb-16">
+            <div className="text-[#ea580c] font-black tracking-widest text-sm mb-2 uppercase">رحلة الباحث</div>
+            <h2 className="text-4xl md:text-5xl font-black text-[#183059] mb-4">كيف تعمل المنصة؟</h2>
+            <p className="text-slate-500 font-bold text-lg max-w-2xl mx-auto">خطوات واضحة ومحددة تبدأ من تقديم فكرتك البحثية وتصل بك إلى إيجاد الشريك أو المستثمر المناسب.</p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {stepsData.map((step, idx) => (
+              <div key={idx} className="bg-white border border-slate-100 p-8 rounded-[32px] shadow-sm hover:shadow-xl transition-all duration-300 group relative overflow-hidden">
+                <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-blue-500 to-orange-500 transform scale-x-0 group-hover:scale-x-100 transition-transform origin-left duration-300"></div>
+                
+                <div className="flex justify-between items-start mb-6">
+                  <div className={`w-16 h-16 rounded-2xl flex items-center justify-center ${step.color} group-hover:scale-110 transition-transform`}>
+                    <step.icon className="w-8 h-8" />
                   </div>
-                </InfoBox>
+                  <span className="text-5xl font-black text-slate-100 select-none group-hover:text-slate-200 transition-colors">{step.id}</span>
+                </div>
+                
+                <h3 className="text-2xl font-black text-slate-800 mb-2">{step.title}</h3>
+                <p className="text-slate-500 font-bold text-sm mb-6 pb-6 border-b border-slate-100">{step.desc}</p>
+                
+                <ul className="space-y-3">
+                  {step.items.map((item, i) => (
+                    <li key={i} className="flex items-start gap-3 text-sm font-bold text-slate-600">
+                      <div className="w-1.5 h-1.5 rounded-full bg-[#ea580c] mt-1.5 shrink-0"></div>
+                      <span className="leading-relaxed">{item}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ))}
+
+            {/* Custom Box for Status Tracking */}
+            <div className="bg-[#183059] p-8 rounded-[32px] shadow-lg text-white relative overflow-hidden">
+              <div className="absolute -right-10 -top-10 w-40 h-40 bg-blue-500/20 rounded-full blur-2xl"></div>
+              
+              <div className="flex justify-between items-start mb-6 relative z-10">
+                <div className="w-16 h-16 rounded-2xl flex items-center justify-center bg-white/10">
+                  <ActivityIcon className="w-8 h-8 text-white" />
+                </div>
+                <span className="text-5xl font-black text-white/10 select-none">06</span>
               </div>
               
-              <div className="w-full md:w-2/3">
-                <InfoBox number="05" title="ارفع الملفات المطلوبة" colorHex="#2b6cb0">
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 h-full">
-                    <div className="bg-[#e6f0fa] p-4 rounded-lg border border-[#2b6cb0]/20 flex flex-col">
-                      <div className="text-center font-bold text-[#2b6cb0] text-sm mb-3 border-b border-[#2b6cb0]/20 pb-2">مرفقات إلزامية</div>
-                      <ul className="space-y-3 text-xs font-bold text-slate-800 flex-1">
-                        {['ملف البحث أو ملخصه PDF', 'ملخص تسويقي من صفحة واحدة', 'بيانات فريق البحث', 'صورة أو رسم توضيحي إن وجد'].map(t => (
-                          <li key={t} className="flex items-start gap-2">
-                            <div className="w-1.5 h-1.5 mt-1 rounded-full bg-[#2b6cb0] shrink-0" /> 
-                            <span className="leading-relaxed">{t}</span>
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                    
-                    <div className="bg-white p-4 rounded-lg border border-slate-200 flex flex-col">
-                      <div className="text-center font-bold text-slate-500 text-sm mb-3 border-b border-slate-100 pb-2">مرفقات اختيارية</div>
-                      <ul className="space-y-3 text-xs font-bold text-slate-600 flex-1">
-                        {['عرض تقديمي Pitch Deck', 'صور النموذج الأولي', 'فيديو قصير', 'رابط تطبيق أو منصة', 'نتائج اختبار أو تقرير تجربة', 'خطاب اهتمام من شركة', 'دراسة جدوى أولية'].map(t => (
-                          <li key={t} className="flex items-start gap-2">
-                            <div className="w-1.5 h-1.5 mt-1 rounded-full bg-slate-300 shrink-0" /> 
-                            <span className="leading-relaxed">{t}</span>
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                  </div>
-                </InfoBox>
-              </div>
-            </div>
-
-            {/* Bottom Banners inside the center column */}
-            <div className="flex flex-col gap-6 mt-2">
-              <div className="bg-white border border-slate-200 rounded-xl p-5 flex flex-col shadow-sm">
-                 <div className="text-[#183059] font-black text-base border-b border-[#183059] px-4 pb-2 mb-4 inline-block mx-auto text-center">مخرجات هذا المسار</div>
-                 <div className="flex flex-wrap justify-center gap-4 text-xs font-bold text-slate-700 text-center">
-                   <div className="flex flex-col items-center gap-2"><Lock className="w-5 h-5 text-slate-400"/> منع العرض</div>
-                   <div className="flex flex-col items-center gap-2"><Settings className="w-5 h-5 text-[#d69e2e]"/> IP Fast Track</div>
-                   <div className="flex flex-col items-center gap-2"><Shield className="w-5 h-5 text-[#2b6cb0]"/> عيادة الملكية</div>
-                   <div className="flex flex-col items-center gap-2"><Eye className="w-5 h-5 text-slate-500"/> عرض جزئي</div>
-                   <div className="flex flex-col items-center gap-2"><CheckCircle2 className="w-5 h-5 text-[#2f855a]"/> عرض مسموح</div>
-                 </div>
-              </div>
+              <h3 className="text-2xl font-black text-white mb-2 relative z-10">حالة الطلب ومتابعته</h3>
+              <p className="text-blue-200 font-bold text-sm mb-6 pb-6 border-b border-white/10 relative z-10">يتابع الباحث بحثه عبر مراحل واضحة</p>
               
-              <div className="bg-[#105a6b] rounded-xl overflow-hidden flex flex-col shadow-md">
-                 <div className="bg-[#0c4755] text-white text-center py-2 font-black text-lg flex items-center justify-center gap-2">
-                   <Eye className="w-5 h-5" /> ما الذي يظهر للشركاء؟
-                 </div>
-                 <div className="bg-white p-5 flex-1 text-center">
-                   <div className="text-[#0c4755] font-black text-sm md:text-base mb-4 border-b pb-2 inline-block mx-auto">النسخة العامة غير السرية فقط</div>
-                   <div className="flex flex-wrap justify-center gap-3 mb-5 text-xs font-bold text-slate-700">
-                     <span className="bg-slate-100 px-3 py-1.5 rounded-lg border border-slate-200">نوع الشراكة</span>
-                     <span className="bg-slate-100 px-3 py-1.5 rounded-lg border border-slate-200">حالة الملكية</span>
-                     <span className="bg-slate-100 px-3 py-1.5 rounded-lg border border-slate-200">مستوى الجاهزية</span>
-                     <span className="bg-slate-100 px-3 py-1.5 rounded-lg border border-slate-200">الحل المقترح</span>
-                     <span className="bg-slate-100 px-3 py-1.5 rounded-lg border border-slate-200">المشكلة</span>
-                     <span className="bg-slate-100 px-3 py-1.5 rounded-lg border border-slate-200">القطاع</span>
-                     <span className="bg-slate-100 px-3 py-1.5 rounded-lg border border-slate-200">عنوان البحث</span>
-                   </div>
-                   
-                   <div className="bg-blue-50 text-[#183059] py-2 px-6 rounded-lg font-black border border-blue-200 inline-block mx-auto mb-3">
-                     طلب اجتماع مع فريق البحث
-                   </div>
-                   <div className="text-xs font-bold text-red-600 bg-red-50 p-2 rounded flex items-center justify-center gap-2 max-w-xl mx-auto leading-relaxed">
-                     <Lock className="w-4 h-4 shrink-0" />
-                     لا يظهر البحث الكامل ولا التفاصيل الفنية السرية للعامة أو للشركات إلا بعد موافقة اللجنة المختصة.
-                   </div>
-                 </div>
+              <div className="space-y-4 relative z-10">
+                <div className="flex items-center gap-3 text-sm font-bold">
+                   <div className="w-6 h-6 rounded-full bg-blue-500 flex items-center justify-center"><Check className="w-3 h-3 text-white"/></div>
+                   <span>تم استلام البحث</span>
+                </div>
+                <div className="flex items-center gap-3 text-sm font-bold">
+                   <div className="w-6 h-6 rounded-full bg-blue-500 flex items-center justify-center"><Check className="w-3 h-3 text-white"/></div>
+                   <span>تقييم اللجنة الفنية</span>
+                </div>
+                <div className="flex items-center gap-3 text-sm font-bold opacity-50">
+                   <div className="w-6 h-6 rounded-full border-2 border-slate-400 flex items-center justify-center"></div>
+                   <span>مقبول للعرض</span>
+                </div>
+                <div className="flex items-center gap-3 text-sm font-bold opacity-50">
+                   <div className="w-6 h-6 rounded-full border-2 border-slate-400 flex items-center justify-center"></div>
+                   <span>مجدول للعرض على الشركاء</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* 4. FINAL OUTPUTS & IP VIEW */}
+      <section className="py-12 bg-slate-50 border-t border-slate-100">
+        <div className="max-w-[1600px] mx-auto px-4 lg:px-8">
+          
+          <div className="flex flex-col lg:flex-row gap-12">
+            {/* Right side: Outputs */}
+            <div className="w-full lg:w-1/2">
+              <h2 className="text-3xl font-black text-[#183059] mb-4">المخرجات النهائية</h2>
+              <p className="text-slate-500 font-bold mb-8">بعد اجتياز التقييم، يتم توجيه البحث إلى المسار المناسب لتعظيم الاستفادة منه.</p>
+              
+              <div className="grid grid-cols-2 gap-4">
+                {finalOutputs.map((out, idx) => (
+                  <div key={idx} className="bg-white p-4 rounded-2xl shadow-sm border border-slate-100 flex items-center gap-4 hover:-translate-y-1 transition-transform">
+                    <div className={`w-12 h-12 rounded-xl flex items-center justify-center shrink-0 ${out.bg}`}>
+                      <out.i className={`w-6 h-6 ${out.c}`} />
+                    </div>
+                    <span className="font-bold text-slate-700 text-sm">{out.t}</span>
+                  </div>
+                ))}
               </div>
             </div>
 
-          </div>
-
-          {/* Left Column (RTL) - Boxes 8, 7, 6 */}
-          <div className="w-full xl:w-1/4 flex flex-col gap-6">
-            <InfoBox number="08" title="حالة الطلب داخل المنصة" colorHex="#2c7a7b">
-              <div className="text-center text-sm font-bold text-[#2c7a7b] mb-3 border-b border-[#2c7a7b]/20 pb-2">يتابع الباحث بحثه عبر مراحل واضحة</div>
-              <ul className="space-y-3.5 text-xs font-bold text-slate-700 relative before:absolute before:right-2.5 before:top-3 before:bottom-3 before:w-0.5 before:bg-[#2c7a7b]/20 pr-1">
-                {[
-                  'تم استلام البحث', 'تحت الفحص الإداري', 'تحت التقييم الفني', 
-                  'تحت مراجعة الملكية الفكرية', 'مقبول للعرض', 'Technology Offer Book', 
-                  'مجدول للعرض أمام الشركاء', 'محال إلى جهة صناعية', 'تحت المتابعة'
-                ].map((t, i) => (
-                  <li key={t} className="flex items-center gap-3 relative z-10">
-                    <div className="w-6 h-6 rounded-full bg-[#2c7a7b] text-white flex items-center justify-center shrink-0 shadow-sm">{i+1}</div>
-                    <span className="leading-tight">{t}</span>
-                  </li>
-                ))}
-              </ul>
-            </InfoBox>
-
-            <InfoBox number="07" title="تقييم اللجنة" colorHex="#dd6b20">
-              <div className="text-center text-sm font-bold text-[#dd6b20] mb-3 border-b border-[#dd6b20]/20 pb-2">كيف يتم تقييم البحث؟</div>
-              <ul className="space-y-3 text-xs font-bold text-slate-700">
-                {[
-                  {l:'وضوح المشكلة', s:15}, {l:'أصالة الحل', s:15}, {l:'قابلية التطبيق', s:15}, 
-                  {l:'مستوى الجاهزية', s:15}, {l:'الأثر الاقتصادي أو المجتمعي', s:10}, 
-                  {l:'إمكانية الحماية الفكرية', s:10}, {l:'وجود سوق أو شريك محتمل', s:10}, {l:'جودة الملف والعرض', s:10}
-                ].map((t, i) => (
-                  <li key={i} className="flex items-center justify-between bg-white px-2 py-1.5 rounded-lg border border-slate-100 shadow-sm">
-                    <span className="leading-tight">{t.l}</span>
-                    <span className="w-6 h-6 rounded-full bg-[#dd6b20] text-white flex items-center justify-center font-black shadow-sm shrink-0">{t.s}</span>
-                  </li>
-                ))}
-              </ul>
-            </InfoBox>
-
-            <InfoBox number="06" title="اختر نوع التعاون المطلوب" colorHex="#6b46c1">
-              <div className="text-center text-sm font-bold text-[#6b46c1] mb-3 border-b border-[#6b46c1]/20 pb-2">ماذا يريد الباحث من القمة؟</div>
-              <ul className="flex flex-col gap-2 text-xs font-bold text-slate-700">
-                {['ترخيص التكنولوجيا', 'تصنيع', 'تسويق', 'تعاقد بحثي', 'تأسيس شركة ناشئة', 'إدراج ضمن شركة نماء', 'عرض أمام مستثمرين', 'احتضان', 'Technology Offer Book'].map(t => (
-                  <li key={t} className="flex items-start gap-2 leading-tight">
-                    <CheckCircle2 className="w-4 h-4 text-[#6b46c1] shrink-0" /> 
-                    <span>{t}</span>
-                  </li>
-                ))}
-              </ul>
-            </InfoBox>
+            {/* Left side: Privacy and Partners */}
+            <div className="w-full lg:w-1/2 flex flex-col gap-6">
+              <div className="bg-[#105a6b] rounded-3xl overflow-hidden shadow-xl text-white">
+                <div className="bg-[#0c4755] p-6 text-center">
+                  <h3 className="text-xl font-black flex items-center justify-center gap-3"><Eye className="w-6 h-6" /> ما الذي يظهر للشركاء؟</h3>
+                </div>
+                <div className="p-8 bg-white text-slate-800 text-center">
+                  <h4 className="font-black text-[#105a6b] mb-4 border-b pb-4 border-slate-100">تظهر النسخة العامة غير السرية فقط وتشمل:</h4>
+                  <div className="flex flex-wrap justify-center gap-3 mb-8">
+                    {['عنوان البحث', 'القطاع', 'المشكلة', 'الحل المقترح', 'مستوى الجاهزية', 'حالة الملكية', 'نوع الشراكة'].map(t => (
+                      <span key={t} className="bg-slate-100 px-4 py-2 rounded-xl text-xs font-bold text-slate-600 border border-slate-200">
+                        {t}
+                      </span>
+                    ))}
+                  </div>
+                  <div className="bg-red-50 text-red-600 p-4 rounded-xl text-sm font-bold flex items-start gap-3 text-right border border-red-100">
+                    <Lock className="w-6 h-6 shrink-0 mt-0.5" />
+                    <p>لا يظهر البحث الكامل ولا التفاصيل الفنية السرية للعامة أو للشركات إلا بعد موافقة اللجنة المختصة وبعد طلب اجتماع رسمي.</p>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
 
         </div>
-      </div>
+      </section>
+
     </div>
   );
 };
+
+// Custom Icon for Status
+const ActivityIcon = (props) => (
+  <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline>
+  </svg>
+);
 
 export default AppliedResearchPage;

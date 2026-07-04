@@ -113,10 +113,53 @@ const AdminDashboard = () => {
   
   // Selection details modal
   const [selectedItem, setSelectedItem] = useState(null);
+  
+  // News modal state
+  const [isNewsModalOpen, setIsNewsModalOpen] = useState(false);
+  const [newNewsData, setNewNewsData] = useState({ title: '', content: '', image_url: '', uploader_name: 'أدمن النظام' });
   const [selectedType, setSelectedType] = useState(null); // 'graduation', 'research', 'registration'
   
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState('الكل');
+
+  const [editingNewsId, setEditingNewsId] = useState(null);
+
+  const handleSaveNews = (e) => {
+    e.preventDefault();
+    if (!newNewsData.title || !newNewsData.content) return;
+    
+    if (editingNewsId) {
+      setNewsList(newsList.map(news => news.id === editingNewsId ? { ...news, ...newNewsData } : news));
+    } else {
+      const newNews = {
+        ...newNewsData,
+        id: Date.now().toString(),
+        created_at: new Date().toISOString()
+      };
+      setNewsList([newNews, ...newsList]);
+    }
+    
+    setIsNewsModalOpen(false);
+    setEditingNewsId(null);
+    setNewNewsData({ title: '', content: '', image_url: '', uploader_name: 'أدمن النظام' });
+  };
+
+  const openEditNewsModal = (newsItem) => {
+    setNewNewsData({
+      title: newsItem.title,
+      content: newsItem.content,
+      image_url: newsItem.image_url || '',
+      uploader_name: newsItem.uploader_name
+    });
+    setEditingNewsId(newsItem.id);
+    setIsNewsModalOpen(true);
+  };
+
+  const handleDeleteNews = (id) => {
+    if(window.confirm('هل أنت متأكد من رغبتك في حذف هذا الخبر؟')) {
+      setNewsList(newsList.filter(news => news.id !== id));
+    }
+  };
 
   useEffect(() => {
     // Check if already authenticated via session
@@ -484,7 +527,10 @@ const AdminDashboard = () => {
                       <h3 className="text-xl font-black text-[#26462C] mb-1">إدارة الأخبار</h3>
                       <p className="text-sm text-slate-500 font-bold">إضافة وتعديل وحذف الأخبار المعروضة في الصفحة الرئيسية.</p>
                     </div>
-                    <button className="bg-[#26462C] hover:bg-[#1a301e] text-[#F4A217] px-6 py-3 rounded-xl font-bold flex items-center gap-2 transition-colors shadow-sm shrink-0">
+                    <button 
+                      onClick={() => setIsNewsModalOpen(true)}
+                      className="bg-[#26462C] hover:bg-[#1a301e] text-[#F4A217] px-6 py-3 rounded-xl font-bold flex items-center gap-2 transition-colors shadow-sm shrink-0"
+                    >
                       + إضافة خبر جديد
                     </button>
                   </div>
@@ -515,8 +561,8 @@ const AdminDashboard = () => {
                               <div className="flex items-center gap-1"><Users className="w-3.5 h-3.5"/> {newsItem.uploader_name}</div>
                             </div>
                             <div className="flex gap-2 mt-4 pt-4 border-t border-slate-100">
-                               <button className="flex-1 py-2 bg-blue-50 text-blue-600 rounded-lg font-bold text-xs hover:bg-blue-100 transition-colors">تعديل</button>
-                               <button className="flex-1 py-2 bg-red-50 text-red-600 rounded-lg font-bold text-xs hover:bg-red-100 transition-colors">حذف</button>
+                               <button onClick={() => openEditNewsModal(newsItem)} className="flex-1 py-2 bg-blue-50 text-blue-600 rounded-lg font-bold text-xs hover:bg-blue-100 transition-colors">تعديل</button>
+                               <button onClick={() => handleDeleteNews(newsItem.id)} className="flex-1 py-2 bg-red-50 text-red-600 rounded-lg font-bold text-xs hover:bg-red-100 transition-colors">حذف</button>
                             </div>
                           </div>
                         </div>
@@ -866,6 +912,81 @@ const AdminDashboard = () => {
         </div>
 
       </div>
+
+      {/* Add News Modal */}
+      {isNewsModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" onClick={() => setIsNewsModalOpen(false)}></div>
+          <div className="bg-white rounded-3xl w-full max-w-2xl overflow-hidden relative z-10 shadow-2xl animate-scale-up flex flex-col max-h-[90vh]">
+            <div className="bg-[#26462C] text-white p-6 flex justify-between items-center shrink-0">
+              <h2 className="text-2xl font-black text-[#F4A217]">{editingNewsId ? 'تعديل الخبر' : 'إضافة خبر جديد'}</h2>
+              <button 
+                onClick={() => setIsNewsModalOpen(false)}
+                className="w-8 h-8 flex items-center justify-center bg-white/10 hover:bg-white/20 rounded-full transition-colors font-bold"
+              >
+                ✕
+              </button>
+            </div>
+            
+            <div className="p-6 overflow-y-auto flex-1">
+              <form onSubmit={handleSaveNews} className="space-y-5">
+                <div>
+                  <label className="block text-sm font-bold text-slate-700 mb-2">عنوان الخبر *</label>
+                  <input 
+                    type="text" 
+                    required
+                    value={newNewsData.title}
+                    onChange={(e) => setNewNewsData({...newNewsData, title: e.target.value})}
+                    className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-[#26462C] focus:ring-1 focus:ring-[#26462C] outline-none"
+                    placeholder="اكتب عنوان الخبر هنا"
+                  />
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-bold text-slate-700 mb-2">محتوى وتفاصيل الخبر *</label>
+                  <textarea 
+                    required
+                    rows={5}
+                    value={newNewsData.content}
+                    onChange={(e) => setNewNewsData({...newNewsData, content: e.target.value})}
+                    className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-[#26462C] focus:ring-1 focus:ring-[#26462C] outline-none resize-none"
+                    placeholder="اكتب تفاصيل الخبر هنا..."
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-bold text-slate-700 mb-2">رابط صورة الخبر (اختياري)</label>
+                  <input 
+                    type="text" 
+                    value={newNewsData.image_url}
+                    onChange={(e) => setNewNewsData({...newNewsData, image_url: e.target.value})}
+                    className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-[#26462C] focus:ring-1 focus:ring-[#26462C] outline-none"
+                    placeholder="مثال: https://example.com/image.jpg"
+                  />
+                  <p className="text-xs text-slate-500 mt-2 font-semibold">إذا تركت هذا الحقل فارغاً، سيتم وضع أيقونة افتراضية.</p>
+                </div>
+                
+                <div className="pt-6 border-t border-slate-100 flex gap-3">
+                  <button 
+                    type="submit"
+                    className="flex-1 bg-[#26462C] hover:bg-[#1a301e] text-white px-6 py-3 rounded-xl font-bold transition-colors shadow-sm"
+                  >
+                    {editingNewsId ? 'حفظ التعديلات' : 'نشر الخبر'}
+                  </button>
+                  <button 
+                    type="button"
+                    onClick={() => setIsNewsModalOpen(false)}
+                    className="px-6 py-3 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl font-bold transition-colors"
+                  >
+                    إلغاء
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      )}
+
     </div>
   );
 };
