@@ -65,15 +65,27 @@ const FeatureBox3D = ({ title, colorHex, icon: Icon, link, isRtl, children }) =>
   );
 };
 
-const ListItem = ({ children, colorHex, isRtl }) => (
-  <li className="flex items-start gap-3 text-slate-600 font-bold text-[15px] group/item transition-colors hover:text-slate-900">
-    <div 
-      className={`w-2 h-2 rounded-full shrink-0 mt-2 transition-transform duration-300 ${isRtl ? 'group-hover/item:-translate-x-1' : 'group-hover/item:translate-x-1'}`}
-      style={{ backgroundColor: colorHex, boxShadow: `0 0 10px ${colorHex}` }} 
-    />
-    <span className="leading-relaxed">{children}</span>
-  </li>
-);
+const ListItem = ({ children, colorHex, isRtl, link }) => {
+  const content = (
+    <div className="flex items-start gap-3 text-slate-600 font-bold text-[15px] group/item transition-colors hover:text-slate-900 cursor-pointer">
+      <div 
+        className={`w-2 h-2 rounded-full shrink-0 mt-2 transition-transform duration-300 ${isRtl ? 'group-hover/item:-translate-x-1' : 'group-hover/item:translate-x-1'}`}
+        style={{ backgroundColor: colorHex, boxShadow: `0 0 10px ${colorHex}` }} 
+      />
+      <span className="leading-relaxed">{children}</span>
+    </div>
+  );
+
+  return (
+    <li>
+      {link ? (
+        <Link to={link}>
+          {content}
+        </Link>
+      ) : content}
+    </li>
+  );
+};
 
 const DigitalPlatform = () => {
   const { i18n } = useTranslation();
@@ -102,51 +114,51 @@ const DigitalPlatform = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 lg:gap-10">
           
           <FeatureBox3D title="المبادرات والبرامج" colorHex="#0d9488" icon={Lightbulb} link="/digital-mentors" isRtl={isRtl}>
-            <ListItem colorHex="#0d9488" isRtl={isRtl}>برنامج رواد جامعة المنيا</ListItem>
-            <ListItem colorHex="#0d9488" isRtl={isRtl}>شبكة المدربين الرقمية</ListItem>
-            <ListItem colorHex="#0d9488" isRtl={isRtl}>مبادرة الابتكار الأخضر والاستدامة</ListItem>
-            <ListItem colorHex="#0d9488" isRtl={isRtl}>شركة نماء</ListItem>
-            <ListItem colorHex="#0d9488" isRtl={isRtl}>برامج التدريب والاحتضان</ListItem>
+            <ListItem colorHex="#0d9488" isRtl={isRtl} link="/register">برنامج رواد جامعة المنيا</ListItem>
+            <ListItem colorHex="#0d9488" isRtl={isRtl} link="/digital-mentors">شبكة المدربين الرقمية</ListItem>
+            <ListItem colorHex="#0d9488" isRtl={isRtl} link="/green-innovation">مبادرة الابتكار الأخضر والاستدامة</ListItem>
+            <ListItem colorHex="#0d9488" isRtl={isRtl} link="/center">شركة نماء</ListItem>
+            <ListItem colorHex="#0d9488" isRtl={isRtl} link="/digital-mentors">برامج التدريب والاحتضان</ListItem>
           </FeatureBox3D>
 
           <FeatureBox3D title="المسابقات والعروض" colorHex="#d97706" icon={Trophy} link="/competitions" isRtl={isRtl}>
-            <ListItem colorHex="#d97706" isRtl={isRtl}>Pitching Day</ListItem>
-            <ListItem colorHex="#d97706" isRtl={isRtl}>أفضل رائد أعمال</ListItem>
-            <ListItem colorHex="#d97706" isRtl={isRtl}>أفضل مشروع طلابي</ListItem>
-            <ListItem colorHex="#d97706" isRtl={isRtl}>رفع العروض والملفات</ListItem>
-            <ListItem colorHex="#d97706" isRtl={isRtl}>التحكيم وإعلان النتائج</ListItem>
+            <ListItem colorHex="#d97706" isRtl={isRtl} link="/competitions">Pitching Day</ListItem>
+            <ListItem colorHex="#d97706" isRtl={isRtl} link="/competitions">أفضل رائد أعمال</ListItem>
+            <ListItem colorHex="#d97706" isRtl={isRtl} link="/competitions">أفضل مشروع طلابي</ListItem>
+            <ListItem colorHex="#d97706" isRtl={isRtl} link="/competitions#submit-proposal">رفع العروض والملفات</ListItem>
+            <ListItem colorHex="#d97706" isRtl={isRtl} link="/competitions">التحكيم وإعلان النتائج</ListItem>
           </FeatureBox3D>
 
           <FeatureBox3D title="البحوث ومشروعات التخرج" colorHex="#ea580c" icon={GraduationCap} link="/graduation-projects" isRtl={isRtl}>
-            <ListItem colorHex="#ea580c" isRtl={isRtl}>تقديم البحوث التطبيقية</ListItem>
-            <ListItem colorHex="#ea580c" isRtl={isRtl}>Technology Offer Book</ListItem>
-            <ListItem colorHex="#ea580c" isRtl={isRtl}>تسويق مشروعات التخرج</ListItem>
-            <ListItem colorHex="#ea580c" isRtl={isRtl}>تقييم الجاهزية</ListItem>
-            <ListItem colorHex="#ea580c" isRtl={isRtl}>طلبات التعاون والتمويل</ListItem>
+            <ListItem colorHex="#ea580c" isRtl={isRtl} link="/submit-research">تقديم البحوث التطبيقية</ListItem>
+            <ListItem colorHex="#ea580c" isRtl={isRtl} link="/applied-research">Technology Offer Book</ListItem>
+            <ListItem colorHex="#ea580c" isRtl={isRtl} link="/graduation-projects">تسويق مشروعات التخرج</ListItem>
+            <ListItem colorHex="#ea580c" isRtl={isRtl} link="/submit-graduation-project">تقييم الجاهزية</ListItem>
+            <ListItem colorHex="#ea580c" isRtl={isRtl} link="/submit-research">طلبات التعاون والتمويل</ListItem>
           </FeatureBox3D>
 
           <FeatureBox3D title="المعارض والمنتجات" colorHex="#16a34a" icon={Store} link="/exhibition/1" isRtl={isRtl}>
-            <ListItem colorHex="#16a34a" isRtl={isRtl}>معرض الابتكارات الرقمية</ListItem>
-            <ListItem colorHex="#16a34a" isRtl={isRtl}>معرض الوحدات الإنتاجية</ListItem>
-            <ListItem colorHex="#16a34a" isRtl={isRtl}>كتالوج المنتجات والخدمات</ListItem>
-            <ListItem colorHex="#16a34a" isRtl={isRtl}>الحجز والمشاركة</ListItem>
-            <ListItem colorHex="#16a34a" isRtl={isRtl}>عرض الصور والفيديوهات</ListItem>
+            <ListItem colorHex="#16a34a" isRtl={isRtl} link="/exhibition/1">معرض الابتكارات الرقمية</ListItem>
+            <ListItem colorHex="#16a34a" isRtl={isRtl} link="/exhibition/4">معرض الوحدات الإنتاجية</ListItem>
+            <ListItem colorHex="#16a34a" isRtl={isRtl} link="/exhibition/1">كتالوج المنتجات والخدمات</ListItem>
+            <ListItem colorHex="#16a34a" isRtl={isRtl} link="/exhibition/1">الحجز والمشاركة</ListItem>
+            <ListItem colorHex="#16a34a" isRtl={isRtl} link="/exhibition/1">عرض الصور والفيديوهات</ListItem>
           </FeatureBox3D>
 
           <FeatureBox3D title="التوظيف والتدريب والشركاء" colorHex="#6b21a8" icon={Briefcase} link="/employment-fair" isRtl={isRtl}>
-            <ListItem colorHex="#6b21a8" isRtl={isRtl}>ملتقى التوظيف</ListItem>
-            <ListItem colorHex="#6b21a8" isRtl={isRtl}>الوظائف والتدريب</ListItem>
-            <ListItem colorHex="#6b21a8" isRtl={isRtl}>Minia Talent Pool</ListItem>
-            <ListItem colorHex="#6b21a8" isRtl={isRtl}>الشركات المشاركة</ListItem>
-            <ListItem colorHex="#6b21a8" isRtl={isRtl}>طلب المقابلات</ListItem>
+            <ListItem colorHex="#6b21a8" isRtl={isRtl} link="/employment-fair">ملتقى التوظيف</ListItem>
+            <ListItem colorHex="#6b21a8" isRtl={isRtl} link="/employment-fair">الوظائف والتدريب</ListItem>
+            <ListItem colorHex="#6b21a8" isRtl={isRtl} link="/employment-fair">Minia Talent Pool</ListItem>
+            <ListItem colorHex="#6b21a8" isRtl={isRtl} link="/employment-fair">الشركات المشاركة</ListItem>
+            <ListItem colorHex="#6b21a8" isRtl={isRtl} link="/employment-fair">طلب المقابلات</ListItem>
           </FeatureBox3D>
 
-          <FeatureBox3D title="الاستثمار والملكية الفكرية" colorHex="#1d4ed8" icon={Handshake} link="/dashboard" isRtl={isRtl}>
-            <ListItem colorHex="#1d4ed8" isRtl={isRtl}>Investor Matchmaking</ListItem>
-            <ListItem colorHex="#1d4ed8" isRtl={isRtl}>Founder Services Pavilion</ListItem>
-            <ListItem colorHex="#1d4ed8" isRtl={isRtl}>Startup Readiness Desk</ListItem>
-            <ListItem colorHex="#1d4ed8" isRtl={isRtl}>عيادة الملكية الفكرية</ListItem>
-            <ListItem colorHex="#1d4ed8" isRtl={isRtl}>طلب اجتماع أو استشارة</ListItem>
+          <FeatureBox3D title="الاستثمار والملكية الفكرية" colorHex="#1d4ed8" icon={Handshake} link="/stakeholders" isRtl={isRtl}>
+            <ListItem colorHex="#1d4ed8" isRtl={isRtl} link="/stakeholders">Investor Matchmaking</ListItem>
+            <ListItem colorHex="#1d4ed8" isRtl={isRtl} link="/stakeholders">Founder Services Pavilion</ListItem>
+            <ListItem colorHex="#1d4ed8" isRtl={isRtl} link="/stakeholders">Startup Readiness Desk</ListItem>
+            <ListItem colorHex="#1d4ed8" isRtl={isRtl} link="/stakeholders">عيادة الملكية الفكرية</ListItem>
+            <ListItem colorHex="#1d4ed8" isRtl={isRtl} link="/register?role=investor">طلب اجتماع أو استشارة</ListItem>
           </FeatureBox3D>
         </div>
 
