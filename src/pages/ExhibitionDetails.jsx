@@ -741,6 +741,127 @@ const DigitalInnovationsLayout = ({ exhibition, isRtl }) => {
   );
 };
 
+const FeaturedProductsCarousel = ({ isRtl }) => {
+  const featured = [
+    {
+      id: 1,
+      name: 'عسل نحل طبيعي مصفى نقي',
+      faculty: 'كلية الزراعة',
+      price: '150 ج.م',
+      image: 'https://images.unsplash.com/photo-1587049352846-4a222e784d38?auto=format&fit=crop&q=80&w=500',
+      description: 'عبوة 1 كجم عسل مصفى نقي خالي تماماً من السكر المضاف، منتج بجودة أكاديمية عالية ومعايير صحية صارمة.'
+    },
+    {
+      id: 2,
+      name: 'زيت زيتون بكر ممتاز معصور بارد',
+      faculty: 'كلية الزراعة',
+      price: '180 ج.م',
+      image: 'https://images.unsplash.com/photo-1474979266404-7eaacbcd87c5?auto=format&fit=crop&q=80&w=500',
+      description: 'زيت زيتون بكر ممتاز درجة أولى، نسبة حموضة منخفضة جداً، معصور ميكانيكياً على البارد للحفاظ على الفوائد الصحية.'
+    },
+    {
+      id: 3,
+      name: 'لوحة جدارية نحت بارز على الجبس',
+      faculty: 'كلية الفنون الجميلة',
+      price: '850 ج.م',
+      image: 'https://images.unsplash.com/photo-1541701494587-cb58502866ab?auto=format&fit=crop&q=80&w=500',
+      description: 'جدارية ثلاثية الأبعاد منحوتة يدوياً بالكامل على الجبس المقوى، تجمع بين أصالة التاريخ وحداثة الفن المعاصر.'
+    },
+    {
+      id: 4,
+      name: 'مستحضرات تجميل وتركيبات طبيعية',
+      faculty: 'كلية الصيدلة',
+      price: '250 ج.م',
+      image: 'https://images.unsplash.com/photo-1586015555751-63bb77f4322a?w=300&fit=crop&q=80',
+      description: 'مجموعة متكاملة من مستحضرات العناية بالبشرة والتركيبات الطبيعية الآمنة، مصنعة بمعامل الكلية وتحت إشراف أساتذة متخصصين.'
+    }
+  ];
+
+  const [currentIndex, setCurrentIndex] = useState(0);
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCurrentIndex((prevIndex) => (prevIndex + 1) % featured.length);
+    }, 4000);
+    return () => clearInterval(timer);
+  }, []);
+
+  const handlePrev = () => {
+    setCurrentIndex((prevIndex) => (prevIndex - 1 + featured.length) % featured.length);
+  };
+
+  const handleNext = () => {
+    setCurrentIndex((prevIndex) => (prevIndex + 1) % featured.length);
+  };
+
+  const current = featured[currentIndex];
+
+  return (
+    <div className="bg-white text-slate-900 border border-slate-100 shadow-2xl rounded-[2rem] overflow-hidden flex flex-col w-full max-w-[460px] h-[520px] relative group transition-all duration-300">
+      <div className="h-72 overflow-hidden relative bg-slate-50 shrink-0">
+        <img 
+          src={current.image} 
+          alt={current.name} 
+          className="w-full h-full object-cover transition-transform duration-700 ease-out scale-100 group-hover:scale-105"
+        />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent" />
+        <span className="absolute top-4 right-4 bg-orange-500 text-white text-[10px] font-black px-3 py-1 rounded-full shadow-md">
+          منتج متميز رائد
+        </span>
+        <span className="absolute bottom-4 right-4 bg-slate-900/85 backdrop-blur-sm text-white text-[10px] font-black px-2.5 py-1 rounded-lg">
+          {current.faculty}
+        </span>
+      </div>
+
+      <div className="p-6 flex flex-col justify-between flex-1 text-right">
+        <div className="space-y-2">
+          <div className="flex items-center justify-between">
+            <span className="text-lg font-black text-blue-600">{current.price}</span>
+            <div className="flex items-center gap-1 text-amber-400">
+              {[1, 2, 3, 4, 5].map((star) => (
+                <Star key={star} className="w-3.5 h-3.5 fill-current" />
+              ))}
+            </div>
+          </div>
+          <h3 className="text-xl font-black text-slate-900 line-clamp-1">
+            {current.name}
+          </h3>
+          <p className="text-xs sm:text-sm text-slate-500 font-bold leading-relaxed line-clamp-3">
+            {current.description}
+          </p>
+        </div>
+
+        <div className="flex items-center justify-between pt-4 border-t border-slate-100 mt-auto">
+          <div className="flex items-center gap-2">
+            <button 
+              onClick={handlePrev}
+              className="w-8 h-8 rounded-full border border-slate-200 hover:border-slate-400 hover:bg-slate-50 flex items-center justify-center text-slate-700 transition-all cursor-pointer"
+            >
+              <ChevronRight className="w-4 h-4" />
+            </button>
+            <button 
+              onClick={handleNext}
+              className="w-8 h-8 rounded-full border border-slate-200 hover:border-slate-400 hover:bg-slate-50 flex items-center justify-center text-slate-700 transition-all cursor-pointer"
+            >
+              <ChevronLeft className="w-4 h-4" />
+            </button>
+          </div>
+
+          <div className="flex items-center gap-1.5">
+            {featured.map((_, idx) => (
+              <button 
+                key={idx}
+                onClick={() => setCurrentIndex(idx)}
+                className={`h-2 rounded-full transition-all duration-300 ${currentIndex === idx ? 'h-2 w-6 bg-blue-600' : 'h-2 w-2 bg-slate-200 hover:bg-slate-300'}`}
+              />
+            ))}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 const ProductiveUnitsLayout = ({ exhibition, isRtl }) => {
   const [selectedSector, setSelectedSector] = useState('all');
   const [selectedFaculty, setSelectedFaculty] = useState('all');
