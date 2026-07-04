@@ -1,5 +1,6 @@
 import React from 'react';
 import { Lightbulb, Trophy, GraduationCap, Store, Briefcase, Handshake, ArrowLeft } from 'lucide-react';
+import { Link } from 'react-router-dom';
 
 const ExhibitionTracks = () => {
   const tracks = [
@@ -7,6 +8,7 @@ const ExhibitionTracks = () => {
       id: 1,
       title: 'المبادرات والبرامج',
       icon: Lightbulb,
+      link: '/digital-mentors',
       description: 'برنامج رواد جامعة المنيا، شبكة المدربين الرقمية، مبادرة الابتكار الأخضر والاستدامة، شركة نماء، برامج التدريب والاحتضان.',
       colors: {
         bg: 'bg-[#f4f8fb]',
@@ -19,6 +21,7 @@ const ExhibitionTracks = () => {
       id: 2,
       title: 'المسابقات والعروض',
       icon: Trophy,
+      link: '/competitions',
       description: 'Pitching Day، أفضل رائد أعمال، أفضل مشروع طلابي، رفع العروض والملفات، التحكيم وإعلان النتائج.',
       colors: {
         bg: 'bg-[#fff5f6]',
@@ -31,6 +34,7 @@ const ExhibitionTracks = () => {
       id: 3,
       title: 'البحوث ومشروعات التخرج',
       icon: GraduationCap,
+      link: '/graduation-projects',
       description: 'تقديم البحوث التطبيقية، Technology Offer Book، تسويق مشروعات التخرج، تقييم الجاهزية، طلبات التعاون والتمويل.',
       colors: {
         bg: 'bg-[#f6f5fb]',
@@ -43,6 +47,7 @@ const ExhibitionTracks = () => {
       id: 4,
       title: 'المعارض والمنتجات',
       icon: Store,
+      link: '/exhibition/1',
       description: 'معرض الابتكارات الرقمية، معرض الوحدات الإنتاجية، كتالوج المنتجات والخدمات، الحجز والمشاركة، عرض الصور والفيديوهات.',
       colors: {
         bg: 'bg-[#fef9f1]',
@@ -55,6 +60,7 @@ const ExhibitionTracks = () => {
       id: 5,
       title: 'التوظيف والتدريب والشركاء',
       icon: Briefcase,
+      link: '/employment-fair',
       description: 'ملتقى التوظيف، الوظائف والتدريب، Minia Talent Pool، الشركات المشاركة، طلب المقابلات.',
       colors: {
         bg: 'bg-[#f2fcf6]',
@@ -67,6 +73,7 @@ const ExhibitionTracks = () => {
       id: 6,
       title: 'الاستثمار والملكية الفكرية',
       icon: Handshake,
+      link: '/stakeholders',
       description: 'Investor Matchmaking، Founder Services Pavilion، Startup Readiness Desk، عيادة الملكية الفكرية، طلب اجتماع أو استشارة.',
       colors: {
         bg: 'bg-[#fff6f4]',
@@ -107,9 +114,10 @@ const ExhibitionTracks = () => {
         {/* Cards Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
           {tracks.map((track) => (
-            <div 
+            <Link 
               key={track.id}
-              className={`${track.colors.bg} rounded-[2.5rem] p-10 flex flex-col items-center text-center transition-all duration-500 hover:scale-[1.03] group cursor-pointer relative shadow-lg hover:shadow-2xl z-10`}
+              to={track.link}
+              className={`${track.colors.bg} rounded-[2.5rem] p-10 flex flex-col items-center text-center transition-all duration-500 hover:scale-[1.03] group cursor-pointer relative shadow-lg hover:shadow-2xl z-10 block`}
               style={{
                 animation: `float-card ${3 + (track.id % 3) * 0.5}s ease-in-out infinite alternate`
               }}
@@ -150,7 +158,7 @@ const ExhibitionTracks = () => {
                 <span>التفاصيل والمزيد</span>
                 <ArrowLeft className="w-5 h-5 transform transition-transform duration-500 group-hover:-translate-x-2" />
               </div>
-            </div>
+            </Link>
           ))}
         </div>
 
