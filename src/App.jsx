@@ -23,6 +23,7 @@ import GraduationProjectsPage from './pages/GraduationProjectsPage';
 import SubmitGraduationProjectPage from './pages/SubmitGraduationProjectPage';
 import GreenInnovationPage from './pages/GreenInnovationPage';
 import AdminDashboard from './pages/AdminDashboard';
+import CompetitionsPage from './pages/CompetitionsPage';
 import NewsDetails from './pages/NewsDetails';
 import NewsListPage from './pages/NewsListPage';
 import UserDashboard from './pages/UserDashboard';
@@ -66,6 +67,7 @@ function App() {
             <Route path="/graduation-projects" element={<GraduationProjectsPage />} />
             <Route path="/submit-graduation-project" element={<SubmitGraduationProjectPage />} />
             <Route path="/green-innovation" element={<GreenInnovationPage />} />
+            <Route path="/competitions" element={<CompetitionsPage />} />
             <Route path="/admin" element={<AdminDashboard />} />
             <Route path="/dashboard" element={<UserDashboard />} />
             <Route path="/activities" element={<CenterActivitiesPage />} />

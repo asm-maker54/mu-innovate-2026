@@ -84,6 +84,7 @@ const Navbar = () => {
       dropdown: [
         { label: 'ملتقى التوظيف', labelEn: 'Employment Fair', href: '/employment-fair' },
         { label: 'ملتقى الخريجين', labelEn: 'Alumni Fair', href: '/alumni-fair' },
+        { label: 'المسابقات والهاكاثونات', labelEn: 'Competitions & Hackathons', href: '/competitions' },
         { label: 'معرض الابتكارات', labelEn: 'Digital Expo', href: '/exhibition/1' },
         { label: 'معرض الوحدات', labelEn: 'Productive Units', href: '/exhibition/4' }
       ]

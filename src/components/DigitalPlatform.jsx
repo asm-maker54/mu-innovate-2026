@@ -109,7 +109,7 @@ const DigitalPlatform = () => {
             <ListItem colorHex="#0d9488" isRtl={isRtl}>برامج التدريب والاحتضان</ListItem>
           </FeatureBox3D>
 
-          <FeatureBox3D title="المسابقات والعروض" colorHex="#d97706" icon={Trophy} link="/agenda" isRtl={isRtl}>
+          <FeatureBox3D title="المسابقات والعروض" colorHex="#d97706" icon={Trophy} link="/competitions" isRtl={isRtl}>
             <ListItem colorHex="#d97706" isRtl={isRtl}>Pitching Day</ListItem>
             <ListItem colorHex="#d97706" isRtl={isRtl}>أفضل رائد أعمال</ListItem>
             <ListItem colorHex="#d97706" isRtl={isRtl}>أفضل مشروع طلابي</ListItem>
