@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { 
   User, BookOpen, GraduationCap, Mic, Settings, LayoutDashboard, 
   Calendar, Clock, FileText, CheckCircle, AlertCircle, LogOut,
-  Upload, Camera, FileCheck, X
+  Upload, Camera, FileCheck, X, XCircle, ExternalLink
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
@@ -70,7 +70,7 @@ const UserDashboard = () => {
         full_name: user.full_name || '',
         phone: user.phone || '',
         organization: user.organization || '',
-        cv_url: user.cv_url || '',
+        cv_url: user.cv_url || user.details?.cv_url || '',
         speechTopic: user.details?.speechTopic || '',
         speakerExpertise: user.details?.speakerExpertise || '',
         speakerBio: user.details?.speakerBio || '',
@@ -386,6 +386,47 @@ const UserDashboard = () => {
       const parsed = JSON.parse(session);
       setUser(parsed);
       setActiveRole(parsed.role || 'user');
+
+      // Fetch latest registration status and files dynamically on load
+      const loadLatestData = async () => {
+        try {
+          const { supabase, isSupabaseConfigured } = await import('../supabaseClient');
+          if (isSupabaseConfigured) {
+            const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+            const isUuid = uuidRegex.test(parsed.id);
+
+            let query = supabase
+              .from('registrations')
+              .select('*');
+
+            if (isUuid) {
+              query = query.eq('id', parsed.id);
+            } else {
+              query = query.eq('email', parsed.email);
+            }
+
+            const { data, error } = await query.maybeSingle();
+            if (!error && data) {
+              localStorage.setItem('current_user', JSON.stringify(data));
+              setUser(data);
+              setActiveRole(data.role || 'user');
+            }
+          } else {
+            // Local fallback
+            const localRegs = JSON.parse(localStorage.getItem('local_registrations') || '[]');
+            const matched = localRegs.find(r => r.id === parsed.id || r.email === parsed.email);
+            if (matched) {
+              localStorage.setItem('current_user', JSON.stringify(matched));
+              setUser(matched);
+              setActiveRole(matched.role || 'user');
+            }
+          }
+        } catch (e) {
+          console.error("Error refreshing dashboard data:", e);
+        }
+      };
+
+      loadLatestData();
     } else {
       setUser({
         full_name: 'أحمد محمد',
@@ -417,10 +458,10 @@ const UserDashboard = () => {
   const getRoleLabel = (roleId) => roles.find(r => r.id === roleId)?.label;
 
   const renderOverviewTab = () => {
-    switch (activeRole) {
-      case 'speaker':
-        return (
-          <div className="space-y-6">
+    const getRoleDetails = () => {
+      switch (activeRole) {
+        case 'speaker':
+          return (
             <div className="bg-white p-6 rounded-3xl shadow-sm border border-slate-100">
               <h3 className="text-xl font-black text-slate-800 mb-4">{isRtl ? 'بيانات الجلسة والتحدث الخاص بك' : 'Your Session & Speech Details'}</h3>
               <div className="flex items-start gap-4 p-4 bg-orange-50 rounded-2xl border border-orange-100">
@@ -431,7 +472,6 @@ const UserDashboard = () => {
                   <h4 className="font-black text-slate-900 text-lg mb-1">{user?.details?.speechTopic || (isRtl ? 'لم يحدد عنوان الجلسة بعد' : 'Session topic not set')}</h4>
                   <p className="text-sm font-bold text-slate-500 mb-3">{isRtl ? `مجال التخصص: ${user?.details?.speakerExpertise || 'غير محدد'}` : `Expertise: ${user?.details?.speakerExpertise || 'Not set'}`}</p>
                   <p className="text-slate-600 text-sm leading-relaxed bg-white/60 p-3 rounded-xl border border-slate-100">{user?.details?.speakerBio || (isRtl ? 'لا يوجد نبذة تعريفية مضافة.' : 'No speaker bio provided.')}</p>
-                  
                   {user?.details?.speakerLinkedin && (
                     <a href={user.details.speakerLinkedin} target="_blank" rel="noreferrer" className="inline-block mt-3 text-xs font-bold text-blue-600 hover:underline">
                       LinkedIn Profile ↗
@@ -440,26 +480,9 @@ const UserDashboard = () => {
                 </div>
               </div>
             </div>
-            
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="bg-white p-6 rounded-3xl shadow-sm border border-slate-100">
-                <h3 className="font-black text-slate-800 mb-4">{isRtl ? 'حالة الطلب والملفات المرفقة' : 'Application Status & Attachments'}</h3>
-                <div className="flex items-center justify-between p-4 bg-slate-50 rounded-2xl border border-slate-100">
-                  <div className="flex items-center gap-3">
-                    <FileText className="w-6 h-6 text-blue-500" />
-                    <span className="font-bold text-slate-700">{isRtl ? 'السيرة الذاتية (CV)' : 'Resume / CV'}</span>
-                  </div>
-                  <span className="text-sm font-bold text-amber-600 flex items-center gap-1 bg-amber-50 px-3 py-1 rounded-full border border-amber-100">
-                    <Clock className="w-4 h-4" /> {isRtl ? 'تحت المراجعة الإدارية' : 'Pending Review'}
-                  </span>
-                </div>
-              </div>
-            </div>
-          </div>
-        );
-      case 'startup':
-        return (
-          <div className="space-y-6">
+          );
+        case 'startup':
+          return (
             <div className="bg-white p-6 rounded-3xl shadow-sm border border-slate-100">
               <h3 className="text-xl font-black text-slate-800 mb-4">{isRtl ? 'بيانات الشركة الناشئة / المشروع المبتكر' : 'Startup / Project Details'}</h3>
               <div className="p-6 border-s-4 border-emerald-500 bg-emerald-50/50 rounded-2xl">
@@ -471,17 +494,12 @@ const UserDashboard = () => {
                     </p>
                     <p className="text-slate-600 text-sm leading-relaxed bg-white p-3 rounded-xl border border-slate-100">{user?.details?.elevatorPitch || (isRtl ? 'لا يوجد وصف مختصر مضاف.' : 'No elevator pitch provided.')}</p>
                   </div>
-                  <div className="px-5 py-2.5 bg-emerald-600 text-white rounded-full text-xs font-bold shadow-md shadow-emerald-500/20 text-center shrink-0">
-                    {isRtl ? 'قيد الفحص الفني' : 'Under Technical Review'}
-                  </div>
                 </div>
               </div>
             </div>
-          </div>
-        );
-      case 'investor':
-        return (
-          <div className="space-y-6">
+          );
+        case 'investor':
+          return (
             <div className="bg-white p-6 rounded-3xl shadow-sm border border-slate-100">
               <h3 className="text-xl font-black text-slate-800 mb-4">{isRtl ? 'البيانات الاستثمارية والاهتمام' : 'Investor Profile & Settings'}</h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -501,45 +519,31 @@ const UserDashboard = () => {
                 )}
               </div>
             </div>
-          </div>
-        );
-      case 'mentor':
-        return (
-          <div className="space-y-6">
+          );
+        case 'mentor':
+          return (
             <div className="bg-white p-6 rounded-3xl shadow-sm border border-slate-100">
               <h3 className="text-xl font-black text-slate-800 mb-4">{isRtl ? 'ملف التوجيه والإرشاد' : 'Mentor / Coach Profile'}</h3>
               <div className="p-6 bg-blue-50/40 rounded-2xl border border-blue-100">
                 <h4 className="font-black text-slate-900 text-lg mb-2">{isRtl ? 'تفاصيل الخبرة ومجالات الإرشاد' : 'Expertise & Experience Details'}</h4>
                 <p className="text-sm text-slate-600 font-bold mb-1">{isRtl ? `سنوات الخبرة العملية: ${user?.details?.yearsExperience || '0'} سنوات` : `Years of Experience: ${user?.details?.yearsExperience || '0'} years`}</p>
                 <p className="text-sm text-slate-600 font-bold mb-4">{isRtl ? `مجال التدريب والتوجيه: ${user?.details?.mentorExpertise || 'غير محدد'}` : `Mentorship Domain: ${user?.details?.mentorExpertise || 'Not set'}`}</p>
-                <span className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-green-100 text-green-700 rounded-full text-xs font-black">
-                  <CheckCircle className="w-3.5 h-3.5" /> {isRtl ? 'مرشد نشط بالقمة' : 'Active Summit Mentor'}
-                </span>
               </div>
             </div>
-          </div>
-        );
-      case 'researcher':
-        return (
-          <div className="space-y-6">
+          );
+        case 'researcher':
+          return (
             <div className="bg-white p-6 rounded-3xl shadow-sm border border-slate-100">
               <h3 className="text-xl font-black text-slate-800 mb-4">{isRtl ? 'بيانات البحث التطبيقي / الابتكار العلمي' : 'Research Submission Details'}</h3>
               <div className="p-6 border-s-4 border-indigo-500 bg-indigo-50/50 rounded-2xl text-right">
                 <h4 className="font-black text-indigo-950 text-lg mb-1">{user?.details?.researchTitle || (isRtl ? 'لم يحدد عنوان البحث بعد' : 'Research title not set')}</h4>
                 <p className="text-xs text-indigo-800 font-bold mb-3">{isRtl ? `مستوى الجاهزية التكنولوجية (TRL): ${user?.details?.trlLevel || 'غير محدد'}` : `TRL Level: ${user?.details?.trlLevel || 'Not set'}`}</p>
                 <p className="text-slate-600 text-sm leading-relaxed bg-white p-4 rounded-xl border border-slate-100">{user?.details?.researchIdea || (isRtl ? 'لا توجد تفاصيل مضافة للفكرة البحثية.' : 'No idea summary provided.')}</p>
-                <div className="mt-4 flex justify-between items-center flex-wrap gap-2">
-                  <span className="text-xs font-black text-indigo-700 bg-indigo-100 px-3 py-1.5 rounded-full">
-                    {isRtl ? 'قيد تقييم اللجنة العلمية' : 'Scientific Committee Evaluation'}
-                  </span>
-                </div>
               </div>
             </div>
-          </div>
-        );
-      case 'partner':
-        return (
-          <div className="space-y-6">
+          );
+        case 'partner':
+          return (
             <div className="bg-white p-6 rounded-3xl shadow-sm border border-slate-100">
               <h3 className="text-xl font-black text-slate-800 mb-4">{isRtl ? 'بيانات الشراكة الاستراتيجية / الرعاية' : 'Partnership & Sponsor Profile'}</h3>
               <div className="p-6 bg-slate-50 rounded-2xl border border-slate-200">
@@ -548,24 +552,20 @@ const UserDashboard = () => {
                 <p className="text-slate-600 text-sm leading-relaxed bg-white p-4 rounded-xl border border-slate-100">{user?.details?.partnerMessage || (isRtl ? 'لا توجد رسالة مقترحة.' : 'No custom message.')}</p>
               </div>
             </div>
-          </div>
-        );
-      case 'volunteer':
-        return (
-          <div className="space-y-6">
+          );
+        case 'volunteer':
+          return (
             <div className="bg-white p-6 rounded-3xl shadow-sm border border-slate-100">
               <h3 className="text-xl font-black text-slate-800 mb-4">{isRtl ? 'بيانات طلب التطوع واللجان المفضلة' : 'Volunteer Application Details'}</h3>
               <div className="p-6 bg-emerald-50/30 rounded-2xl border border-emerald-100 text-right">
                 <h4 className="font-black text-[#26462C] text-lg mb-2">{isRtl ? `اللجنة المفضلة: ${user?.details?.volunteerCommittee || 'غير محدد'}` : `Committee: ${user?.details?.volunteerCommittee || 'Not set'}`}</h4>
                 <p className="text-sm text-slate-600 font-semibold mb-3">{isRtl ? `هل لديك خبرة تطوعية سابقة؟: ${user?.details?.hasVolunteerExperience || 'لا'}` : `Has experience? ${user?.details?.hasVolunteerExperience || 'No'}`}</p>
-                <p className="text-slate-600 text-sm leading-relaxed bg-white p-4 rounded-xl border border-slate-100">{user?.details?.volunteerReason || (isRtl ? 'لا توجد أسباب تفصيلية.' : 'No reason provided.')}</p>
+                <p className="text-slate-600 text-sm leading-relaxed bg-white p-4 rounded-xl border border-slate-100">{user?.details?.volunteerReason || (isRtl ? 'لا يوجد سبب مفصل للتطوع.' : 'No reason provided.')}</p>
               </div>
             </div>
-          </div>
-        );
-      default:
-        return (
-          <div className="space-y-6">
+          );
+        default:
+          return (
             <div className="bg-gradient-to-r from-blue-600 to-indigo-700 p-8 md:p-10 rounded-3xl shadow-xl shadow-blue-900/10 text-white relative overflow-hidden">
               <div className="relative z-10">
                 <h2 className="text-3xl md:text-4xl font-black mb-4">{isRtl ? 'مرحباً بك في منصة الابتكار' : 'Welcome to the Innovation Platform'}</h2>
@@ -580,9 +580,72 @@ const UserDashboard = () => {
                 </svg>
               </div>
             </div>
+          );
+      }
+    };
+
+    const cvUrl = user?.cv_url || user?.details?.cv_url || '';
+
+    return (
+      <div className="space-y-6">
+        {getRoleDetails()}
+
+        <div className="bg-white p-6 rounded-3xl shadow-sm border border-slate-100">
+          <h3 className="font-black text-slate-800 mb-4">{isRtl ? 'حالة الطلب والملفات المرفقة' : 'Application Status & Attachments'}</h3>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {/* Application Status */}
+            <div className="flex items-center justify-between p-4 bg-slate-50 rounded-2xl border border-slate-100">
+              <span className="font-bold text-slate-700">{isRtl ? 'حالة الطلب' : 'Application Status'}</span>
+              {(() => {
+                const status = user?.status || 'تحت المراجعة الإدارية';
+                if (status === 'مقبول للعرض في القمة') {
+                  return (
+                    <span className="text-sm font-bold text-emerald-700 flex items-center gap-1.5 bg-emerald-50 px-3 py-1.5 rounded-full border border-emerald-200">
+                      <CheckCircle className="w-4 h-4" /> {isRtl ? 'تم القبول والاعتماد للعرض ✓' : 'Approved ✓'}
+                    </span>
+                  );
+                } else if (status === 'مرفوض') {
+                  return (
+                    <span className="text-sm font-bold text-red-600 flex items-center gap-1.5 bg-red-50 px-3 py-1.5 rounded-full border border-red-200">
+                      <XCircle className="w-4 h-4" /> {isRtl ? 'مرفوض' : 'Rejected'}
+                    </span>
+                  );
+                } else {
+                  return (
+                    <span className="text-sm font-bold text-amber-600 flex items-center gap-1.5 bg-amber-50 px-3 py-1.5 rounded-full border border-amber-100">
+                      <Clock className="w-4 h-4" /> {isRtl ? 'تحت المراجعة الإدارية' : 'Pending Review'}
+                    </span>
+                  );
+                }
+              })()}
+            </div>
+
+            {/* CV File */}
+            <div className="flex items-center justify-between p-4 bg-slate-50 rounded-2xl border border-slate-100">
+              <div className="flex items-center gap-3">
+                <FileText className="w-6 h-6 text-blue-500" />
+                <span className="font-bold text-slate-700">{isRtl ? 'السيرة الذاتية (CV)' : 'Resume / CV'}</span>
+              </div>
+              {cvUrl ? (
+                <a 
+                  href={cvUrl} 
+                  target="_blank" 
+                  rel="noreferrer"
+                  className="text-sm font-bold text-blue-600 flex items-center gap-1.5 bg-blue-50 px-3 py-1.5 rounded-full border border-blue-200 hover:bg-blue-100 transition-colors"
+                >
+                  <ExternalLink className="w-4 h-4" /> {isRtl ? 'عرض وتحميل الملف ↗' : 'View File ↗'}
+                </a>
+              ) : (
+                <span className="text-sm font-bold text-slate-400 flex items-center gap-1.5 bg-slate-100 px-3 py-1.5 rounded-full border border-slate-200">
+                  {isRtl ? 'لم يتم الرفع بعد' : 'Not uploaded yet'}
+                </span>
+              )}
+            </div>
           </div>
-        );
-    }
+        </div>
+      </div>
+    );
   };
 
   return (
