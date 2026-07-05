@@ -30,7 +30,7 @@ const AboutPage = () => {
         {/* Background Image */}
         <div 
           className="absolute inset-0 bg-cover bg-center"
-          style={{ backgroundImage: "url('/summit_networking.png')" }}
+          style={{ backgroundImage: "url('/summit_about_hero.png')" }}
         />
         {/* Elegant gradient overlay */}
         <div className="absolute inset-0 bg-gradient-to-t from-slate-900 via-slate-900/50 to-slate-900/80" />
