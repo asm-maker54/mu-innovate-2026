@@ -50,6 +50,20 @@ const UserDashboard = () => {
   const [uploadingImage, setUploadingImage] = useState(false);
   const [uploadingCv, setUploadingCv] = useState(false);
 
+  // Profile Image Editor States
+  const [editorImageSrc, setEditorImageSrc] = useState(null);
+  const [imageEditorOpen, setImageEditorOpen] = useState(false);
+  const [zoom, setZoom] = useState(1);
+  const [translateX, setTranslateX] = useState(0);
+  const [translateY, setTranslateY] = useState(0);
+  const [brightness, setBrightness] = useState(100);
+  const [contrast, setContrast] = useState(100);
+  const [isDragging, setIsDragging] = useState(false);
+  const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
+
+  // Lightbox Modal for profile image preview
+  const [imageLightboxOpen, setImageLightboxOpen] = useState(false);
+
   useEffect(() => {
     if (user) {
       setFormData({
@@ -127,22 +141,104 @@ const UserDashboard = () => {
     setUser(updatedUser);
   };
 
-  const handleImageFileChange = async (e) => {
+  const handleImageFileChange = (e) => {
     const file = e.target.files[0];
     if (!file) return;
 
+    const reader = new FileReader();
+    reader.onload = () => {
+      setEditorImageSrc(reader.result);
+      setZoom(1);
+      setTranslateX(0);
+      setTranslateY(0);
+      setBrightness(100);
+      setContrast(100);
+      setImageEditorOpen(true);
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const handleMouseDown = (e) => {
+    setIsDragging(true);
+    setDragStart({ x: e.clientX - translateX, y: e.clientY - translateY });
+  };
+
+  const handleMouseMove = (e) => {
+    if (!isDragging) return;
+    setTranslateX(e.clientX - dragStart.x);
+    setTranslateY(e.clientY - dragStart.y);
+  };
+
+  const handleMouseUp = () => {
+    setIsDragging(false);
+  };
+
+  const handleTouchStart = (e) => {
+    if (e.touches.length !== 1) return;
+    setIsDragging(true);
+    setDragStart({ x: e.touches[0].clientX - translateX, y: e.touches[0].clientY - translateY });
+  };
+
+  const handleTouchMove = (e) => {
+    if (!isDragging || e.touches.length !== 1) return;
+    setTranslateX(e.touches[0].clientX - dragStart.x);
+    setTranslateY(e.touches[0].clientY - dragStart.y);
+  };
+
+  const handleApplyImageEdit = async () => {
     setUploadingImage(true);
+    setImageEditorOpen(false);
+
     try {
+      const img = new Image();
+      img.src = editorImageSrc;
+      await new Promise((resolve, reject) => {
+        img.onload = resolve;
+        img.onerror = reject;
+      });
+
+      const canvas = document.createElement('canvas');
+      const size = 500; // Premium 500x500 avatar output
+      canvas.width = size;
+      canvas.height = size;
+      const ctx = canvas.getContext('2d');
+
+      // Clear background
+      ctx.clearRect(0, 0, size, size);
+
+      // Apply brightness & contrast filters
+      ctx.filter = `brightness(${brightness}%) contrast(${contrast}%)`;
+
+      // Draw the scaled and translated image
+      const drawWidth = size * zoom;
+      const drawHeight = size * zoom;
+      
+      const cx = size / 2;
+      const cy = size / 2;
+
+      // DX and DY translate based on user drag
+      // In preview, dragging moves relative to centered container, so:
+      const dx = cx - (drawWidth / 2) + translateX;
+      const dy = cy - (drawHeight / 2) + translateY;
+
+      ctx.drawImage(img, dx, dy, drawWidth, drawHeight);
+
+      // Export as Blob
+      const blob = await new Promise((resolve) => canvas.toBlob(resolve, 'image/jpeg', 0.95));
+      if (!blob) throw new Error("Failed to process image.");
+
+      const processedFile = new File([blob], "profile_avatar.jpg", { type: 'image/jpeg' });
+
       const { supabase, isSupabaseConfigured } = await import('../supabaseClient');
       let finalUrl = '';
       if (isSupabaseConfigured) {
-        const fileExt = file.name.split('.').pop();
+        const fileExt = 'jpg';
         const fileName = `${Date.now()}_${Math.random().toString(36).substring(7)}.${fileExt}`;
         const filePath = `avatars/${fileName}`;
 
         const { error: uploadError } = await supabase.storage
           .from('project-attachments')
-          .upload(filePath, file);
+          .upload(filePath, processedFile);
 
         if (uploadError) throw uploadError;
 
@@ -152,14 +248,13 @@ const UserDashboard = () => {
 
         finalUrl = publicUrlData.publicUrl;
       } else {
-        // Base64 fallback for offline preview
         finalUrl = await new Promise((resolve) => {
           const reader = new FileReader();
           reader.onloadend = () => resolve(reader.result);
-          reader.readAsDataURL(file);
+          reader.readAsDataURL(processedFile);
         });
       }
-      
+
       const updatedUser = {
         ...user,
         details: {
@@ -172,7 +267,7 @@ const UserDashboard = () => {
       setSaveSuccess(true);
       setTimeout(() => setSaveSuccess(false), 3000);
     } catch (err) {
-      alert("حدث خطأ أثناء رفع الصورة: " + err.message);
+      alert("حدث خطأ أثناء تعديل وحفظ الصورة: " + err.message);
     } finally {
       setUploadingImage(false);
     }
@@ -565,21 +660,23 @@ const UserDashboard = () => {
               </div>
 
               {/* Profile Photo Uploader Section */}
-              <div className="flex flex-col items-center justify-center py-4 bg-slate-50/50 rounded-3xl border border-slate-100 p-6">
-                <div className="relative group w-28 h-28 mb-4">
+              <div className="flex flex-col items-center justify-center py-6 bg-slate-50/50 rounded-3xl border border-slate-100 p-6">
+                <div className="relative group w-44 h-44 mb-4 cursor-pointer">
                   {formData.speakerImage ? (
                     <img 
                       src={formData.speakerImage} 
                       alt={formData.full_name} 
-                      className="w-full h-full rounded-full object-cover shadow-md border-4 border-white group-hover:opacity-80 transition-opacity" 
+                      onClick={() => setImageLightboxOpen(true)}
+                      className="w-full h-full rounded-full object-cover shadow-lg border-4 border-white group-hover:opacity-90 transition-opacity cursor-zoom-in" 
+                      title={isRtl ? 'انقر لتكبير الصورة' : 'Click to enlarge'}
                     />
                   ) : (
-                    <div className="w-full h-full rounded-full bg-blue-100 text-blue-600 flex items-center justify-center font-black text-3xl shadow-md border-4 border-white">
+                    <div className="w-full h-full rounded-full bg-blue-100 text-blue-600 flex items-center justify-center font-black text-4xl shadow-lg border-4 border-white">
                       {formData.full_name?.charAt(0) || 'U'}
                     </div>
                   )}
-                  <label className="absolute inset-0 flex items-center justify-center bg-black/40 text-white rounded-full opacity-0 group-hover:opacity-100 cursor-pointer transition-opacity">
-                    <Camera className="w-6 h-6" />
+                  <label className="absolute bottom-2 right-2 bg-blue-600 hover:bg-blue-700 text-white p-2.5 rounded-full shadow-lg cursor-pointer transition-colors border border-white">
+                    <Camera className="w-4 h-4" />
                     <input 
                       type="file" 
                       accept="image/*" 
@@ -860,6 +957,146 @@ const UserDashboard = () => {
 
         </div>
       </div>
+
+      {/* Image Editor Crop/Brightness Modal */}
+      {imageEditorOpen && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4 overflow-y-auto">
+          <div className="bg-white rounded-3xl max-w-lg w-full p-6 shadow-2xl border border-slate-100 space-y-6">
+            <div className="flex justify-between items-center pb-3 border-b border-slate-100">
+              <h3 className="text-lg font-black text-slate-800">{isRtl ? 'تعديل الصورة الشخصية' : 'Edit Profile Image'}</h3>
+              <button 
+                onClick={() => setImageEditorOpen(false)}
+                className="p-1.5 hover:bg-slate-100 rounded-full text-slate-400 hover:text-slate-600 transition-colors"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            {/* Editor Container with Circular Mask */}
+            <div className="flex flex-col items-center justify-center">
+              <p className="text-xs font-semibold text-slate-400 mb-3">{isRtl ? 'اسحب الصورة لتعديل الموضع داخل الدائرة' : 'Drag image to reposition inside the circle'}</p>
+              
+              {/* Circular Crop Mask */}
+              <div 
+                className="relative w-64 h-64 rounded-full overflow-hidden border-4 border-blue-500/30 bg-slate-100 cursor-move select-none"
+                onMouseDown={handleMouseDown}
+                onMouseMove={handleMouseMove}
+                onMouseUp={handleMouseUp}
+                onMouseLeave={handleMouseUp}
+                onTouchStart={handleTouchStart}
+                onTouchMove={handleTouchMove}
+                onTouchEnd={handleMouseUp}
+              >
+                <img 
+                  src={editorImageSrc} 
+                  alt="Crop preview" 
+                  draggable="false"
+                  className="absolute max-w-none origin-center pointer-events-none"
+                  style={{
+                    transform: `translate(-50%, -50%) translate(${translateX}px, ${translateY}px) scale(${zoom})`,
+                    top: '50%',
+                    left: '50%',
+                    filter: `brightness(${brightness}%) contrast(${contrast}%)`,
+                    width: '100%',
+                    height: '100%',
+                    objectFit: 'cover'
+                  }}
+                />
+              </div>
+            </div>
+
+            {/* Sliders Controls */}
+            <div className="space-y-4 pt-4 border-t border-slate-100">
+              {/* Zoom Slider */}
+              <div>
+                <div className="flex justify-between text-xs font-bold text-slate-600 mb-1.5">
+                  <span>{isRtl ? 'تكبير وتصغير (Zoom)' : 'Zoom'}</span>
+                  <span>{Math.round(zoom * 100)}%</span>
+                </div>
+                <input 
+                  type="range" 
+                  min="1" 
+                  max="3" 
+                  step="0.1" 
+                  value={zoom} 
+                  onChange={(e) => setZoom(parseFloat(e.target.value))}
+                  className="w-full accent-blue-600 h-1.5 bg-slate-100 rounded-lg appearance-none cursor-pointer"
+                />
+              </div>
+
+              {/* Brightness Slider */}
+              <div>
+                <div className="flex justify-between text-xs font-bold text-slate-600 mb-1.5">
+                  <span>{isRtl ? 'السطوع (Brightness)' : 'Brightness'}</span>
+                  <span>{brightness}%</span>
+                </div>
+                <input 
+                  type="range" 
+                  min="50" 
+                  max="150" 
+                  value={brightness} 
+                  onChange={(e) => setBrightness(parseInt(e.target.value))}
+                  className="w-full accent-blue-600 h-1.5 bg-slate-100 rounded-lg appearance-none cursor-pointer"
+                />
+              </div>
+
+              {/* Contrast Slider */}
+              <div>
+                <div className="flex justify-between text-xs font-bold text-slate-600 mb-1.5">
+                  <span>{isRtl ? 'التباين (Contrast)' : 'Contrast'}</span>
+                  <span>{contrast}%</span>
+                </div>
+                <input 
+                  type="range" 
+                  min="50" 
+                  max="150" 
+                  value={contrast} 
+                  onChange={(e) => setContrast(parseInt(e.target.value))}
+                  className="w-full accent-blue-600 h-1.5 bg-slate-100 rounded-lg appearance-none cursor-pointer"
+                />
+              </div>
+            </div>
+
+            {/* Actions */}
+            <div className="flex gap-3 justify-end pt-3">
+              <button 
+                onClick={() => setImageEditorOpen(false)}
+                className="px-5 py-2.5 rounded-xl border border-slate-200 text-slate-600 font-bold text-xs hover:bg-slate-50 transition-colors"
+              >
+                {isRtl ? 'إلغاء' : 'Cancel'}
+              </button>
+              <button 
+                onClick={handleApplyImageEdit}
+                className="bg-blue-600 hover:bg-blue-700 text-white font-bold px-6 py-2.5 rounded-xl text-xs shadow-md transition-colors"
+              >
+                {isRtl ? 'تطبيق وحفظ' : 'Apply & Save'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* High-Resolution Profile Image Lightbox Modal */}
+      {imageLightboxOpen && formData.speakerImage && (
+        <div 
+          onClick={() => setImageLightboxOpen(false)}
+          className="fixed inset-0 z-[110] flex items-center justify-center bg-black/80 backdrop-blur-sm p-4 cursor-zoom-out animate-fade-in"
+        >
+          <div className="relative max-w-3xl max-h-[85vh] p-2 bg-white rounded-3xl shadow-2xl flex items-center justify-center">
+            <img 
+              src={formData.speakerImage} 
+              alt={formData.full_name} 
+              className="rounded-2xl max-w-full max-h-[80vh] object-contain border border-slate-100" 
+            />
+            <button 
+              onClick={() => setImageLightboxOpen(false)}
+              className="absolute -top-4 -right-4 bg-white text-slate-800 p-2 rounded-full shadow-lg border border-slate-100 hover:bg-slate-50 transition-colors cursor-pointer"
+            >
+              <X className="w-5 h-5" />
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
