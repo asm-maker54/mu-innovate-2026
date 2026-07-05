@@ -209,15 +209,25 @@ const UserDashboard = () => {
       // Apply brightness & contrast filters
       ctx.filter = `brightness(${brightness}%) contrast(${contrast}%)`;
 
-      // Draw the scaled and translated image
-      const drawWidth = size * zoom;
-      const drawHeight = size * zoom;
+      // Draw the image preserving its aspect ratio (cover-fit into the square)
+      const imgAspect = img.naturalWidth / img.naturalHeight;
+      let baseWidth, baseHeight;
+      if (imgAspect >= 1) {
+        // Landscape or square: height fills the canvas, width scales proportionally
+        baseHeight = size;
+        baseWidth = size * imgAspect;
+      } else {
+        // Portrait: width fills the canvas, height scales proportionally
+        baseWidth = size;
+        baseHeight = size / imgAspect;
+      }
+      const drawWidth = baseWidth * zoom;
+      const drawHeight = baseHeight * zoom;
       
       const cx = size / 2;
       const cy = size / 2;
 
       // DX and DY translate based on user drag
-      // In preview, dragging moves relative to centered container, so:
       const dx = cx - (drawWidth / 2) + translateX;
       const dy = cy - (drawHeight / 2) + translateY;
 
