@@ -3,8 +3,6 @@ import { useNavigate, Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { ArrowRight, Search, Globe, Mail, Sparkles, MessageSquare, Cpu, Award, BookOpen } from 'lucide-react';
 import { supabase, isSupabaseConfigured } from '../supabaseClient';
-import Navbar from '../components/Navbar';
-import Footer from '../components/Footer';
 
 const SpeakersPage = () => {
   const { i18n } = useTranslation();
@@ -211,7 +209,7 @@ const SpeakersPage = () => {
       <div className="absolute top-20 right-0 w-[500px] h-[500px] rounded-full bg-blue-500/10 blur-[120px] pointer-events-none" />
       <div className="absolute top-1/2 left-0 w-[450px] h-[450px] rounded-full bg-purple-500/10 blur-[130px] pointer-events-none" />
 
-      <Navbar />
+
 
       {/* Hero Banner Section */}
       <div className="relative pt-32 pb-16 bg-[#0a0f1c]/80 border-b border-white/5">
@@ -293,7 +291,7 @@ const SpeakersPage = () => {
                   <img
                     src={speaker.image}
                     alt={speaker.name}
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 origin-center"
+                    className="w-full h-full object-cover object-center transition-transform duration-500 origin-center"
                   />
                   <div className="absolute top-4 left-4 z-20">
                     <span className="px-3 py-1 text-[10px] font-black tracking-wider uppercase rounded-full bg-blue-600/90 text-white border border-blue-400/20 shadow-md">
@@ -393,7 +391,7 @@ const SpeakersPage = () => {
         )}
       </div>
 
-      <Footer />
+
     </div>
   );
 };

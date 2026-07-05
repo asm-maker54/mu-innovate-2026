@@ -209,8 +209,8 @@ const Speakers = () => {
                   <img
                     src={speaker.image}
                     alt={speaker.name}
-                    className={`w-full h-full object-cover object-top transition-transform duration-1000 ${
-                      isActive ? 'scale-105' : 'scale-100 grayscale-[30%]'
+                    className={`w-full h-full object-cover object-center transition-transform duration-1000 ${
+                      isActive ? 'scale-100' : 'scale-100 grayscale-[30%]'
                     }`}
                   />
                 </div>
