@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { 
   User, BookOpen, GraduationCap, Mic, Settings, LayoutDashboard, 
   Calendar, Clock, FileText, CheckCircle, AlertCircle, LogOut,
-  Upload, Camera, FileCheck
+  Upload, Camera, FileCheck, X
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
