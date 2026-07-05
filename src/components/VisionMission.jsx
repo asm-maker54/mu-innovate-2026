@@ -1,6 +1,7 @@
 import React from 'react';
 import { Eye, Target, Sparkles, ChevronLeft } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
+import { Link } from 'react-router-dom';
 
 const VisionMission = () => {
   const { i18n } = useTranslation();
@@ -93,10 +94,10 @@ const VisionMission = () => {
 
             {/* Action Button */}
             <div>
-              <button className="bg-[#FFC107] hover:bg-[#ffb300] text-[#111827] px-8 py-3.5 rounded-full font-black text-lg transition-all duration-300 shadow-md hover:shadow-xl hover:-translate-y-1 flex items-center gap-2">
-                اقرأ المزيد
-                <ChevronLeft className="w-5 h-5" />
-              </button>
+              <Link to="/about" className="bg-[#FFC107] hover:bg-[#ffb300] text-[#111827] px-8 py-3.5 rounded-full font-black text-lg transition-all duration-300 shadow-md hover:shadow-xl hover:-translate-y-1 inline-flex items-center gap-2">
+                {isRtl ? 'اقرأ المزيد' : 'Read More'}
+                <ChevronLeft className={`w-5 h-5 ${isRtl ? '' : 'rotate-180'}`} />
+              </Link>
             </div>
 
           </div>
