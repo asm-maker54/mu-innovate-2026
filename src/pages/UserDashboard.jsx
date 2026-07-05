@@ -15,6 +15,143 @@ const UserDashboard = () => {
   const [activeRole, setActiveRole] = useState('user');
   const [activeTab, setActiveTab] = useState('overview');
 
+  const [formData, setFormData] = useState({
+    full_name: '',
+    phone: '',
+    organization: '',
+    speechTopic: '',
+    speakerExpertise: '',
+    speakerBio: '',
+    speakerLinkedin: '',
+    speakerFacebook: '',
+    speakerX: '',
+    speakerImage: '',
+    startupName: '',
+    industry: '',
+    stage: '',
+    elevatorPitch: '',
+    researchTitle: '',
+    researchIdea: '',
+    trlLevel: '',
+    mentorExpertise: '',
+    yearsExperience: '',
+    companyName: '',
+    partnerType: '',
+    partnerMessage: '',
+    volunteerCommittee: '',
+    volunteerReason: ''
+  });
+  const [isSaving, setIsSaving] = useState(false);
+  const [saveSuccess, setSaveSuccess] = useState(false);
+
+  useEffect(() => {
+    if (user) {
+      setFormData({
+        full_name: user.full_name || '',
+        phone: user.phone || '',
+        organization: user.organization || '',
+        speechTopic: user.details?.speechTopic || '',
+        speakerExpertise: user.details?.speakerExpertise || '',
+        speakerBio: user.details?.speakerBio || '',
+        speakerLinkedin: user.details?.speakerLinkedin || '',
+        speakerFacebook: user.details?.speakerFacebook || '',
+        speakerX: user.details?.speakerX || '',
+        speakerImage: user.details?.speakerImage || '',
+        startupName: user.details?.startupName || '',
+        industry: user.details?.industry || '',
+        stage: user.details?.stage || '',
+        elevatorPitch: user.details?.elevatorPitch || '',
+        researchTitle: user.details?.researchTitle || '',
+        researchIdea: user.details?.researchIdea || '',
+        trlLevel: user.details?.trlLevel || '',
+        mentorExpertise: user.details?.mentorExpertise || '',
+        yearsExperience: user.details?.yearsExperience || '',
+        companyName: user.details?.companyName || '',
+        partnerType: user.details?.partnerType || '',
+        partnerMessage: user.details?.partnerMessage || '',
+        volunteerCommittee: user.details?.volunteerCommittee || '',
+        volunteerReason: user.details?.volunteerReason || ''
+      });
+    }
+  }, [user]);
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({ ...prev, [name]: value }));
+  };
+
+  const handleProfileSave = async (e) => {
+    e.preventDefault();
+    setIsSaving(true);
+    setSaveSuccess(false);
+
+    try {
+      const updatedUser = {
+        ...user,
+        full_name: formData.full_name,
+        phone: formData.phone,
+        organization: formData.organization,
+        details: {
+          ...user.details,
+          speechTopic: formData.speechTopic,
+          speakerExpertise: formData.speakerExpertise,
+          speakerBio: formData.speakerBio,
+          speakerLinkedin: formData.speakerLinkedin,
+          speakerFacebook: formData.speakerFacebook,
+          speakerX: formData.speakerX,
+          speakerImage: formData.speakerImage,
+          startupName: formData.startupName,
+          industry: formData.industry,
+          stage: formData.stage,
+          elevatorPitch: formData.elevatorPitch,
+          researchTitle: formData.researchTitle,
+          researchIdea: formData.researchIdea,
+          trlLevel: formData.trlLevel,
+          mentorExpertise: formData.mentorExpertise,
+          yearsExperience: formData.yearsExperience,
+          companyName: formData.companyName,
+          partnerType: formData.partnerType,
+          partnerMessage: formData.partnerMessage,
+          volunteerCommittee: formData.volunteerCommittee,
+          volunteerReason: formData.volunteerReason
+        }
+      };
+
+      const { supabase, isSupabaseConfigured } = await import('../supabaseClient');
+      if (isSupabaseConfigured) {
+        const { error } = await supabase
+          .from('registrations')
+          .update({
+            full_name: updatedUser.full_name,
+            phone: updatedUser.phone,
+            organization: updatedUser.organization,
+            details: updatedUser.details
+          })
+          .eq('id', user.id);
+        if (error) throw error;
+      } else {
+        const localRegs = JSON.parse(localStorage.getItem('local_registrations') || '[]');
+        const updatedRegs = localRegs.map(r => r.id === user.id ? {
+          ...r,
+          full_name: updatedUser.full_name,
+          phone: updatedUser.phone,
+          organization: updatedUser.organization,
+          details: updatedUser.details
+        } : r);
+        localStorage.setItem('local_registrations', JSON.stringify(updatedRegs));
+      }
+
+      localStorage.setItem('current_user', JSON.stringify(updatedUser));
+      setUser(updatedUser);
+      setSaveSuccess(true);
+      setTimeout(() => setSaveSuccess(false), 3000);
+    } catch (err) {
+      alert("حدث خطأ أثناء حفظ البيانات: " + err.message);
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
   useEffect(() => {
     window.scrollTo(0, 0);
     const session = localStorage.getItem('current_user');
@@ -290,10 +427,239 @@ const UserDashboard = () => {
 
           {/* Tab Content */}
           {activeTab === 'overview' ? renderOverviewTab() : (
-            <div className="bg-white p-8 rounded-3xl shadow-sm border border-slate-100">
-              <h3 className="text-xl font-black text-slate-800 mb-4">{isRtl ? 'إعدادات الحساب' : 'Account Settings'}</h3>
-              <p className="text-slate-500 font-medium">{isRtl ? 'قريباً...' : 'Coming soon...'}</p>
-            </div>
+            <form onSubmit={handleProfileSave} className="bg-white p-8 rounded-3xl shadow-sm border border-slate-100 space-y-6">
+              <div className="flex items-center justify-between pb-4 border-b border-slate-100">
+                <h3 className="text-xl font-black text-slate-800">{isRtl ? 'تعديل البيانات الشخصية' : 'Edit Personal Profile'}</h3>
+                {saveSuccess && (
+                  <span className="text-emerald-600 bg-emerald-50 px-4 py-1.5 rounded-full text-xs font-bold border border-emerald-100 animate-pulse">
+                    {isRtl ? '✓ تم حفظ التغييرات بنجاح!' : '✓ Changes saved successfully!'}
+                  </span>
+                )}
+              </div>
+
+              {/* General Info */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                  <label className="block text-sm font-bold text-slate-700 mb-2">{isRtl ? 'الاسم الكامل *' : 'Full Name *'}</label>
+                  <input
+                    type="text"
+                    name="full_name"
+                    value={formData.full_name}
+                    onChange={handleChange}
+                    required
+                    className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500 font-bold"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-bold text-slate-700 mb-2">{isRtl ? 'رقم الهاتف *' : 'Phone Number *'}</label>
+                  <input
+                    type="text"
+                    name="phone"
+                    value={formData.phone}
+                    onChange={handleChange}
+                    required
+                    className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500 font-bold"
+                  />
+                </div>
+                <div className="md:col-span-2">
+                  <label className="block text-sm font-bold text-slate-700 mb-2">{isRtl ? 'الجهة / المؤسسة *' : 'Organization *'}</label>
+                  <input
+                    type="text"
+                    name="organization"
+                    value={formData.organization}
+                    onChange={handleChange}
+                    required
+                    className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500 font-bold"
+                  />
+                </div>
+              </div>
+
+              {/* Role-Specific Info */}
+              {activeRole === 'speaker' && (
+                <div className="pt-6 border-t border-slate-100 space-y-6">
+                  <h4 className="font-black text-slate-800 text-lg">{isRtl ? 'بيانات التحدث والمشاركة' : 'Speaking & Topic Details'}</h4>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="md:col-span-2">
+                      <label className="block text-sm font-bold text-slate-700 mb-2">{isRtl ? 'موضوع التحدث المقترح' : 'Proposed Speech Topic'}</label>
+                      <input
+                        type="text"
+                        name="speechTopic"
+                        value={formData.speechTopic}
+                        onChange={handleChange}
+                        className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500 font-bold"
+                      />
+                    </div>
+                    <div className="md:col-span-2">
+                      <label className="block text-sm font-bold text-slate-700 mb-2">{isRtl ? 'رابط الصورة الشخصية' : 'Profile Image URL'}</label>
+                      <input
+                        type="url"
+                        name="speakerImage"
+                        value={formData.speakerImage}
+                        onChange={handleChange}
+                        placeholder="https://example.com/avatar.jpg"
+                        className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500 font-bold"
+                        dir="ltr"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-bold text-slate-700 mb-2">{isRtl ? 'مجال التخصص' : 'Expertise'}</label>
+                      <select
+                        name="speakerExpertise"
+                        value={formData.speakerExpertise}
+                        onChange={handleChange}
+                        className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500 font-bold"
+                      >
+                        <option value="ريادة الأعمال">{isRtl ? 'ريادة الأعمال' : 'Entrepreneurship'}</option>
+                        <option value="التكنولوجيا والذكاء الاصطناعي">{isRtl ? 'التكنولوجيا والذكاء الاصطناعي' : 'Tech & AI'}</option>
+                        <option value="الاستثمار والتمويل">{isRtl ? 'الاستثمار والتمويل' : 'Investment'}</option>
+                        <option value="التسويق والمبيعات">{isRtl ? 'التسويق والمبيعات' : 'Marketing'}</option>
+                        <option value="أخرى">{isRtl ? 'أخرى' : 'Other'}</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-bold text-slate-700 mb-2">{isRtl ? 'رابط LinkedIn' : 'LinkedIn Link'}</label>
+                      <input
+                        type="url"
+                        name="speakerLinkedin"
+                        value={formData.speakerLinkedin}
+                        onChange={handleChange}
+                        className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500 font-bold"
+                        dir="ltr"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-bold text-slate-700 mb-2">{isRtl ? 'رابط Facebook' : 'Facebook Link'}</label>
+                      <input
+                        type="url"
+                        name="speakerFacebook"
+                        value={formData.speakerFacebook}
+                        onChange={handleChange}
+                        className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500 font-bold"
+                        dir="ltr"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-bold text-slate-700 mb-2">{isRtl ? 'رابط X (تويتر)' : 'X (Twitter) Link'}</label>
+                      <input
+                        type="url"
+                        name="speakerX"
+                        value={formData.speakerX}
+                        onChange={handleChange}
+                        className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500 font-bold"
+                        dir="ltr"
+                      />
+                    </div>
+                    <div className="md:col-span-2">
+                      <label className="block text-sm font-bold text-slate-700 mb-2">{isRtl ? 'النبذة التعريفية (Bio)' : 'Speaker Bio'}</label>
+                      <textarea
+                        name="speakerBio"
+                        value={formData.speakerBio}
+                        onChange={handleChange}
+                        rows={4}
+                        className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500 font-bold"
+                      />
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {activeRole === 'startup' && (
+                <div className="pt-6 border-t border-slate-100 space-y-6">
+                  <h4 className="font-black text-slate-800 text-lg">{isRtl ? 'تفاصيل الشركة الناشئة' : 'Startup Details'}</h4>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                      <label className="block text-sm font-bold text-slate-700 mb-2">{isRtl ? 'اسم الشركة الناشئة' : 'Startup Name'}</label>
+                      <input
+                        type="text"
+                        name="startupName"
+                        value={formData.startupName}
+                        onChange={handleChange}
+                        className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500 font-bold"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-bold text-slate-700 mb-2">{isRtl ? 'مجال القطاع' : 'Industry'}</label>
+                      <input
+                        type="text"
+                        name="industry"
+                        value={formData.industry}
+                        onChange={handleChange}
+                        className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500 font-bold"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-bold text-slate-700 mb-2">{isRtl ? 'مرحلة المشروع' : 'Stage'}</label>
+                      <input
+                        type="text"
+                        name="stage"
+                        value={formData.stage}
+                        onChange={handleChange}
+                        className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500 font-bold"
+                      />
+                    </div>
+                    <div className="md:col-span-2">
+                      <label className="block text-sm font-bold text-slate-700 mb-2">{isRtl ? 'الوصف المختصر (Elevator Pitch)' : 'Elevator Pitch'}</label>
+                      <textarea
+                        name="elevatorPitch"
+                        value={formData.elevatorPitch}
+                        onChange={handleChange}
+                        rows={3}
+                        className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500 font-bold"
+                      />
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {activeRole === 'researcher' && (
+                <div className="pt-6 border-t border-slate-100 space-y-6">
+                  <h4 className="font-black text-slate-800 text-lg">{isRtl ? 'بيانات الابتكار والبحث العلمي' : 'Research Details'}</h4>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="md:col-span-2">
+                      <label className="block text-sm font-bold text-slate-700 mb-2">{isRtl ? 'عنوان البحث التطبيقي' : 'Research Title'}</label>
+                      <input
+                        type="text"
+                        name="researchTitle"
+                        value={formData.researchTitle}
+                        onChange={handleChange}
+                        className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500 font-bold"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-bold text-slate-700 mb-2">{isRtl ? 'مستوى الجاهزية TRL' : 'TRL Level'}</label>
+                      <input
+                        type="text"
+                        name="trlLevel"
+                        value={formData.trlLevel}
+                        onChange={handleChange}
+                        className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500 font-bold"
+                      />
+                    </div>
+                    <div className="md:col-span-2">
+                      <label className="block text-sm font-bold text-slate-700 mb-2">{isRtl ? 'ملخص الفكرة البحثية' : 'Idea Summary'}</label>
+                      <textarea
+                        name="researchIdea"
+                        value={formData.researchIdea}
+                        onChange={handleChange}
+                        rows={3}
+                        className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500 font-bold"
+                      />
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Submit Buttons */}
+              <div className="pt-6 border-t border-slate-100 flex justify-end">
+                <button
+                  type="submit"
+                  disabled={isSaving}
+                  className="bg-blue-600 hover:bg-blue-700 text-white font-bold px-8 py-3 rounded-full shadow-lg shadow-blue-500/25 transition-all disabled:opacity-50 flex items-center gap-2"
+                >
+                  {isSaving ? (isRtl ? 'جاري الحفظ...' : 'Saving...') : (isRtl ? 'حفظ التعديلات' : 'Save Changes')}
+                </button>
+              </div>
+            </form>
           )}
 
         </div>

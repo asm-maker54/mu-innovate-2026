@@ -9,6 +9,7 @@ const Navbar = () => {
   
   const [isScrolled, setIsScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [user, setUser] = useState(null);
 
   // Handle scroll effect for navbar background
   useEffect(() => {
@@ -17,6 +18,31 @@ const Navbar = () => {
     };
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  useEffect(() => {
+    const checkUser = () => {
+      const stored = localStorage.getItem('current_user');
+      if (stored) {
+        try {
+          setUser(JSON.parse(stored));
+        } catch (e) {
+          console.error(e);
+        }
+      } else {
+        setUser(null);
+      }
+    };
+    checkUser();
+    
+    // Listen for storage events and periodic interval to stay in sync
+    window.addEventListener('storage', checkUser);
+    const interval = setInterval(checkUser, 1500);
+    
+    return () => {
+      window.removeEventListener('storage', checkUser);
+      clearInterval(interval);
+    };
   }, []);
 
   const toggleLanguage = () => {
@@ -156,12 +182,32 @@ const Navbar = () => {
 
         {/* Left Actions */}
         <div className="hidden lg:flex items-center gap-3 pl-1 h-full">
-          <Link 
-            to="/auth"
-            className="flex items-center gap-1.5 px-4 py-1.5 rounded-full font-bold text-[10px] xl:text-[12px] transition-all bg-[#ea580c] text-white hover:bg-[#c2410c] shadow-md whitespace-nowrap hidden sm:flex"
-          >
-            <span>{isRtl ? 'تسجيل الدخول' : 'Login'}</span>
-          </Link>
+          {user ? (
+            <Link 
+              to={user.email === 'admin@knowledge.com' ? '/admin' : '/dashboard'}
+              className="flex items-center gap-2 px-3 py-1.5 rounded-full font-bold text-[10px] xl:text-[12px] transition-all bg-[#26462C]/10 border border-[#26462C]/20 text-[#26462C] hover:bg-[#26462C] hover:text-white whitespace-nowrap"
+            >
+              {user.details?.speakerImage ? (
+                <img 
+                  src={user.details.speakerImage} 
+                  alt={user.full_name} 
+                  className="w-5 h-5 rounded-full object-cover border border-emerald-500 shrink-0" 
+                />
+              ) : (
+                <div className="w-5 h-5 rounded-full bg-[#26462C] text-white flex items-center justify-center font-bold text-[8px] shrink-0">
+                  {user.full_name?.charAt(0) || 'U'}
+                </div>
+              )}
+              <span className="max-w-[70px] truncate">{user.full_name?.split(' ')[0]}</span>
+            </Link>
+          ) : (
+            <Link 
+              to="/auth"
+              className="flex items-center gap-1.5 px-4 py-1.5 rounded-full font-bold text-[10px] xl:text-[12px] transition-all bg-[#ea580c] text-white hover:bg-[#c2410c] shadow-md whitespace-nowrap hidden sm:flex"
+            >
+              <span>{isRtl ? 'تسجيل الدخول' : 'Login'}</span>
+            </Link>
+          )}
 
           <button 
             onClick={toggleLanguage}
@@ -227,13 +273,34 @@ const Navbar = () => {
               <Globe className="w-5 h-5" />
               {isRtl ? 'English' : 'عربي'}
             </button>
-            <Link 
-              to="/auth" 
-              onClick={() => setMobileMenuOpen(false)}
-              className="flex items-center justify-center gap-2 w-full py-4 bg-[#ea580c] text-white rounded-xl font-bold text-lg hover:bg-[#c2410c] transition-colors"
-            >
-              {isRtl ? 'تسجيل الدخول' : 'Login'}
-            </Link>
+            {user ? (
+              <Link 
+                to={user.email === 'admin@knowledge.com' ? '/admin' : '/dashboard'}
+                onClick={() => setMobileMenuOpen(false)}
+                className="flex items-center justify-center gap-3 w-full py-4 bg-[#26462C]/10 text-[#26462C] border border-[#26462C]/20 rounded-xl font-bold text-lg hover:bg-[#26462C] hover:text-white transition-colors"
+              >
+                {user.details?.speakerImage ? (
+                  <img 
+                    src={user.details.speakerImage} 
+                    alt={user.full_name} 
+                    className="w-8 h-8 rounded-full object-cover border border-emerald-500 shrink-0" 
+                  />
+                ) : (
+                  <div className="w-8 h-8 rounded-full bg-[#26462C] text-white flex items-center justify-center font-bold text-sm shrink-0">
+                    {user.full_name?.charAt(0) || 'U'}
+                  </div>
+                )}
+                <span>{user.full_name}</span>
+              </Link>
+            ) : (
+              <Link 
+                to="/auth" 
+                onClick={() => setMobileMenuOpen(false)}
+                className="flex items-center justify-center gap-2 w-full py-4 bg-[#ea580c] text-white rounded-xl font-bold text-lg hover:bg-[#c2410c] transition-colors"
+              >
+                {isRtl ? 'تسجيل الدخول' : 'Login'}
+              </Link>
+            )}
           </div>
         </div>
       </div>
