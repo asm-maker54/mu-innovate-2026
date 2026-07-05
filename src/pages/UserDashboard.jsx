@@ -1156,8 +1156,8 @@ const UserDashboard = () => {
             {/* Form Title & Success Alert */}
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-slate-100">
               <div>
-                <h3 className="text-2xl font-black text-slate-800">{isRtl ? 'تعديل بيانات الملف الشخصي' : 'Edit Profile Settings'}</h3>
-                <p className="text-slate-400 text-xs mt-1 font-bold">{isRtl ? 'قم بتحديث صورتك، وسيرتك الذاتية، وبياناتك الشخصية' : 'Update your photo, resume, and info'}</p>
+                <h3 className="text-2xl font-black text-slate-800">{isRtl ? 'إعدادات الحساب' : 'Account settings'}</h3>
+                <p className="text-slate-400 text-xs mt-1 font-bold">{isRtl ? 'قم بإدارة إعدادات حسابك والملف الشخصي والأمان' : 'Manage your account settings, profile and security'}</p>
               </div>
               {saveSuccess && (
                 <span className="text-emerald-600 bg-emerald-50 px-4 py-2 rounded-full text-xs font-black border border-emerald-100 flex items-center gap-1.5 animate-bounce">
@@ -1166,307 +1166,524 @@ const UserDashboard = () => {
               )}
             </div>
 
-            {/* Profile Photo Uploader Section */}
-            <div className="flex flex-col items-center justify-center py-6 bg-slate-50/50 rounded-3xl border border-slate-100 p-6">
-              <div className="relative group w-44 h-44 mb-4 cursor-pointer">
-                {formData.speakerImage ? (
-                  <img 
-                    src={formData.speakerImage} 
-                    alt={formData.full_name} 
-                    onClick={() => setImageLightboxOpen(true)}
-                    className="w-full h-full rounded-full object-cover shadow-lg border-4 border-white group-hover:opacity-90 transition-opacity cursor-zoom-in" 
-                    title={isRtl ? 'انقر لتكبير الصورة' : 'Click to enlarge'}
-                  />
-                ) : (
-                  <div className="w-full h-full rounded-full bg-blue-100 text-blue-600 flex items-center justify-center font-black text-4xl shadow-lg border-4 border-white">
-                    {formData.full_name?.charAt(0) || 'U'}
+            {/* Redesigned Two-Column Settings Container */}
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 pt-4">
+              
+              {/* Left Sub-Tab Navigation (Occupies 3 columns out of 12) */}
+              <div className="lg:col-span-3 flex flex-col gap-2">
+                {[
+                  { id: 'profile', label: isRtl ? 'إعدادات الملف الشخصي' : 'Profile Settings', icon: User },
+                  { id: 'password', label: isRtl ? 'كلمة المرور' : 'Password', icon: Lock },
+                  { id: 'notifications', label: isRtl ? 'الإشعارات' : 'Notifications', icon: Bell },
+                  { id: 'verification', label: isRtl ? 'التوثيق والتحقق' : 'Verification', icon: Shield }
+                ].map(tab => {
+                  const IconComponent = tab.icon;
+                  return (
+                    <button
+                      key={tab.id}
+                      type="button"
+                      onClick={() => setSettingsSubTab(tab.id)}
+                      className={`flex items-center gap-3 px-4 py-3.5 rounded-xl font-bold text-xs transition-all text-right ${
+                        settingsSubTab === tab.id
+                          ? 'bg-blue-50 text-blue-600 border-r-4 border-blue-600'
+                          : 'text-slate-600 hover:bg-slate-50'
+                      }`}
+                    >
+                      <IconComponent className="w-4 h-4 shrink-0" />
+                      <span>{tab.label}</span>
+                    </button>
+                  );
+                })}
+              </div>
+
+              {/* Right Panel Container (Occupies 9 columns out of 12) */}
+              <div className="lg:col-span-9 space-y-6">
+                
+                {/* 1. PROFILE SETTINGS PANEL */}
+                {settingsSubTab === 'profile' && (
+                  <div className="space-y-6 animate-fade-in">
+                    
+                    {/* Avatar Uploader Section */}
+                    <div className="flex flex-col sm:flex-row items-center gap-6 p-6 bg-slate-50/50 rounded-3xl border border-slate-100">
+                      <div className="relative w-28 h-28 cursor-pointer select-none">
+                        {formData.speakerImage ? (
+                          <img 
+                            src={formData.speakerImage} 
+                            alt={formData.full_name} 
+                            onClick={() => setImageLightboxOpen(true)}
+                            className="w-full h-full rounded-full object-cover shadow-lg border-4 border-white cursor-zoom-in" 
+                          />
+                        ) : (
+                          <div className="w-full h-full rounded-full bg-blue-100 text-blue-600 flex items-center justify-center font-black text-3xl shadow-lg border-4 border-white">
+                            {formData.full_name?.charAt(0) || 'U'}
+                          </div>
+                        )}
+                        <label className="absolute bottom-0 right-0 bg-blue-600 hover:bg-blue-700 text-white p-2 rounded-full shadow-md cursor-pointer transition-colors border-2 border-white">
+                          <Camera className="w-3.5 h-3.5" />
+                          <input 
+                            type="file" 
+                            accept="image/*" 
+                            onChange={handleImageFileChange} 
+                            className="hidden" 
+                          />
+                        </label>
+                      </div>
+
+                      <div className="flex flex-col sm:flex-row gap-3">
+                        <label className="bg-blue-600 hover:bg-blue-700 text-white font-black px-5 py-2.5 rounded-xl shadow-md cursor-pointer inline-flex items-center justify-center gap-2 text-xs transition-colors">
+                          <Upload className="w-3.5 h-3.5" />
+                          <span>{uploadingImage ? (isRtl ? 'جاري الرفع...' : 'Uploading...') : (isRtl ? 'تحميل صورة جديدة' : 'Upload New')}</span>
+                          <input 
+                            type="file" 
+                            accept="image/*" 
+                            onChange={handleImageFileChange} 
+                            className="hidden" 
+                          />
+                        </label>
+                        <button
+                          type="button"
+                          onClick={() => setFormData(prev => ({ ...prev, speakerImage: '' }))}
+                          className="bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold px-5 py-2.5 rounded-xl border border-slate-200 text-xs transition-colors"
+                        >
+                          {isRtl ? 'حذف الصورة' : 'Delete avatar'}
+                        </button>
+                      </div>
+                    </div>
+
+                    {/* Profile Fields Grid */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      <div>
+                        <label className="block text-xs font-bold text-slate-500 mb-2">{isRtl ? 'الاسم الأول *' : 'First Name *'}</label>
+                        <input
+                          type="text"
+                          name="firstName"
+                          value={formData.firstName || ''}
+                          onChange={handleChange}
+                          required
+                          className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500 font-bold text-slate-700 text-sm"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-xs font-bold text-slate-500 mb-2">{isRtl ? 'الاسم الأخير *' : 'Last Name *'}</label>
+                        <input
+                          type="text"
+                          name="lastName"
+                          value={formData.lastName || ''}
+                          onChange={handleChange}
+                          required
+                          className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500 font-bold text-slate-700 text-sm"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-xs font-bold text-slate-500 mb-2">{isRtl ? 'البريد الإلكتروني' : 'Email'}</label>
+                        <input
+                          type="email"
+                          name="email"
+                          value={user?.email || ''}
+                          disabled
+                          className="w-full px-4 py-3 rounded-xl border border-slate-100 bg-slate-50 font-bold text-slate-400 cursor-not-allowed text-sm"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-xs font-bold text-slate-500 mb-2">{isRtl ? 'رقم الهاتف المحمول *' : 'Mobile Number *'}</label>
+                        <div className="flex gap-2" dir="ltr">
+                          <div className="flex items-center gap-1 bg-slate-50 border border-slate-200 rounded-xl px-3 text-slate-600 font-bold text-xs shrink-0 select-none">
+                            <span>🇪🇬</span>
+                            <span>+20</span>
+                          </div>
+                          <input
+                            type="tel"
+                            name="phone"
+                            value={formData.phone || ''}
+                            onChange={handleChange}
+                            required
+                            className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500 font-bold text-slate-700 text-sm text-left"
+                          />
+                        </div>
+                      </div>
+                      <div>
+                        <label className="block text-xs font-bold text-slate-500 mb-2">{isRtl ? 'الجنس' : 'Gender'}</label>
+                        <div className="flex gap-4 pt-2">
+                          <label className="flex items-center gap-2 cursor-pointer font-bold text-slate-700 text-xs">
+                            <input 
+                              type="radio" 
+                              name="gender" 
+                              value="Male" 
+                              checked={formData.gender === 'Male'} 
+                              onChange={handleChange}
+                              className="w-4 h-4 text-blue-600 focus:ring-blue-500" 
+                            />
+                            <span>{isRtl ? 'ذكر' : 'Male'}</span>
+                          </label>
+                          <label className="flex items-center gap-2 cursor-pointer font-bold text-slate-700 text-xs">
+                            <input 
+                              type="radio" 
+                              name="gender" 
+                              value="Female" 
+                              checked={formData.gender === 'Female'} 
+                              onChange={handleChange}
+                              className="w-4 h-4 text-blue-600 focus:ring-blue-500" 
+                            />
+                            <span>{isRtl ? 'أنثى' : 'Female'}</span>
+                          </label>
+                        </div>
+                      </div>
+                      <div>
+                        <label className="block text-xs font-bold text-slate-500 mb-2">{isRtl ? 'الرقم القومي / المعرف (ID)' : 'ID / National ID'}</label>
+                        <input
+                          type="text"
+                          name="nationalId"
+                          value={formData.nationalId || ''}
+                          disabled
+                          className="w-full px-4 py-3 rounded-xl border border-slate-100 bg-slate-50 font-bold text-slate-400 cursor-not-allowed text-sm"
+                          placeholder={isRtl ? 'لم يتم إدخاله' : 'Not entered'}
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-xs font-bold text-slate-500 mb-2">{isRtl ? 'الرقم الضريبي التعريفى (TIN)' : 'Tax Identification Number'}</label>
+                        <input
+                          type="text"
+                          name="taxId"
+                          value={formData.taxId || ''}
+                          onChange={handleChange}
+                          className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500 font-bold text-slate-700 text-sm"
+                          placeholder="e.g. 123-456-789"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-xs font-bold text-slate-500 mb-2">{isRtl ? 'بلد الرقم الضريبي' : 'Tax Identification Country'}</label>
+                        <div className="flex gap-2" dir="ltr">
+                          <div className="flex items-center gap-1 bg-slate-50 border border-slate-200 rounded-xl px-3 text-slate-600 font-bold text-xs shrink-0 select-none">
+                            <span>🇪🇬</span>
+                            <span>EG</span>
+                          </div>
+                          <input
+                            type="text"
+                            name="taxCountry"
+                            value={formData.taxCountry || ''}
+                            onChange={handleChange}
+                            className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500 font-bold text-slate-700 text-sm"
+                          />
+                        </div>
+                      </div>
+                      <div className="md:col-span-2">
+                        <label className="block text-xs font-bold text-slate-500 mb-2">{isRtl ? 'عنوان الإقامة والسكن' : 'Residential Address'}</label>
+                        <textarea
+                          name="address"
+                          value={formData.address || ''}
+                          onChange={handleChange}
+                          rows={3}
+                          className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500 font-bold text-slate-700 text-sm leading-relaxed"
+                          placeholder={isRtl ? 'أدخل عنوان السكن بالتفصيل...' : 'Enter your residential address...'}
+                        />
+                      </div>
+                    </div>
+
+                    {/* Role Specific details accordion / blocks nested below for convenience */}
+                    {activeRole === 'speaker' && (
+                      <div className="pt-6 border-t border-slate-100 space-y-6">
+                        <h4 className="font-black text-slate-800 text-base">{isRtl ? 'بيانات التحدث والمشاركة' : 'Speaking & Topic Details'}</h4>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                          <div className="md:col-span-2">
+                            <label className="block text-xs font-bold text-slate-500 mb-2">{isRtl ? 'موضوع التحدث المقترح *' : 'Proposed Speech Topic *'}</label>
+                            <input
+                              type="text"
+                              name="speechTopic"
+                              value={formData.speechTopic || ''}
+                              onChange={handleChange}
+                              required
+                              className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500 font-bold text-slate-700 text-sm"
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-xs font-bold text-slate-500 mb-2">{isRtl ? 'مجال التخصص *' : 'Expertise *'}</label>
+                            <select
+                              name="speakerExpertise"
+                              value={formData.speakerExpertise || ''}
+                              onChange={handleChange}
+                              required
+                              className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500 font-bold text-slate-700 text-sm"
+                            >
+                              <option value="ريادة الأعمال">{isRtl ? 'ريادة الأعمال' : 'Entrepreneurship'}</option>
+                              <option value="التكنولوجيا والذكاء الاصطناعي">{isRtl ? 'التكنولوجيا والذكاء الاصطناعي' : 'Tech & AI'}</option>
+                              <option value="الاستثمار والتمويل">{isRtl ? 'الاستثمار والتمويل' : 'Investment'}</option>
+                              <option value="التسويق والمبيعات">{isRtl ? 'التسويق والمبيعات' : 'Marketing'}</option>
+                            </select>
+                          </div>
+                          <div>
+                            <label className="block text-xs font-bold text-slate-500 mb-2">{isRtl ? 'السيرة الذاتية المختصرة (Bio) *' : 'Short Speaker Bio *'}</label>
+                            <textarea
+                              name="speakerBio"
+                              value={formData.speakerBio || ''}
+                              onChange={handleChange}
+                              rows={3}
+                              required
+                              className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500 font-bold text-slate-700 text-sm"
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-xs font-bold text-slate-500 mb-2">LinkedIn Profile URL</label>
+                            <input
+                              type="url"
+                              name="speakerLinkedin"
+                              value={formData.speakerLinkedin || ''}
+                              onChange={handleChange}
+                              className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500 font-bold text-slate-700 text-sm"
+                              placeholder="https://linkedin.com/in/username"
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-xs font-bold text-slate-500 mb-2">Facebook Profile URL</label>
+                            <input
+                              type="url"
+                              name="speakerFacebook"
+                              value={formData.speakerFacebook || ''}
+                              onChange={handleChange}
+                              className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500 font-bold text-slate-700 text-sm"
+                              placeholder="https://facebook.com/username"
+                            />
+                          </div>
+                        </div>
+                      </div>
+                    )}
+
+                    {activeRole === 'startup' && (
+                      <div className="pt-6 border-t border-slate-100 space-y-6">
+                        <h4 className="font-black text-slate-800 text-base">{isRtl ? 'تفاصيل الشركة الناشئة' : 'Startup Details'}</h4>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                          <div>
+                            <label className="block text-xs font-bold text-slate-500 mb-2">{isRtl ? 'اسم المشروع / الشركة الناشئة *' : 'Startup/Project Name *'}</label>
+                            <input
+                              type="text"
+                              name="startupName"
+                              value={formData.startupName || ''}
+                              onChange={handleChange}
+                              required
+                              className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500 font-bold text-slate-700 text-sm"
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-xs font-bold text-slate-500 mb-2">{isRtl ? 'قطاع العمل *' : 'Industry *'}</label>
+                            <input
+                              type="text"
+                              name="industry"
+                              value={formData.industry || ''}
+                              onChange={handleChange}
+                              required
+                              className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500 font-bold text-slate-700 text-sm"
+                            />
+                          </div>
+                          <div className="md:col-span-2">
+                            <label className="block text-xs font-bold text-slate-500 mb-2">{isRtl ? 'وصف مختصر (Elevator Pitch) *' : 'Elevator Pitch *'}</label>
+                            <textarea
+                              name="elevatorPitch"
+                              value={formData.elevatorPitch || ''}
+                              onChange={handleChange}
+                              rows={3}
+                              required
+                              className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500 font-bold text-slate-700 text-sm"
+                            />
+                          </div>
+                        </div>
+                      </div>
+                    )}
+
+                    {activeRole === 'researcher' && (
+                      <div className="pt-6 border-t border-slate-100 space-y-6">
+                        <h4 className="font-black text-slate-800 text-base">{isRtl ? 'تفاصيل البحث العلمي' : 'Scientific Research Details'}</h4>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                          <div>
+                            <label className="block text-xs font-bold text-slate-500 mb-2">{isRtl ? 'عنوان الورقة البحثية *' : 'Research Title *'}</label>
+                            <input
+                              type="text"
+                              name="researchTitle"
+                              value={formData.researchTitle || ''}
+                              onChange={handleChange}
+                              required
+                              className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500 font-bold text-slate-700 text-sm"
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-xs font-bold text-slate-500 mb-2">{isRtl ? 'مستوى الجاهزية TRL *' : 'TRL Level *'}</label>
+                            <input
+                              type="text"
+                              name="trlLevel"
+                              value={formData.trlLevel || ''}
+                              onChange={handleChange}
+                              required
+                              className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500 font-bold text-slate-700 text-sm"
+                            />
+                          </div>
+                          <div className="md:col-span-2">
+                            <label className="block text-xs font-bold text-slate-500 mb-2">{isRtl ? 'ملخص الفكرة البحثية *' : 'Idea Summary *'}</label>
+                            <textarea
+                              name="researchIdea"
+                              value={formData.researchIdea || ''}
+                              onChange={handleChange}
+                              rows={3}
+                              required
+                              className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500 font-bold text-slate-700 text-sm"
+                            />
+                          </div>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* CV Attachment Section */}
+                    <div className="pt-6 border-t border-slate-100">
+                      <h4 className="font-black text-slate-800 text-base mb-4">{isRtl ? 'السيرة الذاتية والملف المهني (CV)' : 'CV & Professional Resume'}</h4>
+                      <div className="p-5 bg-blue-50/30 rounded-3xl border border-blue-100/50 flex flex-col sm:flex-row items-center justify-between gap-4">
+                        <div className="flex items-center gap-3">
+                          <div className="w-12 h-12 rounded-2xl bg-blue-50 flex items-center justify-center text-blue-600 shrink-0">
+                            <FileText className="w-6 h-6" />
+                          </div>
+                          <div className="text-right">
+                            <h5 className="font-black text-slate-800 text-sm">{isRtl ? 'ملف السيرة الذاتية للمشترك' : 'Applicant Resume Document'}</h5>
+                            <span className="text-[10px] text-slate-400 font-bold block mt-0.5">
+                              {formData.cv_url && formData.cv_url !== '#' ? (isRtl ? 'مرفوع ومحفوظ بنجاح' : 'Uploaded successfully') : (isRtl ? 'لم يتم رفع ملف سيرة ذاتية بعد' : 'No resume uploaded yet')}
+                            </span>
+                          </div>
+                        </div>
+
+                        <div className="flex gap-2">
+                          <label className="bg-white hover:bg-slate-50 text-slate-700 font-bold px-4 py-2.5 rounded-xl border border-slate-200 shadow-sm cursor-pointer text-xs transition-colors whitespace-nowrap inline-flex items-center gap-1.5">
+                            <Upload className="w-3.5 h-3.5" />
+                            {uploadingCv ? (isRtl ? 'جاري الرفع...' : 'Uploading...') : (isRtl ? 'رفع ملف CV جديد' : 'Upload CV')}
+                            <input 
+                              type="file" 
+                              accept=".pdf,.doc,.docx" 
+                              onChange={handleCvFileChange} 
+                              className="hidden" 
+                            />
+                          </label>
+                          {formData.cv_url && formData.cv_url !== '#' && (
+                            <a 
+                              href={formData.cv_url} 
+                              target="_blank" 
+                              rel="noreferrer"
+                              className="bg-blue-50 hover:bg-blue-100 text-blue-600 font-bold px-4 py-2.5 rounded-xl border border-blue-100 text-xs transition-colors inline-flex items-center gap-1.5"
+                            >
+                              <ExternalLink className="w-3.5 h-3.5" />
+                              {isRtl ? 'عرض السيرة الذاتية' : 'View CV'}
+                            </a>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+
                   </div>
                 )}
-                <label className="absolute bottom-2 right-2 bg-blue-600 hover:bg-blue-700 text-white p-2.5 rounded-full shadow-lg cursor-pointer transition-colors border border-white">
-                  <Camera className="w-4 h-4" />
-                  <input 
-                    type="file" 
-                    accept="image/*" 
-                    onChange={handleImageFileChange} 
-                    className="hidden" 
-                  />
-                </label>
-              </div>
-              <div className="text-center">
-                <label className="bg-white hover:bg-slate-50 text-slate-700 font-bold px-4 py-2 rounded-xl border border-slate-200 shadow-sm cursor-pointer inline-flex items-center gap-2 text-xs transition-colors">
-                  <Upload className="w-3.5 h-3.5" />
-                  {uploadingImage ? (isRtl ? 'جاري الرفع...' : 'Uploading...') : (isRtl ? 'اختر صورة شخصية جديدة' : 'Upload New Photo')}
-                  <input 
-                    type="file" 
-                    accept="image/*" 
-                    onChange={handleImageFileChange} 
-                    className="hidden" 
-                  />
-                </label>
-                <p className="text-slate-400 text-[10px] mt-2 font-semibold">{isRtl ? 'JPG, PNG أو WebP. بحد أقصى 5 ميجابايت.' : 'JPG, PNG or WebP. Max 5MB.'}</p>
-              </div>
-            </div>
 
-            {/* Core Fields */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div>
-                <label className="block text-sm font-bold text-slate-700 mb-2">{isRtl ? 'الاسم بالكامل *' : 'Full Name *'}</label>
-                <input
-                  type="text"
-                  name="full_name"
-                  value={formData.full_name}
-                  onChange={handleChange}
-                  required
-                  className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500 font-bold text-slate-700"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-bold text-slate-700 mb-2">{isRtl ? 'البريد الإلكتروني *' : 'Email Address *'}</label>
-                <input
-                  type="email"
-                  name="email"
-                  value={user?.email || ''}
-                  disabled
-                  className="w-full px-4 py-3 rounded-xl border border-slate-100 bg-slate-50 font-bold text-slate-400 cursor-not-allowed"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-bold text-slate-700 mb-2">{isRtl ? 'رقم الهاتف *' : 'Phone Number *'}</label>
-                <input
-                  type="text"
-                  name="phone"
-                  value={formData.phone}
-                  onChange={handleChange}
-                  required
-                  className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500 font-bold text-slate-700"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-bold text-slate-700 mb-2">{isRtl ? 'الجامعة / جهة العمل *' : 'Organization *'}</label>
-                <input
-                  type="text"
-                  name="organization"
-                  value={formData.organization}
-                  onChange={handleChange}
-                  required
-                  className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500 font-bold text-slate-700"
-                />
-              </div>
-            </div>
-
-            {/* CV Attachment Section */}
-            <div className="pt-6 border-t border-slate-100">
-              <h4 className="font-black text-slate-800 text-lg mb-4">{isRtl ? 'السيرة الذاتية والملف المهني (CV)' : 'CV & Professional Resume'}</h4>
-              <div className="p-5 bg-blue-50/30 rounded-3xl border border-blue-100/50 flex flex-col sm:flex-row items-center justify-between gap-4">
-                <div className="flex items-center gap-3">
-                  <div className="w-12 h-12 rounded-2xl bg-blue-50 flex items-center justify-center text-blue-600 shrink-0">
-                    <FileText className="w-6 h-6" />
-                  </div>
-                  <div>
-                    <p className="font-bold text-slate-700 text-sm">{isRtl ? 'ملف السيرة الذاتية المرفوع' : 'CV / Resume File'}</p>
-                    {formData.cv_url && formData.cv_url !== '#' ? (
-                      <a href={formData.cv_url} target="_blank" rel="noreferrer" className="text-xs font-bold text-blue-600 hover:underline inline-block mt-0.5">
-                        {isRtl ? 'تحميل أو عرض السيرة الذاتية الحالية ↗' : 'Download current CV ↗'}
-                      </a>
-                    ) : (
-                      <p className="text-xs font-bold text-slate-400 mt-0.5">{isRtl ? 'لم يتم إرفاق سيرة ذاتية بعد' : 'No CV uploaded yet'}</p>
-                    )}
-                  </div>
-                </div>
-                <label className="bg-white hover:bg-slate-50 text-blue-600 border border-blue-200 font-black px-6 py-2.5 rounded-xl text-xs cursor-pointer shadow-sm transition-colors inline-flex items-center gap-2">
-                  <Upload className="w-4 h-4" />
-                  {uploadingCv ? (isRtl ? 'جاري الرفع...' : 'Uploading...') : (isRtl ? 'تحديث / رفع ملف CV جديد' : 'Upload New CV')}
-                  <input 
-                    type="file" 
-                    accept=".pdf,.doc,.docx" 
-                    onChange={handleCvFileChange} 
-                    className="hidden" 
-                  />
-                </label>
-              </div>
-            </div>
-
-            {/* Role-Specific Info */}
-            {activeRole === 'speaker' && (
-              <div className="pt-6 border-t border-slate-100 space-y-6">
-                <h4 className="font-black text-slate-800 text-lg">{isRtl ? 'بيانات التحدث والمشاركة' : 'Speaking & Topic Details'}</h4>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div className="md:col-span-2">
-                    <label className="block text-sm font-bold text-slate-700 mb-2">{isRtl ? 'موضوع التحدث المقترح *' : 'Proposed Speech Topic *'}</label>
-                    <input
-                      type="text"
-                      name="speechTopic"
-                      value={formData.speechTopic}
-                      onChange={handleChange}
-                      required
-                      className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500 font-bold text-slate-700"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-bold text-slate-700 mb-2">{isRtl ? 'مجال التخصص *' : 'Expertise *'}</label>
-                    <select
-                      name="speakerExpertise"
-                      value={formData.speakerExpertise}
-                      onChange={handleChange}
-                      required
-                      className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500 font-bold text-slate-700"
-                    >
-                      <option value="ريادة الأعمال">{isRtl ? 'ريادة الأعمال' : 'Entrepreneurship'}</option>
-                      <option value="التكنولوجيا والذكاء الاصطناعي">{isRtl ? 'التكنولوجيا والذكاء الاصطناعي' : 'Tech & AI'}</option>
-                      <option value="الاستثمار والتمويل">{isRtl ? 'الاستثمار والتمويل' : 'Investment'}</option>
-                      <option value="التسويق والمبيعات">{isRtl ? 'التسويق والمبيعات' : 'Marketing'}</option>
-                    </select>
-                  </div>
-                  <div>
-                    <label className="block text-sm font-bold text-slate-700 mb-2">{isRtl ? 'السيرة الذاتية المختصرة (Bio) *' : 'Short Speaker Bio *'}</label>
-                    <textarea
-                      name="speakerBio"
-                      value={formData.speakerBio}
-                      onChange={handleChange}
-                      rows={3}
-                      required
-                      className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500 font-bold text-slate-700"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-bold text-slate-700 mb-2">LinkedIn Profile URL</label>
-                    <input
-                      type="url"
-                      name="speakerLinkedin"
-                      value={formData.speakerLinkedin}
-                      onChange={handleChange}
-                      className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500 font-bold text-slate-700"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-bold text-slate-700 mb-2">Facebook Profile URL</label>
-                    <input
-                      type="url"
-                      name="speakerFacebook"
-                      value={formData.speakerFacebook}
-                      onChange={handleChange}
-                      className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500 font-bold text-slate-700"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-bold text-slate-700 mb-2">X / Twitter URL</label>
-                    <input
-                      type="url"
-                      name="speakerX"
-                      value={formData.speakerX}
-                      onChange={handleChange}
-                      className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500 font-bold text-slate-700"
-                    />
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {/* Other roles: startup, researcher details fields etc. */}
-            {activeRole === 'startup' && (
-              <div className="pt-6 border-t border-slate-100 space-y-6">
-                <h4 className="font-black text-slate-800 text-lg">{isRtl ? 'تفاصيل الشركة الناشئة' : 'Startup Details'}</h4>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div>
-                    <label className="block text-sm font-bold text-slate-700 mb-2">{isRtl ? 'اسم الشركة *' : 'Startup Name *'}</label>
-                    <input
-                      type="text"
-                      name="startupName"
-                      value={formData.startupName}
-                      onChange={handleChange}
-                      required
-                      className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500 font-bold text-slate-700"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-bold text-slate-700 mb-2">{isRtl ? 'المجال / القطاع *' : 'Industry Sector *'}</label>
-                    <input
-                      type="text"
-                      name="industry"
-                      value={formData.industry}
-                      onChange={handleChange}
-                      required
-                      className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500 font-bold text-slate-700"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-bold text-slate-700 mb-2">{isRtl ? 'مرحلة المشروع *' : 'Startup Stage *'}</label>
-                    <input
-                      type="text"
-                      name="stage"
-                      value={formData.stage}
-                      onChange={handleChange}
-                      required
-                      className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500 font-bold text-slate-700"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-bold text-slate-700 mb-2">{isRtl ? 'وصف مختصر (Elevator Pitch) *' : 'Elevator Pitch *'}</label>
-                    <textarea
-                      name="elevatorPitch"
-                      value={formData.elevatorPitch}
-                      onChange={handleChange}
-                      rows={3}
-                      required
-                      className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500 font-bold text-slate-700"
-                    />
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {activeRole === 'researcher' && (
-              <div className="pt-6 border-t border-slate-100 space-y-6">
-                <h4 className="font-black text-slate-800 text-lg">{isRtl ? 'تفاصيل البحث العلمي' : 'Scientific Research Details'}</h4>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div>
-                    <label className="block text-sm font-bold text-slate-700 mb-2">{isRtl ? 'عنوان الورقة البحثية *' : 'Research Title *'}</label>
-                    <input
-                      type="text"
-                      name="researchTitle"
-                      value={formData.researchTitle}
-                      onChange={handleChange}
-                      required
-                      className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500 font-bold text-slate-700"
-                    />
-                  </div>
-                  <div>
-                      <label className="block text-sm font-bold text-slate-700 mb-2">{isRtl ? 'مستوى الجاهزية TRL *' : 'TRL Level *'}</label>
-                      <input
-                        type="text"
-                        name="trlLevel"
-                        value={formData.trlLevel}
-                        onChange={handleChange}
-                        required
-                        className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500 font-bold text-slate-700"
-                      />
-                    </div>
-                    <div className="md:col-span-2">
-                      <label className="block text-sm font-bold text-slate-700 mb-2">{isRtl ? 'ملخص الفكرة البحثية *' : 'Idea Summary *'}</label>
-                      <textarea
-                        name="researchIdea"
-                        value={formData.researchIdea}
-                        onChange={handleChange}
-                        rows={3}
-                        required
-                        className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500 font-bold text-slate-700"
-                      />
+                {/* 2. PASSWORD PANEL */}
+                {settingsSubTab === 'password' && (
+                  <div className="space-y-6 animate-fade-in">
+                    <div className="bg-slate-50/50 p-6 rounded-3xl border border-slate-100 space-y-4">
+                      <h4 className="font-black text-slate-800 text-base mb-2">{isRtl ? 'تغيير كلمة المرور' : 'Change Password'}</h4>
+                      <div className="space-y-4">
+                        <div>
+                          <label className="block text-xs font-bold text-slate-500 mb-2">{isRtl ? 'كلمة المرور الحالية' : 'Current Password'}</label>
+                          <input
+                            type="password"
+                            className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500 font-bold text-slate-700 text-sm max-w-md"
+                            placeholder="••••••••"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-xs font-bold text-slate-500 mb-2">{isRtl ? 'كلمة المرور الجديدة' : 'New Password'}</label>
+                          <input
+                            type="password"
+                            className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500 font-bold text-slate-700 text-sm max-w-md"
+                            placeholder="••••••••"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-xs font-bold text-slate-500 mb-2">{isRtl ? 'تأكيد كلمة المرور الجديدة' : 'Confirm New Password'}</label>
+                          <input
+                            type="password"
+                            className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500 font-bold text-slate-700 text-sm max-w-md"
+                            placeholder="••••••••"
+                          />
+                        </div>
+                      </div>
                     </div>
                   </div>
-                </div>
-              )}
+                )}
 
-              {/* Submit Buttons */}
-              <div className="pt-6 border-t border-slate-100 flex justify-end">
-                <button
-                  type="submit"
-                  disabled={isSaving || uploadingImage || uploadingCv}
-                  className="bg-blue-600 hover:bg-blue-700 text-white font-black px-10 py-4 rounded-full shadow-lg shadow-blue-500/25 transition-all disabled:opacity-50 flex items-center gap-2 text-sm"
-                >
-                  {isSaving ? (isRtl ? 'جاري الحفظ...' : 'Saving...') : (isRtl ? 'حفظ التعديلات' : 'Save Changes')}
-                </button>
+                {/* 3. NOTIFICATIONS PANEL */}
+                {settingsSubTab === 'notifications' && (
+                  <div className="space-y-6 animate-fade-in">
+                    <div className="bg-slate-50/50 p-6 rounded-3xl border border-slate-100 space-y-4">
+                      <h4 className="font-black text-slate-800 text-base mb-4">{isRtl ? 'إعدادات الإشعارات والتنبيهات' : 'Notifications Settings'}</h4>
+                      <div className="space-y-4">
+                        {[
+                          { title: isRtl ? 'إرسال تنبيهات البريد الإلكتروني' : 'Email Notifications', desc: isRtl ? 'تلقي آخر مستجدات القمة وجدول الفعاليات مباشرة عبر البريد.' : 'Get summit updates directly to your inbox.' },
+                          { title: isRtl ? 'إرسال رسائل SMS نصية' : 'SMS Notifications', desc: isRtl ? 'إرسال تنبيهات سريعة على هاتفك عند قبول طلب المشاركة.' : 'Fast notifications sent to your registered mobile number.' },
+                          { title: isRtl ? 'تنبيهات ورش العمل والفعاليات' : 'Workshop Alerts', desc: isRtl ? 'تذكير قبل ساعة من بدء ورشة العمل أو الجلسة المسجل بها.' : 'Reminders 1 hour before scheduled sessions start.' }
+                        ].map((item, idx) => (
+                          <div key={idx} className="flex items-center justify-between p-4 bg-white rounded-2xl border border-slate-100">
+                            <div className="text-right">
+                              <h5 className="font-black text-slate-800 text-sm">{item.title}</h5>
+                              <p className="text-xs text-slate-400 font-semibold mt-1">{item.desc}</p>
+                            </div>
+                            <label className="relative inline-flex items-center cursor-pointer">
+                              <input type="checkbox" defaultChecked className="sr-only peer" />
+                              <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+                            </label>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* 4. VERIFICATION PANEL */}
+                {settingsSubTab === 'verification' && (
+                  <div className="space-y-6 animate-fade-in">
+                    <div className="bg-slate-50/50 p-6 rounded-3xl border border-slate-100 space-y-4">
+                      <h4 className="font-black text-slate-800 text-base mb-2">{isRtl ? 'حالة توثيق الحساب' : 'Identity Verification'}</h4>
+                      <p className="text-xs text-slate-400 font-semibold leading-relaxed mb-4">
+                        {isRtl 
+                          ? 'يتطلب قبول الطلبات مراجعة الهوية الوطنية والرقم القومي للمشترك وتأكيد صلاحية البيانات من قبل اللجنة المنظمة.' 
+                          : 'Identity verification matches your National ID and credentials before final administrative approvals.'}
+                      </p>
+                      
+                      <div className="p-5 bg-white border border-slate-200 rounded-2xl flex items-center justify-between gap-4">
+                        <div className="flex items-center gap-3">
+                          <div className={`w-10 h-10 rounded-full flex items-center justify-center shrink-0 ${
+                            user?.status === 'مقبول للعرض في القمة' ? 'bg-green-50 text-green-600' : 'bg-amber-50 text-amber-600'
+                          }`}>
+                            <Shield className="w-5 h-5" />
+                          </div>
+                          <div className="text-right">
+                            <span className="text-[10px] text-slate-400 font-bold uppercase block">{isRtl ? 'حالة التحقق الحالية' : 'Verification Status'}</span>
+                            <span className="font-black text-sm text-slate-800">{user?.status || 'تحت الفحص الإداري'}</span>
+                          </div>
+                        </div>
+                        <span className={`text-[10px] font-black px-3 py-1.5 rounded-full ${
+                          user?.status === 'مقبول للعرض في القمة' ? 'bg-green-100 text-green-700' : 'bg-amber-100 text-amber-700'
+                        }`}>
+                          {user?.status === 'مقبول للعرض في القمة' ? (isRtl ? 'موثق ومعتمد' : 'Verified') : (isRtl ? 'قيد المراجعة' : 'Pending Review')}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* Save Changes Button at the bottom of the form panel */}
+                <div className="pt-6 border-t border-slate-100 flex justify-end">
+                  <button
+                    type="submit"
+                    disabled={isSaving || uploadingImage || uploadingCv}
+                    className="bg-blue-600 hover:bg-blue-700 text-white font-black px-10 py-4 rounded-full shadow-lg shadow-blue-500/25 transition-all disabled:opacity-50 flex items-center gap-2 text-sm"
+                  >
+                    {isSaving ? (isRtl ? 'جاري الحفظ...' : 'Saving...') : (isRtl ? 'حفظ التعديلات' : 'Save Changes')}
+                  </button>
+                </div>
+
               </div>
-            </form>
+
+            </div>
+          </form>
           )}
 
         </div>
