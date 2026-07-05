@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { Globe, Menu, X, ChevronDown, User, ArrowLeft } from 'lucide-react';
+import { Globe, Menu, X, ChevronDown, User, ArrowLeft, LogOut } from 'lucide-react';
 
 const Navbar = () => {
   const { t, i18n } = useTranslation();
@@ -47,6 +47,13 @@ const Navbar = () => {
 
   const toggleLanguage = () => {
     i18n.changeLanguage(isRtl ? 'en' : 'ar');
+  };
+
+  const handleLogout = () => {
+    localStorage.removeItem('current_user');
+    setUser(null);
+    setMobileMenuOpen(false);
+    window.location.href = '/';
   };
 
   const navLinks = [
@@ -183,23 +190,32 @@ const Navbar = () => {
         {/* Left Actions */}
         <div className="hidden lg:flex items-center gap-3 pl-1 h-full">
           {user ? (
-            <Link 
-              to={user.email === 'admin@knowledge.com' ? '/admin' : '/dashboard'}
-              className="flex items-center gap-2 px-3 py-1.5 rounded-full font-bold text-[10px] xl:text-[12px] transition-all bg-[#26462C]/10 border border-[#26462C]/20 text-[#26462C] hover:bg-[#26462C] hover:text-white whitespace-nowrap"
-            >
-              {user.details?.speakerImage ? (
-                <img 
-                  src={user.details.speakerImage} 
-                  alt={user.full_name} 
-                  className="w-5 h-5 rounded-full object-cover border border-emerald-500 shrink-0" 
-                />
-              ) : (
-                <div className="w-5 h-5 rounded-full bg-[#26462C] text-white flex items-center justify-center font-bold text-[8px] shrink-0">
-                  {user.full_name?.charAt(0) || 'U'}
-                </div>
-              )}
-              <span className="max-w-[70px] truncate">{user.full_name?.split(' ')[0]}</span>
-            </Link>
+            <>
+              <Link 
+                to={user.email === 'admin@knowledge.com' ? '/admin' : '/dashboard'}
+                className="flex items-center gap-2 px-3.5 py-1.5 rounded-full font-bold text-[10px] xl:text-[12px] transition-all bg-white border border-slate-200 text-[#26462C] hover:bg-slate-50 shadow-sm whitespace-nowrap shrink-0"
+              >
+                {user.details?.speakerImage ? (
+                  <img 
+                    src={user.details.speakerImage} 
+                    alt={user.full_name} 
+                    className="w-5 h-5 rounded-full object-cover border border-emerald-500 shrink-0" 
+                  />
+                ) : (
+                  <div className="w-5 h-5 rounded-full bg-[#26462C] text-white flex items-center justify-center font-bold text-[8px] shrink-0">
+                    {user.full_name?.charAt(0) || 'U'}
+                  </div>
+                )}
+                <span className="max-w-[70px] truncate">{user.full_name?.split(' ')[0]}</span>
+              </Link>
+              <button
+                onClick={handleLogout}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-full font-bold text-[10px] xl:text-[12px] transition-all bg-red-50 text-red-600 hover:bg-red-100 border border-red-100 shadow-sm whitespace-nowrap shrink-0"
+              >
+                <LogOut className="w-3 h-3" />
+                <span>{isRtl ? 'خروج' : 'Logout'}</span>
+              </button>
+            </>
           ) : (
             <Link 
               to="/auth"
@@ -274,24 +290,33 @@ const Navbar = () => {
               {isRtl ? 'English' : 'عربي'}
             </button>
             {user ? (
-              <Link 
-                to={user.email === 'admin@knowledge.com' ? '/admin' : '/dashboard'}
-                onClick={() => setMobileMenuOpen(false)}
-                className="flex items-center justify-center gap-3 w-full py-4 bg-[#26462C]/10 text-[#26462C] border border-[#26462C]/20 rounded-xl font-bold text-lg hover:bg-[#26462C] hover:text-white transition-colors"
-              >
-                {user.details?.speakerImage ? (
-                  <img 
-                    src={user.details.speakerImage} 
-                    alt={user.full_name} 
-                    className="w-8 h-8 rounded-full object-cover border border-emerald-500 shrink-0" 
-                  />
-                ) : (
-                  <div className="w-8 h-8 rounded-full bg-[#26462C] text-white flex items-center justify-center font-bold text-sm shrink-0">
-                    {user.full_name?.charAt(0) || 'U'}
-                  </div>
-                )}
-                <span>{user.full_name}</span>
-              </Link>
+              <>
+                <Link 
+                  to={user.email === 'admin@knowledge.com' ? '/admin' : '/dashboard'}
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="flex items-center justify-center gap-3 w-full py-4 bg-white text-[#26462C] border border-slate-200 rounded-xl font-bold text-lg hover:bg-slate-50 transition-colors"
+                >
+                  {user.details?.speakerImage ? (
+                    <img 
+                      src={user.details.speakerImage} 
+                      alt={user.full_name} 
+                      className="w-8 h-8 rounded-full object-cover border border-emerald-500 shrink-0" 
+                    />
+                  ) : (
+                    <div className="w-8 h-8 rounded-full bg-[#26462C] text-white flex items-center justify-center font-bold text-sm shrink-0">
+                      {user.full_name?.charAt(0) || 'U'}
+                    </div>
+                  )}
+                  <span>{user.full_name}</span>
+                </Link>
+                <button 
+                  onClick={handleLogout}
+                  className="flex items-center justify-center gap-2 w-full py-4 bg-red-50 text-red-600 border border-red-100 rounded-xl font-bold text-lg hover:bg-red-100 transition-colors"
+                >
+                  <LogOut className="w-5 h-5" />
+                  {isRtl ? 'تسجيل الخروج' : 'Logout'}
+                </button>
+              </>
             ) : (
               <Link 
                 to="/auth" 
