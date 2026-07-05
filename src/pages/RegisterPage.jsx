@@ -37,7 +37,7 @@ const TermsModal = ({ isOpen, onClose }) => {
 const RegisterPage = () => {
   const [searchParams] = useSearchParams();
   const role = searchParams.get('role') || 'speaker';
-  const roleTypes = ['speaker', 'startup', 'investor', 'mentor'];
+  const roleTypes = ['speaker', 'startup', 'investor', 'mentor', 'partner', 'researcher', 'volunteer'];
   const urlRole = roleTypes.includes(role) ? role : 'speaker';
 
   const [step, setStep] = useState(1);
@@ -101,9 +101,12 @@ const RegisterPage = () => {
 
   const roleDetails = {
     speaker: { title: 'تسجيل المتحدثين', description: 'شارك بخبراتك وكن جزءاً من منصة المتحدثين.', attachmentLabel: 'السيرة الذاتية (CV)', requiresAttachment: true },
-    startup: { title: 'تسجيل الشركات الناشئة', description: 'سجل شركتك الناشئة واعرض ابتكارك للعالم.', attachmentLabel: 'العرض التقديمي (Pitch Deck)', requiresAttachment: true },
+    startup: { title: 'تسجيل الشركات الناشئة والمشاريع', description: 'سجل شركتك الناشئة واعرض ابتكارك للعالم.', attachmentLabel: 'العرض التقديمي (Pitch Deck)', requiresAttachment: true },
     investor: { title: 'تسجيل المستثمرين', description: 'انضم لشبكة مستثمري قمة الابتكار.', attachmentLabel: 'ملف تعريفي (اختياري)', requiresAttachment: false },
-    mentor: { title: 'تسجيل المدربين', description: 'كن مدرباً لرواد الأعمال وساعدهم في رحلتهم.', attachmentLabel: 'السيرة الذاتية (CV)', requiresAttachment: true }
+    mentor: { title: 'تسجيل المدربين والموجهين', description: 'كن مدرباً لرواد الأعمال وساعدهم في رحلتهم.', attachmentLabel: 'السيرة الذاتية (CV)', requiresAttachment: true },
+    researcher: { title: 'تسجيل الباحثين والمخترعين', description: 'سجل بحثك التطبيقي أو ابتكارك التكنولوجي للحصول على الدعم والتسويق.', attachmentLabel: 'ملف البحث / براءة الاختراع (PDF)', requiresAttachment: true },
+    partner: { title: 'تسجيل الشركاء والرعاة', description: 'كن شريكاً استراتيجياً أو راعياً لقمة الابتكار.', attachmentLabel: 'ملف تعريفي للمؤسسة (اختياري)', requiresAttachment: false },
+    volunteer: { title: 'تسجيل المتطوعين', description: 'انضم للفريق التنظيمي وكن جزءاً من نجاح قمة الابتكار.', attachmentLabel: 'السيرة الذاتية (اختياري)', requiresAttachment: false }
   };
   const currentRole = roleDetails[selectedRole];
 
@@ -334,6 +337,16 @@ const RegisterPage = () => {
           </div>
 
           <div className="p-8 sm:p-10">
+            {/* Link back to login */}
+            <div className="text-center mb-6">
+              <p className="text-sm text-slate-500 font-bold">
+                لديك حساب بالفعل؟{' '}
+                <Link to="/auth" className="text-blue-600 hover:text-blue-700 underline font-extrabold mr-1">
+                  قم بتسجيل الدخول
+                </Link>
+              </p>
+            </div>
+
             {/* Steps Indicator */}
             <div className="flex items-center justify-center mb-10">
               <div className="flex items-center w-full max-w-sm">
@@ -361,9 +374,12 @@ const RegisterPage = () => {
                         className="w-full px-5 py-3.5 rounded-xl border border-slate-200 bg-slate-50 focus:ring-2 focus:ring-blue-600 focus:border-transparent transition-all outline-none appearance-none font-bold text-slate-700"
                       >
                         <option value="speaker">متحدث (Speaker)</option>
-                        <option value="startup">شركة ناشئة (Startup)</option>
+                        <option value="startup">شركة ناشئة أو مشروع (Startup / Project)</option>
                         <option value="investor">مستثمر (Investor)</option>
                         <option value="mentor">مدرب / موجه (Mentor)</option>
+                        <option value="researcher">باحث / مبتكر (Researcher / Innovator)</option>
+                        <option value="partner">شريك أو راعي (Partner / Sponsor)</option>
+                        <option value="volunteer">متطوع (Volunteer)</option>
                       </select>
                       <ArrowRight className="w-4 h-4 text-slate-400 absolute left-4 top-1/2 -translate-y-1/2 rotate-90 pointer-events-none" />
                     </div>

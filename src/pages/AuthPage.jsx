@@ -40,15 +40,13 @@ const AuthPage = () => {
 
           <div className="pt-4">
             <p className="text-gray-600 font-bold">
-              {isLogin ? (isRtl ? 'ليس لديك حساب؟' : "Don't have an account?") : (isRtl ? 'لديك حساب بالفعل؟' : 'Already have an account?')}{' '}
-              <button 
-                onClick={() => setIsLogin(!isLogin)}
+              {isRtl ? 'ليس لديك حساب؟' : "Don't have an account?"}{' '}
+              <Link 
+                to="/register"
                 className="text-[#fb8500] hover:text-[#e07600] transition-colors underline underline-offset-4"
               >
-                {isLogin 
-                  ? (isRtl ? 'قم بإنشاء حساب جديد' : 'Create a new account') 
-                  : (isRtl ? 'قم بتسجيل الدخول' : 'Sign in here')}
-              </button>
+                {isRtl ? 'قم بإنشاء حساب جديد' : 'Create a new account'}
+              </Link>
             </p>
           </div>
         </div>
