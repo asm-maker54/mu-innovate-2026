@@ -4,7 +4,7 @@ import {
   Users, Award, BookOpen, Download, Search, CheckCircle, Clock, 
   AlertTriangle, Eye, ArrowLeft, RefreshCw, KeyRound, BarChart2,
   FileText, Briefcase, GraduationCap, Presentation, Newspaper,
-  Trash, FileSpreadsheet
+  Trash, FileSpreadsheet, Sparkles, ShoppingBag, Plus, Edit
 } from 'lucide-react';
 import { supabase, isSupabaseConfigured } from '../supabaseClient';
 import { initialMockNews } from '../data/mockNews';
@@ -124,6 +124,167 @@ const AdminDashboard = () => {
   const [statusFilter, setStatusFilter] = useState('الكل');
 
   const [editingNewsId, setEditingNewsId] = useState(null);
+
+  // --- Exhibition states for Innovations & Productive Units ---
+  const [innovations, setInnovations] = useState([]);
+  const [products, setProducts] = useState([]);
+  const [isExhibitionModalOpen, setIsExhibitionModalOpen] = useState(false);
+  const [exhibitionModalType, setExhibitionModalType] = useState('innovation'); // 'innovation' or 'product'
+  const [exhibitionEditItem, setExhibitionEditItem] = useState(null);
+
+  const [innovationFormData, setInnovationFormData] = useState({
+    name: '',
+    category: 'ai',
+    level: 'prototype',
+    levelName: 'نموذج أولي',
+    team: '',
+    desc: '',
+    image: '',
+    tech: 'Python',
+    speed: 'فوري',
+    accuracy: '95%',
+    icon: 'Cpu'
+  });
+
+  const [productFormData, setProductFormData] = useState({
+    name: '',
+    category: 'منتجات زراعية',
+    faculty: 'كلية الزراعة',
+    facultyId: 'agriculture',
+    price: '',
+    image: '',
+    rating: '4.8 (120)',
+    tag: '',
+    tagColor: 'bg-emerald-600 text-white',
+    details: ''
+  });
+
+  // --- Exhibition Save/Delete Handlers ---
+  const handleSaveInnovation = (e) => {
+    e.preventDefault();
+    let updated;
+    if (exhibitionEditItem) {
+      updated = innovations.map(item => item.id === exhibitionEditItem.id ? { ...item, ...innovationFormData } : item);
+    } else {
+      const newItem = {
+        ...innovationFormData,
+        id: Date.now()
+      };
+      updated = [newItem, ...innovations];
+    }
+    setInnovations(updated);
+    localStorage.setItem('exhibition_innovations', JSON.stringify(updated));
+    setIsExhibitionModalOpen(false);
+    setExhibitionEditItem(null);
+  };
+
+  const handleDeleteInnovation = (id) => {
+    if (window.confirm('هل أنت متأكد من حذف هذا الابتكار؟')) {
+      const updated = innovations.filter(item => item.id !== id);
+      setInnovations(updated);
+      localStorage.setItem('exhibition_innovations', JSON.stringify(updated));
+    }
+  };
+
+  const handleSaveProduct = (e) => {
+    e.preventDefault();
+    let updated;
+    if (exhibitionEditItem) {
+      updated = products.map(item => item.id === exhibitionEditItem.id ? { ...item, ...productFormData } : item);
+    } else {
+      const newItem = {
+        ...productFormData,
+        id: Date.now()
+      };
+      updated = [newItem, ...products];
+    }
+    setProducts(updated);
+    localStorage.setItem('exhibition_products', JSON.stringify(updated));
+    setIsExhibitionModalOpen(false);
+    setExhibitionEditItem(null);
+  };
+
+  const handleDeleteProduct = (id) => {
+    if (window.confirm('هل أنت متأكد من حذف هذا المنتج؟')) {
+      const updated = products.filter(item => item.id !== id);
+      setProducts(updated);
+      localStorage.setItem('exhibition_products', JSON.stringify(updated));
+    }
+  };
+
+  const openAddInnovationModal = () => {
+    setExhibitionModalType('innovation');
+    setExhibitionEditItem(null);
+    setInnovationFormData({
+      name: '',
+      category: 'ai',
+      level: 'prototype',
+      levelName: 'نموذج أولي',
+      team: '',
+      desc: '',
+      image: '',
+      tech: 'Python',
+      speed: 'فوري',
+      accuracy: '95%',
+      icon: 'Cpu'
+    });
+    setIsExhibitionModalOpen(true);
+  };
+
+  const openEditInnovationModal = (item) => {
+    setExhibitionModalType('innovation');
+    setExhibitionEditItem(item);
+    setInnovationFormData({
+      name: item.name || '',
+      category: item.category || 'ai',
+      level: item.level || 'prototype',
+      levelName: item.levelName || 'نموذج أولي',
+      team: item.team || '',
+      desc: item.desc || '',
+      image: item.image || '',
+      tech: item.stats?.tech || item.tech || 'Python',
+      speed: item.stats?.speed || item.speed || 'فوري',
+      accuracy: item.stats?.accuracy || item.accuracy || '95%',
+      icon: item.icon || 'Cpu'
+    });
+    setIsExhibitionModalOpen(true);
+  };
+
+  const openAddProductModal = () => {
+    setExhibitionModalType('product');
+    setExhibitionEditItem(null);
+    setProductFormData({
+      name: '',
+      category: 'منتجات زراعية',
+      faculty: 'كلية الزراعة',
+      facultyId: 'agriculture',
+      price: '',
+      image: '',
+      rating: '4.8 (120)',
+      tag: '',
+      tagColor: 'bg-emerald-600 text-white',
+      details: ''
+    });
+    setIsExhibitionModalOpen(true);
+  };
+
+  const openEditProductModal = (item) => {
+    setExhibitionModalType('product');
+    setExhibitionEditItem(item);
+    setProductFormData({
+      name: item.name || '',
+      category: item.category || 'منتجات زراعية',
+      faculty: item.faculty || 'كلية الزراعة',
+      facultyId: item.facultyId || 'agriculture',
+      price: item.price || '',
+      image: item.image || '',
+      rating: item.rating || '4.8 (120)',
+      tag: item.tag || '',
+      tagColor: item.tagColor || 'bg-emerald-600 text-white',
+      details: item.details || ''
+    });
+    setIsExhibitionModalOpen(true);
+  };
 
   const handleSaveNews = (e) => {
     e.preventDefault();
@@ -596,6 +757,8 @@ const AdminDashboard = () => {
           {[
             { id: 'overview', label: 'نظرة عامة', icon: BarChart2 },
             { id: 'news', label: `الأخبار (${newsList.length})`, icon: Newspaper },
+            { id: 'exhibition_innovations', label: `معرض الابتكارات (${innovations.length})`, icon: Sparkles },
+            { id: 'exhibition_products', label: `معرض الوحدات (${products.length})`, icon: ShoppingBag },
             { id: 'graduation', label: `مشروعات التخرج (${stats.totalGP})`, icon: GraduationCap },
             { id: 'research', label: `البحوث التطبيقية (${stats.totalAR})`, icon: BookOpen },
             { id: 'speakers', label: `المتحدثون (${stats.totalSpeakers})`, icon: Presentation },
@@ -968,6 +1131,151 @@ const AdminDashboard = () => {
                 </div>
               )}
 
+              {/* --- EXHIBITION INNOVATIONS TAB --- */}
+              {activeTab === 'exhibition_innovations' && (
+                <div className="space-y-6">
+                  <div className="flex justify-between items-center bg-white p-4 rounded-2xl border border-slate-200 shadow-sm">
+                    <h3 className="text-lg font-black text-slate-800">إدارة معروضات معرض الابتكارات الرقمية والذكاء الاصطناعي</h3>
+                    <button 
+                      onClick={openAddInnovationModal}
+                      className="px-5 py-2.5 bg-[#26462C] hover:bg-[#1a301e] text-[#F4A217] rounded-xl font-bold text-sm inline-flex items-center gap-2 transition-all shadow-md shadow-green-900/10"
+                    >
+                      <Plus className="w-4 h-4" /> إضافة ابتكار جديد
+                    </button>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {innovations.length === 0 ? (
+                      <div className="col-span-full py-16 text-center text-slate-400 font-bold bg-white rounded-3xl border border-slate-200">
+                        لا توجد ابتكارات مضافة حالياً. اضغط على الزر بالأعلى لإضافة أول ابتكار.
+                      </div>
+                    ) : (
+                      innovations.filter(item => 
+                        item.name?.toLowerCase().includes(searchQuery.toLowerCase()) || 
+                        item.team?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                        item.desc?.toLowerCase().includes(searchQuery.toLowerCase())
+                      ).map(item => (
+                        <div key={item.id} className="bg-white rounded-3xl border border-slate-100 shadow-sm overflow-hidden flex flex-col justify-between group hover:shadow-md transition-all">
+                          <div>
+                            <div className="relative h-48 bg-slate-100">
+                              <img 
+                                src={item.image || 'https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=600'} 
+                                alt={item.name} 
+                                className="w-full h-full object-cover" 
+                              />
+                              <span className="absolute top-4 right-4 bg-teal-600 text-white text-[10px] font-black px-3 py-1 rounded-full uppercase">
+                                {item.category === 'ai' ? 'ذكاء اصطناعي' : 
+                                 item.category === 'cyber' ? 'أمن سيبراني' :
+                                 item.category === 'iot' ? 'إنترنت أشياء' : 'تطبيقات ويب/جوال'}
+                              </span>
+                            </div>
+                            <div className="p-6 space-y-3">
+                              <span className="text-[10px] font-black text-slate-400">{item.team}</span>
+                              <h4 className="font-black text-slate-800 text-base leading-snug line-clamp-1">{item.name}</h4>
+                              <p className="text-xs font-bold text-slate-400 leading-relaxed line-clamp-2">{item.desc}</p>
+                              
+                              <div className="pt-3 border-t border-slate-100 flex items-center justify-between text-[11px] font-bold text-slate-500">
+                                <span>المستوى: <strong className="text-blue-600">{item.levelName || item.level}</strong></span>
+                                <span>التقنية: <strong>{item.stats?.tech || item.tech || 'Python'}</strong></span>
+                              </div>
+                            </div>
+                          </div>
+                          
+                          <div className="p-4 bg-slate-50/80 border-t border-slate-100 flex justify-end gap-2">
+                            <button 
+                              onClick={() => openEditInnovationModal(item)}
+                              className="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl font-bold text-xs inline-flex items-center gap-1 transition-colors"
+                            >
+                              <Edit className="w-3.5 h-3.5" /> تعديل
+                            </button>
+                            <button 
+                              onClick={() => handleDeleteInnovation(item.id)}
+                              className="px-4 py-2 bg-red-50 hover:bg-red-100 text-red-600 rounded-xl font-bold text-xs inline-flex items-center gap-1 transition-colors"
+                            >
+                              <Trash className="w-3.5 h-3.5" /> حذف
+                            </button>
+                          </div>
+                        </div>
+                      ))
+                    )}
+                  </div>
+                </div>
+              )}
+
+              {/* --- EXHIBITION PRODUCTS TAB --- */}
+              {activeTab === 'exhibition_products' && (
+                <div className="space-y-6">
+                  <div className="flex justify-between items-center bg-white p-4 rounded-2xl border border-slate-200 shadow-sm">
+                    <h3 className="text-lg font-black text-slate-800">إدارة معروضات ومنتجات الوحدات الإنتاجية بالكليات</h3>
+                    <button 
+                      onClick={openAddProductModal}
+                      className="px-5 py-2.5 bg-[#26462C] hover:bg-[#1a301e] text-[#F4A217] rounded-xl font-bold text-sm inline-flex items-center gap-2 transition-all shadow-md shadow-green-900/10"
+                    >
+                      <Plus className="w-4 h-4" /> إضافة منتج جديد
+                    </button>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {products.length === 0 ? (
+                      <div className="col-span-full py-16 text-center text-slate-400 font-bold bg-white rounded-3xl border border-slate-200">
+                        لا توجد منتجات مضافة حالياً. اضغط على الزر بالأعلى لإضافة أول منتج.
+                      </div>
+                    ) : (
+                      products.filter(item => 
+                        item.name?.toLowerCase().includes(searchQuery.toLowerCase()) || 
+                        item.faculty?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                        item.category?.toLowerCase().includes(searchQuery.toLowerCase())
+                      ).map(item => (
+                        <div key={item.id} className="bg-white rounded-3xl border border-slate-100 shadow-sm overflow-hidden flex flex-col justify-between group hover:shadow-md transition-all">
+                          <div>
+                            <div className="relative h-48 bg-slate-100">
+                              <img 
+                                src={item.image || 'https://images.unsplash.com/photo-1587049352846-4a222e784d38?w=600'} 
+                                alt={item.name} 
+                                className="w-full h-full object-cover" 
+                              />
+                              {item.tag && (
+                                <span className={`absolute top-4 right-4 text-white text-[10px] font-black px-3 py-1 rounded-full ${item.tagColor || 'bg-amber-500'}`}>
+                                  {item.tag}
+                                </span>
+                              )}
+                              <span className="absolute bottom-4 left-4 bg-white/90 backdrop-blur-sm text-slate-800 text-xs font-black px-3 py-1 rounded-full shadow-sm">
+                                {item.price}
+                              </span>
+                            </div>
+                            <div className="p-6 space-y-3">
+                              <span className="text-[10px] font-black text-slate-400">{item.faculty}</span>
+                              <h4 className="font-black text-slate-800 text-base leading-snug line-clamp-1">{item.name}</h4>
+                              <p className="text-xs font-bold text-slate-400 leading-relaxed line-clamp-2">{item.details}</p>
+                              
+                              <div className="pt-3 border-t border-slate-100 flex items-center justify-between text-[11px] font-bold text-slate-500">
+                                <span>القسم: <strong className="text-indigo-600">{item.category}</strong></span>
+                                <span>التقييم: <strong>{item.rating || '4.8 (120)'}</strong></span>
+                              </div>
+                            </div>
+                          </div>
+                          
+                          <div className="p-4 bg-slate-50/80 border-t border-slate-100 flex justify-end gap-2">
+                            <button 
+                              onClick={() => openEditProductModal(item)}
+                              className="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl font-bold text-xs inline-flex items-center gap-1 transition-colors"
+                            >
+                              <Edit className="w-3.5 h-3.5" /> تعديل
+                            </button>
+                            <button 
+                              onClick={() => handleDeleteProduct(item.id)}
+                              className="px-4 py-2 bg-red-50 hover:bg-red-100 text-red-600 rounded-xl font-bold text-xs inline-flex items-center gap-1 transition-colors"
+                            >
+                              <Trash className="w-3.5 h-3.5" /> حذف
+                            </button>
+                          </div>
+                        </div>
+                      ))
+                    )}
+                  </div>
+                </div>
+              )}
+
               {/* --- SELECTED DETAIL MODAL VIEW --- */}
               {selectedItem && (
                 <div className="space-y-8 animate-fade-in">
@@ -1170,6 +1478,256 @@ const AdminDashboard = () => {
         </div>
 
       </div>
+
+      {/* Exhibition Modal (Add/Edit) */}
+      {isExhibitionModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" onClick={() => setIsExhibitionModalOpen(false)}></div>
+          <div className="bg-white rounded-3xl w-full max-w-2xl overflow-hidden relative z-10 shadow-2xl animate-scale-up flex flex-col max-h-[90vh]">
+            <div className="bg-[#26462C] text-white p-6 flex justify-between items-center shrink-0">
+              <h2 className="text-2xl font-black text-[#F4A217]">
+                {exhibitionModalType === 'innovation'
+                  ? (exhibitionEditItem ? 'تعديل بيانات الابتكار' : 'إضافة ابتكار جديد لمعرض الابتكارات')
+                  : (exhibitionEditItem ? 'تعديل بيانات المنتج' : 'إضافة منتج جديد للوحدات الإنتاجية')
+                }
+              </h2>
+              <button 
+                onClick={() => setIsExhibitionModalOpen(false)}
+                className="w-8 h-8 flex items-center justify-center bg-white/10 hover:bg-white/20 rounded-full transition-colors font-bold"
+              >
+                ✕
+              </button>
+            </div>
+            
+            <div className="p-6 overflow-y-auto flex-1 text-right" dir="rtl">
+              {exhibitionModalType === 'innovation' ? (
+                <form onSubmit={handleSaveInnovation} className="space-y-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-xs font-bold text-slate-700 mb-2">عنوان الابتكار *</label>
+                      <input 
+                        type="text" 
+                        required
+                        value={innovationFormData.name}
+                        onChange={(e) => setInnovationFormData({...innovationFormData, name: e.target.value})}
+                        className="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:border-[#26462C] outline-none font-bold text-xs"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-bold text-slate-700 mb-2">اسم الفريق / المبتكر *</label>
+                      <input 
+                        type="text" 
+                        required
+                        value={innovationFormData.team}
+                        onChange={(e) => setInnovationFormData({...innovationFormData, team: e.target.value})}
+                        className="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:border-[#26462C] outline-none font-bold text-xs"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-bold text-slate-700 mb-2">التصنيف *</label>
+                      <select 
+                        value={innovationFormData.category}
+                        onChange={(e) => setInnovationFormData({...innovationFormData, category: e.target.value})}
+                        className="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:border-[#26462C] outline-none font-bold text-xs"
+                      >
+                        <option value="ai">الذكاء الاصطناعي</option>
+                        <option value="cyber">الأمن السيبراني</option>
+                        <option value="iot">إنترنت الأشياء</option>
+                        <option value="apps">تطبيقات الويب والجوال</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label className="block text-xs font-bold text-slate-700 mb-2">مستوى الجاهزية *</label>
+                      <select 
+                        value={innovationFormData.level}
+                        onChange={(e) => {
+                          const val = e.target.value;
+                          let name = 'نموذج أولي';
+                          if (val === 'advanced') name = 'مستوى متقدم';
+                          if (val === 'ready') name = 'جاهز للتبني التجاري';
+                          setInnovationFormData({...innovationFormData, level: val, levelName: name});
+                        }}
+                        className="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:border-[#26462C] outline-none font-bold text-xs"
+                      >
+                        <option value="prototype">نموذج أولي</option>
+                        <option value="advanced">مستوى متقدم</option>
+                        <option value="ready">جاهز للتبني التجاري</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label className="block text-xs font-bold text-slate-700 mb-2">التقنية المستخدمة</label>
+                      <input 
+                        type="text" 
+                        value={innovationFormData.tech}
+                        onChange={(e) => setInnovationFormData({...innovationFormData, tech: e.target.value})}
+                        className="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:border-[#26462C] outline-none font-bold text-xs"
+                        placeholder="مثال: React / Node.js"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-bold text-slate-700 mb-2">أيقونة العرض (اسم الأيقونة)</label>
+                      <select 
+                        value={innovationFormData.icon}
+                        onChange={(e) => setInnovationFormData({...innovationFormData, icon: e.target.value})}
+                        className="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:border-[#26462C] outline-none font-bold text-xs"
+                      >
+                        <option value="Cpu">Cpu (معالج)</option>
+                        <option value="Lock">Lock (قفل حماية)</option>
+                        <option value="Sprout">Sprout (بيئي / نبات)</option>
+                        <option value="Globe">Globe (إنترنت / شبكة)</option>
+                        <option value="Database">Database (قواعد بيانات)</option>
+                      </select>
+                    </div>
+                    <div className="md:col-span-2">
+                      <label className="block text-xs font-bold text-slate-700 mb-2">رابط صورة الابتكار</label>
+                      <input 
+                        type="url" 
+                        value={innovationFormData.image}
+                        onChange={(e) => setInnovationFormData({...innovationFormData, image: e.target.value})}
+                        className="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:border-[#26462C] outline-none font-bold text-xs text-left"
+                        dir="ltr"
+                        placeholder="https://images.unsplash.com/..."
+                      />
+                    </div>
+                    <div className="md:col-span-2">
+                      <label className="block text-xs font-bold text-slate-700 mb-2">الوصف والشرح *</label>
+                      <textarea 
+                        required
+                        rows={3}
+                        value={innovationFormData.desc}
+                        onChange={(e) => setInnovationFormData({...innovationFormData, desc: e.target.value})}
+                        className="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:border-[#26462C] outline-none font-bold text-xs resize-none"
+                      />
+                    </div>
+                  </div>
+                  
+                  <div className="pt-4 border-t border-slate-100 flex gap-3">
+                    <button type="submit" className="flex-1 bg-[#26462C] hover:bg-[#1a301e] text-white px-6 py-3 rounded-xl font-bold transition-colors text-sm">
+                      {exhibitionEditItem ? 'حفظ التعديلات' : 'إضافة للابتكارات'}
+                    </button>
+                    <button type="button" onClick={() => setIsExhibitionModalOpen(false)} className="px-6 py-3 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl font-bold transition-colors text-sm">
+                      إلغاء
+                    </button>
+                  </div>
+                </form>
+              ) : (
+                <form onSubmit={handleSaveProduct} className="space-y-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-xs font-bold text-slate-700 mb-2">اسم المنتج / الخدمة *</label>
+                      <input 
+                        type="text" 
+                        required
+                        value={productFormData.name}
+                        onChange={(e) => setProductFormData({...productFormData, name: e.target.value})}
+                        className="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:border-[#26462C] outline-none font-bold text-xs"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-bold text-slate-700 mb-2">الكلية المنتجة *</label>
+                      <select 
+                        value={productFormData.facultyId}
+                        onChange={(e) => {
+                          const val = e.target.value;
+                          const selectEl = e.target;
+                          const name = selectEl.options[selectEl.selectedIndex].text;
+                          setProductFormData({...productFormData, facultyId: val, faculty: name});
+                        }}
+                        className="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:border-[#26462C] outline-none font-bold text-xs"
+                      >
+                        <option value="agriculture">كلية الزراعة</option>
+                        <option value="science">كلية العلوم</option>
+                        <option value="artedu">كلية التربية الفنية</option>
+                        <option value="specific">كلية التربية النوعية</option>
+                        <option value="engineering">كلية الهندسة</option>
+                        <option value="computers">كلية الحاسبات والمعلومات</option>
+                        <option value="pharmacy">كلية الصيدلة</option>
+                        <option value="finearts">كلية الفنون الجميلة</option>
+                        <option value="tourism">كلية السياحة والفنادق</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label className="block text-xs font-bold text-slate-700 mb-2">التصنيف والقطاع *</label>
+                      <input 
+                        type="text" 
+                        required
+                        value={productFormData.category}
+                        onChange={(e) => setProductFormData({...productFormData, category: e.target.value})}
+                        className="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:border-[#26462C] outline-none font-bold text-xs"
+                        placeholder="مثال: منتجات زراعية أو منظفات"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-bold text-slate-700 mb-2">السعر التجاري *</label>
+                      <input 
+                        type="text" 
+                        required
+                        value={productFormData.price}
+                        onChange={(e) => setProductFormData({...productFormData, price: e.target.value})}
+                        className="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:border-[#26462C] outline-none font-bold text-xs"
+                        placeholder="مثال: 150 ج.م"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-bold text-slate-700 mb-2">شعار التسويق (Tag) (اختياري)</label>
+                      <input 
+                        type="text" 
+                        value={productFormData.tag}
+                        onChange={(e) => setProductFormData({...productFormData, tag: e.target.value})}
+                        className="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:border-[#26462C] outline-none font-bold text-xs"
+                        placeholder="مثال: الأكثر مبيعاً أو عصر بارد"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-bold text-slate-700 mb-2">لون الشعار</label>
+                      <select 
+                        value={productFormData.tagColor}
+                        onChange={(e) => setProductFormData({...productFormData, tagColor: e.target.value})}
+                        className="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:border-[#26462C] outline-none font-bold text-xs"
+                      >
+                        <option value="bg-emerald-600 text-white">أخضر زمردي</option>
+                        <option value="bg-amber-500 text-white">ذهبي / برتقالي</option>
+                        <option value="bg-blue-600 text-white">أزرق داكن</option>
+                        <option value="bg-purple-600 text-white">بنفسجي فني</option>
+                      </select>
+                    </div>
+                    <div className="md:col-span-2">
+                      <label className="block text-xs font-bold text-slate-700 mb-2">رابط صورة المنتج</label>
+                      <input 
+                        type="url" 
+                        value={productFormData.image}
+                        onChange={(e) => setProductFormData({...productFormData, image: e.target.value})}
+                        className="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:border-[#26462C] outline-none font-bold text-xs text-left"
+                        dir="ltr"
+                        placeholder="https://images.unsplash.com/..."
+                      />
+                    </div>
+                    <div className="md:col-span-2">
+                      <label className="block text-xs font-bold text-slate-700 mb-2">تفاصيل ومواصفات المنتج *</label>
+                      <textarea 
+                        required
+                        rows={3}
+                        value={productFormData.details}
+                        onChange={(e) => setProductFormData({...productFormData, details: e.target.value})}
+                        className="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:border-[#26462C] outline-none font-bold text-xs resize-none"
+                      />
+                    </div>
+                  </div>
+                  
+                  <div className="pt-4 border-t border-slate-100 flex gap-3">
+                    <button type="submit" className="flex-1 bg-[#26462C] hover:bg-[#1a301e] text-white px-6 py-3 rounded-xl font-bold transition-colors text-sm">
+                      {exhibitionEditItem ? 'حفظ التعديلات' : 'إضافة للمنتجات'}
+                    </button>
+                    <button type="button" onClick={() => setIsExhibitionModalOpen(false)} className="px-6 py-3 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl font-bold transition-colors text-sm">
+                      إلغاء
+                    </button>
+                  </div>
+                </form>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Add News Modal */}
       {isNewsModalOpen && (

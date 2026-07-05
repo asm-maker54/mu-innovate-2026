@@ -9,6 +9,9 @@ import {
 } from 'lucide-react';
 import FadeInView from '../components/FadeInView';
 
+// Icon Map for string to icon mapping
+const IconMap = { Cpu, Lock, Sprout, Globe, Database, Sparkles, Target, FlaskConical, Palette, Scissors, ShoppingBag };
+
 // Shared data source for exhibitions
 export const exhibitionsData = [
   {
@@ -70,7 +73,20 @@ const DigitalInnovationsLayout = ({ exhibition, isRtl }) => {
     { id: 'ready', name: 'جاهز للتبني التجاري' }
   ];
 
-  const innovations = [
+  const [innovations] = useState(() => {
+    const local = localStorage.getItem('exhibition_innovations');
+    if (local) {
+      try {
+        const parsed = JSON.parse(local);
+        return parsed.map(item => ({
+          ...item,
+          icon: IconMap[item.icon] || Cpu
+        }));
+      } catch (e) {
+        console.error("Error parsing exhibition_innovations", e);
+      }
+    }
+    return [
     {
       id: 1,
       name: 'نظام تشخيص الأورام الذكي بالرنين المغناطيسي',
@@ -150,6 +166,7 @@ const DigitalInnovationsLayout = ({ exhibition, isRtl }) => {
       iconColor: 'text-[#f0a500] bg-orange-50'
     }
   ];
+});
 
   const filteredInnovations = innovations.filter(item => {
     const matchesCategory = selectedCategory === 'all' || item.category === selectedCategory;
@@ -908,7 +925,16 @@ const ProductiveUnitsLayout = ({ exhibition, isRtl }) => {
     { id: 'sports', name: 'كلية التربية الرياضية', sector: 'humanities', icon: Users, activeBg: 'bg-gradient-to-tr from-slate-600 to-slate-700 shadow-slate-500/20', iconBg: 'bg-slate-100', iconColor: 'text-slate-600', hasProducts: false, desc: 'برمجيات تدريب بدني وتأهيل رياضي متكامل', image: 'https://images.unsplash.com/photo-1517838277536-f5f99be501cd?w=300&fit=crop&q=80' }
   ];
 
-  const products = [
+  const [products] = useState(() => {
+    const local = localStorage.getItem('exhibition_products');
+    if (local) {
+      try {
+        return JSON.parse(local);
+      } catch (e) {
+        console.error("Error parsing exhibition_products", e);
+      }
+    }
+    return [
     // Agriculture (3 products)
     {
       id: 1,
@@ -1144,6 +1170,7 @@ const ProductiveUnitsLayout = ({ exhibition, isRtl }) => {
       details: 'دليل سياحي يجمع بين الطباعة الورقية والرمز الرقمي QR لعرض مقاطع فيديو وخرائط تفاعلية لمعالم محافظة المنيا.'
     }
   ];
+});
 
   // If sector is changed, filter the faculties shown in the carousel
   const visibleFaculties = selectedSector === 'all'
