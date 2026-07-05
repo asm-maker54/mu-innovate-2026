@@ -8,6 +8,7 @@ CREATE TABLE IF NOT EXISTS public.registrations (
     organization TEXT NOT NULL,
     role TEXT NOT NULL, -- speaker, startup, investor, mentor, attendee, partner, researcher, volunteer
     password TEXT,
+    status TEXT DEFAULT 'تحت الفحص الإداري',
     details JSONB DEFAULT '{}'::jsonb,
     cv_url TEXT
 );

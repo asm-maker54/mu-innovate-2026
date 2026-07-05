@@ -67,6 +67,9 @@ const RegisterPage = () => {
     speakerExpertise: '',
     speakerBio: '',
     speakerLinkedin: '',
+    speakerFacebook: '',
+    speakerX: '',
+    speakerImage: '',
 
     // Step 2: Partner
     companyName: '',
@@ -275,6 +278,7 @@ const RegisterPage = () => {
                 organization,
                 role: selectedRole,
                 password,
+                status: 'تحت الفحص الإداري',
                 cv_url: cvUrl,
                 details: otherDetails
               }
@@ -291,6 +295,7 @@ const RegisterPage = () => {
             phone: formData.phone,
             organization: formData.organization,
             role: selectedRole,
+            status: 'تحت الفحص الإداري',
             cv_url: cvUrl || '#',
             details: {
               startupName: formData.startupName || '',
@@ -301,6 +306,9 @@ const RegisterPage = () => {
               speakerExpertise: formData.speakerExpertise || '',
               speakerBio: formData.speakerBio || '',
               speakerLinkedin: formData.speakerLinkedin || '',
+              speakerFacebook: formData.speakerFacebook || '',
+              speakerX: formData.speakerX || '',
+              speakerImage: formData.speakerImage || '',
               companyName: formData.companyName || '',
               partnerType: formData.partnerType || '',
               companyWebsite: formData.companyWebsite || '',
@@ -343,6 +351,9 @@ const RegisterPage = () => {
             speakerExpertise: formData.speakerExpertise || '',
             speakerBio: formData.speakerBio || '',
             speakerLinkedin: formData.speakerLinkedin || '',
+            speakerFacebook: formData.speakerFacebook || '',
+            speakerX: formData.speakerX || '',
+            speakerImage: formData.speakerImage || '',
             companyName: formData.companyName || '',
             partnerType: formData.partnerType || '',
             companyWebsite: formData.companyWebsite || '',
@@ -601,8 +612,20 @@ const RegisterPage = () => {
                         {renderInputError('speakerBio')}
                       </div>
                       <div>
+                        <label className="block text-sm font-bold text-slate-700 mb-2">رابط الصورة الشخصية (اختياري)</label>
+                        <input type="url" name="speakerImage" value={formData.speakerImage} onChange={handleChange} className={getInputClass('speakerImage')} placeholder="https://example.com/my-photo.jpg" dir="ltr" />
+                      </div>
+                      <div>
                         <label className="block text-sm font-bold text-slate-700 mb-2">رابط حساب LinkedIn (اختياري)</label>
                         <input type="url" name="speakerLinkedin" value={formData.speakerLinkedin} onChange={handleChange} className={getInputClass('speakerLinkedin')} placeholder="https://linkedin.com/in/..." dir="ltr" />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-bold text-slate-700 mb-2">رابط حساب Facebook (اختياري)</label>
+                        <input type="url" name="speakerFacebook" value={formData.speakerFacebook} onChange={handleChange} className={getInputClass('speakerFacebook')} placeholder="https://facebook.com/..." dir="ltr" />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-bold text-slate-700 mb-2">رابط حساب X (تويتر سابقاً) (اختياري)</label>
+                        <input type="url" name="speakerX" value={formData.speakerX} onChange={handleChange} className={getInputClass('speakerX')} placeholder="https://x.com/..." dir="ltr" />
                       </div>
                     </>
                   )}

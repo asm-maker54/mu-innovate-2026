@@ -238,19 +238,37 @@ const AdminDashboard = () => {
   const handleStatusChange = async (itemId, type, newStatus) => {
     try {
       if (isSupabaseConfigured) {
-        const table = type === 'graduation' ? 'graduation_projects' : 'applied_research';
+        const table = 
+          type === 'graduation' ? 'graduation_projects' : 
+          type === 'research' ? 'applied_research' : 'registrations';
         const { error } = await supabase
           .from(table)
           .update({ status: newStatus })
           .eq('id', itemId);
         if (error) throw error;
+      } else {
+        if (type === 'registration') {
+          const localRegs = JSON.parse(localStorage.getItem('local_registrations') || '[]');
+          const updated = localRegs.map(r => r.id === itemId ? { ...r, status: newStatus } : r);
+          localStorage.setItem('local_registrations', JSON.stringify(updated));
+        } else if (type === 'graduation') {
+          const localProjects = JSON.parse(localStorage.getItem('local_graduation_projects') || '[]');
+          const updated = localProjects.map(p => p.id === itemId ? { ...p, status: newStatus } : p);
+          localStorage.setItem('local_graduation_projects', JSON.stringify(updated));
+        } else if (type === 'research') {
+          const localResearch = JSON.parse(localStorage.getItem('local_applied_research') || '[]');
+          const updated = localResearch.map(r => r.id === itemId ? { ...r, status: newStatus } : r);
+          localStorage.setItem('local_applied_research', JSON.stringify(updated));
+        }
       }
       
       // Update local state
       if (type === 'graduation') {
         setGradProjects(prev => prev.map(p => p.id === itemId ? { ...p, status: newStatus } : p));
-      } else {
+      } else if (type === 'research') {
         setAppliedResearch(prev => prev.map(r => r.id === itemId ? { ...r, status: newStatus } : r));
+      } else if (type === 'registration') {
+        setRegistrants(prev => prev.map(r => r.id === itemId ? { ...r, status: newStatus } : r));
       }
 
       if (selectedItem && selectedItem.id === itemId) {
@@ -696,11 +714,13 @@ const AdminDashboard = () => {
                         <th className="p-4">البريد الإلكتروني</th>
                         <th className="p-4">رقم الهاتف</th>
                         <th className="p-4 text-center">الملف / السيرة الذاتية</th>
+                        <th className="p-4">الحالة</th>
+                        <th className="p-4 text-center">الإجراءات</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-slate-100">
                       {getFilteredRegistrants(activeTab.slice(0, -1)).length === 0 ? (
-                        <tr><td colSpan="6" className="p-8 text-center text-slate-400 font-bold">لا يوجد مسجلون في هذا القسم</td></tr>
+                        <tr><td colSpan="8" className="p-8 text-center text-slate-400 font-bold">لا يوجد مسجلون في هذا القسم</td></tr>
                       ) : (
                         getFilteredRegistrants(activeTab.slice(0, -1)).map(r => (
                           <tr key={r.id} className="hover:bg-slate-50 transition-colors">
@@ -717,12 +737,35 @@ const AdminDashboard = () => {
                             <td className="p-4 font-semibold text-slate-500">{r.email}</td>
                             <td className="p-4 font-semibold text-slate-500">{r.phone}</td>
                             <td className="p-4 text-center">
-                              {r.cv_url ? (
+                              {r.cv_url && r.cv_url !== '#' ? (
                                 <a href={r.cv_url} target="_blank" className="p-2 text-blue-600 bg-blue-50 hover:bg-blue-100 rounded-lg inline-flex items-center gap-1 font-bold text-xs">
                                   <Download className="w-3.5 h-3.5" /> تحميل الملف
                                 </a>
                               ) : (
                                 <span className="text-slate-400 font-bold text-xs">لا يوجد مرفق</span>
+                              )}
+                            </td>
+                            <td className="p-4">
+                              <span className={`px-3 py-1 rounded-full text-xs font-black ${
+                                r.status === 'مقبول للعرض في القمة' ? 'bg-green-100 text-green-700' :
+                                (r.status || '').includes('تحت') ? 'bg-amber-100 text-amber-700' : 'bg-slate-100 text-slate-700'
+                              }`}>{r.status || 'تحت الفحص الإداري'}</span>
+                            </td>
+                            <td className="p-4 text-center">
+                              {r.status === 'مقبول للعرض في القمة' ? (
+                                <button 
+                                  onClick={() => handleStatusChange(r.id, 'registration', 'تحت الفحص الإداري')}
+                                  className="px-3 py-1.5 bg-amber-50 hover:bg-amber-100 text-amber-700 rounded-lg font-bold text-xs transition-colors"
+                                >
+                                  إلغاء القبول
+                                </button>
+                              ) : (
+                                <button 
+                                  onClick={() => handleStatusChange(r.id, 'registration', 'مقبول للعرض في القمة')}
+                                  className="px-3 py-1.5 bg-green-600 hover:bg-green-700 text-white rounded-lg font-bold text-xs transition-colors shadow-sm"
+                                >
+                                  موافقة وقبول
+                                </button>
                               )}
                             </td>
                           </tr>

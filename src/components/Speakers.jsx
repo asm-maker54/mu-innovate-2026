@@ -1,80 +1,158 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { ArrowLeft, Globe, Mail, Sparkles } from 'lucide-react';
+import { supabase, isSupabaseConfigured } from '../supabaseClient';
 
 const Speakers = () => {
   const [activeIndex, setActiveIndex] = useState(0);
 
-  const speakers = [
+  const defaultSpeakers = [
     {
-      id: 0,
+      id: 'd0',
       name: 'أحمد محمود',
       nameEn: 'AHMED MAHMOUD',
       role: 'مؤسس ومدير تنفيذي',
       company: 'TechVision',
       image: 'https://images.unsplash.com/photo-1560250097-0b93528c311a?auto=format&fit=crop&q=80&w=800',
       color: 'from-blue-600 to-indigo-900',
-      accent: 'bg-blue-500'
+      accent: 'bg-blue-500',
+      linkedin: 'https://linkedin.com',
+      facebook: 'https://facebook.com',
+      x: 'https://x.com'
     },
     {
-      id: 1,
+      id: 'd1',
       name: 'د. إسماعيل فاروق',
       nameEn: 'ISMAEL FARO',
       role: 'نائب رئيس الذكاء الاصطناعي',
       company: 'IBM',
       image: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&q=80&w=800',
       color: 'from-yellow-500 to-orange-700',
-      accent: 'bg-yellow-400'
+      accent: 'bg-yellow-400',
+      linkedin: 'https://linkedin.com',
+      facebook: 'https://facebook.com',
+      x: 'https://x.com'
     },
     {
-      id: 2,
+      id: 'd2',
       name: 'جيرجن وايتشينبيرجر',
       nameEn: 'JUERGEN WEICHENBERGER',
       role: 'شريك البيانات',
       company: 'Ernst & Young',
       image: 'https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?auto=format&fit=crop&q=80&w=800',
       color: 'from-purple-600 to-purple-900',
-      accent: 'bg-purple-500'
+      accent: 'bg-purple-500',
+      linkedin: 'https://linkedin.com',
+      facebook: 'https://facebook.com',
+      x: 'https://x.com'
     },
     {
-      id: 3,
+      id: 'd3',
       name: 'سارة عبد الله',
       nameEn: 'SARAH ABDALLAH',
       role: 'رئيسة قسم الابتكار',
       company: 'Microsoft',
       image: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&q=80&w=800',
       color: 'from-emerald-500 to-teal-900',
+      accent: 'bg-emerald-500',
+      linkedin: 'https://linkedin.com',
+      facebook: 'https://facebook.com',
+      x: 'https://x.com'
     },
     {
-      id: 4,
+      id: 'd4',
       name: 'عمر ياسين',
       nameEn: 'OMAR YASSIN',
       role: 'مستثمر ومبادر',
       company: 'Venture Capital',
       image: 'https://images.unsplash.com/photo-1557862921-37829c790f19?auto=format&fit=crop&q=80&w=800',
       color: 'from-red-500 to-rose-900',
-      accent: 'bg-red-500'
+      accent: 'bg-red-500',
+      linkedin: 'https://linkedin.com',
+      facebook: 'https://facebook.com',
+      x: 'https://x.com'
     },
     {
-      id: 5,
+      id: 'd5',
       name: 'ليلى منصور',
       nameEn: 'LAYLA MANSOUR',
       role: 'مديرة تطوير المنتجات',
       company: 'Amazon',
       image: 'https://images.unsplash.com/photo-1580489944761-15a19d654956?auto=format&fit=crop&q=80&w=800',
       color: 'from-cyan-500 to-blue-900',
-      accent: 'bg-cyan-500'
+      accent: 'bg-cyan-500',
+      linkedin: 'https://linkedin.com',
+      facebook: 'https://facebook.com',
+      x: 'https://x.com'
     },
     {
-      id: 6,
+      id: 'd6',
       name: 'طارق حلمي',
       nameEn: 'TAREK HELMY',
       role: 'مستشار الابتكار',
       company: 'Google',
       image: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80&w=800',
       color: 'from-pink-500 to-fuchsia-900',
-      accent: 'bg-pink-500'
+      accent: 'bg-pink-500',
+      linkedin: 'https://linkedin.com',
+      facebook: 'https://facebook.com',
+      x: 'https://x.com'
     }
   ];
+
+  const [speakers, setSpeakers] = useState(defaultSpeakers);
+
+  useEffect(() => {
+    const fetchApprovedSpeakers = async () => {
+      try {
+        let approvedList = [];
+        
+        if (isSupabaseConfigured) {
+          const { data, error } = await supabase
+            .from('registrations')
+            .select('*')
+            .eq('role', 'speaker')
+            .eq('status', 'مقبول للعرض في القمة');
+          
+          if (!error && data) {
+            approvedList = data;
+          }
+        } else {
+          const localRegs = JSON.parse(localStorage.getItem('local_registrations') || '[]');
+          approvedList = localRegs.filter(r => r.role === 'speaker' && r.status === 'مقبول للعرض في القمة');
+        }
+
+        const gradients = [
+          'from-blue-600 to-indigo-900',
+          'from-yellow-500 to-orange-700',
+          'from-purple-600 to-purple-900',
+          'from-emerald-500 to-teal-900',
+          'from-red-500 to-rose-900',
+          'from-cyan-500 to-blue-900',
+          'from-pink-500 to-fuchsia-900'
+        ];
+        
+        const formatted = approvedList.map((s, index) => ({
+          id: s.id,
+          name: s.full_name,
+          nameEn: s.details?.speechTopic?.toUpperCase() || 'SPEAKER',
+          role: s.details?.speakerExpertise || 'متحدث القمة',
+          company: s.organization || 'جامعة المنيا',
+          image: s.details?.speakerImage || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&q=80&w=800',
+          color: gradients[index % gradients.length],
+          accent: 'bg-emerald-500',
+          linkedin: s.details?.speakerLinkedin || '#',
+          facebook: s.details?.speakerFacebook || '#',
+          x: s.details?.speakerX || '#'
+        }));
+
+        setSpeakers([...defaultSpeakers, ...formatted]);
+      } catch (err) {
+        console.error("Error fetching approved speakers:", err);
+      }
+    };
+
+    fetchApprovedSpeakers();
+  }, []);
 
   return (
     <section className="py-10 md:py-12 bg-[#0a0f1c] relative overflow-hidden" dir="rtl">
@@ -172,12 +250,42 @@ const Speakers = () => {
                         
                         {/* Social Icons */}
                         <div className="flex gap-3 mt-4">
-                          <div className={`w-10 h-10 rounded-full bg-white/10 backdrop-blur-sm flex items-center justify-center text-white hover:${speaker.accent} transition-colors`}>
-                            <Globe className="w-5 h-5" />
-                          </div>
-                          <div className={`w-10 h-10 rounded-full bg-white/10 backdrop-blur-sm flex items-center justify-center text-white hover:${speaker.accent} transition-colors`}>
-                            <Mail className="w-5 h-5" />
-                          </div>
+                          {speaker.linkedin && speaker.linkedin !== '#' && (
+                            <a 
+                              href={speaker.linkedin} 
+                              target="_blank" 
+                              rel="noreferrer"
+                              className="w-10 h-10 rounded-full bg-white/10 backdrop-blur-sm flex items-center justify-center text-white hover:bg-blue-600 transition-all hover:scale-110"
+                            >
+                              <svg className="w-5 h-5 fill-current" viewBox="0 0 24 24">
+                                <path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/>
+                              </svg>
+                            </a>
+                          )}
+                          {speaker.facebook && speaker.facebook !== '#' && (
+                            <a 
+                              href={speaker.facebook} 
+                              target="_blank" 
+                              rel="noreferrer"
+                              className="w-10 h-10 rounded-full bg-white/10 backdrop-blur-sm flex items-center justify-center text-white hover:bg-blue-700 transition-all hover:scale-110"
+                            >
+                              <svg className="w-5 h-5 fill-current" viewBox="0 0 24 24">
+                                <path d="M9 8h-3v4h3v12h5v-12h3.642l.358-4h-4v-1.667c0-.955.192-1.333 1.115-1.333h2.885v-5h-3.808c-3.596 0-5.192 1.583-5.192 4.615v3.385z"/>
+                              </svg>
+                            </a>
+                          )}
+                          {speaker.x && speaker.x !== '#' && (
+                            <a 
+                              href={speaker.x} 
+                              target="_blank" 
+                              rel="noreferrer"
+                              className="w-10 h-10 rounded-full bg-white/10 backdrop-blur-sm flex items-center justify-center text-white hover:bg-slate-800 transition-all hover:scale-110"
+                            >
+                              <svg className="w-5 h-5 fill-current" viewBox="0 0 24 24">
+                                <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
+                              </svg>
+                            </a>
+                          )}
                         </div>
                       </div>
 

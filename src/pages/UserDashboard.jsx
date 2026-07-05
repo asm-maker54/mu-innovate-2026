@@ -229,9 +229,17 @@ const UserDashboard = () => {
         <div className="w-full lg:w-80 shrink-0">
           <div className="bg-white rounded-3xl shadow-xl shadow-slate-200/40 border border-slate-100 overflow-hidden sticky top-28">
             <div className="p-8 border-b border-slate-100 flex items-center gap-4 bg-slate-50/50">
-              <div className="w-16 h-16 bg-gradient-to-tr from-blue-600 to-blue-400 rounded-full flex items-center justify-center text-white shadow-lg shadow-blue-500/30 shrink-0">
-                <User className="w-8 h-8" />
-              </div>
+              {user?.details?.speakerImage ? (
+                <img 
+                  src={user.details.speakerImage} 
+                  alt={user.full_name} 
+                  className="w-16 h-16 rounded-full object-cover shadow-lg border-2 border-blue-500 shrink-0" 
+                />
+              ) : (
+                <div className="w-16 h-16 bg-gradient-to-tr from-blue-600 to-blue-400 rounded-full flex items-center justify-center text-white shadow-lg shadow-blue-500/30 shrink-0">
+                  <User className="w-8 h-8" />
+                </div>
+              )}
               <div>
                 <h2 className="font-black text-xl text-slate-900 mb-1">{user?.full_name || 'أحمد محمد'}</h2>
                 <p className="text-xs bg-blue-50 text-blue-700 px-2 py-0.5 rounded font-black mb-1 w-fit">{getRoleLabel(activeRole)}</p>
@@ -270,26 +278,7 @@ const UserDashboard = () => {
 
         {/* Main Content */}
         <div className="flex-1 min-w-0">
-          {/* Mock Role Selector - For Demo Purposes */}
-          <div className="bg-white p-5 rounded-3xl shadow-sm border border-slate-100 mb-8 flex flex-col sm:flex-row sm:items-center gap-4">
-            <span className="font-bold text-slate-700 text-sm whitespace-nowrap">{isRtl ? 'تغيير نوع المستخدم (للتجربة):' : 'Change User Role (For Demo):'}</span>
-            <div className="flex flex-wrap gap-2">
-              {roles.map(role => (
-                <button
-                  key={role.id}
-                  onClick={() => setActiveRole(role.id)}
-                  className={`px-4 py-2 rounded-full text-xs font-bold transition-all flex items-center gap-2 ${
-                    activeRole === role.id 
-                      ? 'bg-slate-800 text-white shadow-lg shadow-slate-900/20' 
-                      : 'bg-slate-50 text-slate-600 hover:bg-slate-100 border border-slate-200'
-                  }`}
-                >
-                  <role.icon className="w-3.5 h-3.5" />
-                  {role.label}
-                </button>
-              ))}
-            </div>
-          </div>
+
 
           {/* Header */}
           <div className="mb-8 px-2">
