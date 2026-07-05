@@ -4,7 +4,8 @@ import {
   User, BookOpen, GraduationCap, Mic, Settings, LayoutDashboard, 
   Calendar, Clock, FileText, CheckCircle, AlertCircle, LogOut,
   Upload, Camera, FileCheck, X, XCircle, ExternalLink,
-  Play, Pause, Bell, ChevronUp, ChevronDown, ChevronRight, Check
+  Play, Pause, Bell, ChevronUp, ChevronDown, ChevronRight, Check,
+  Lock, Shield
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
