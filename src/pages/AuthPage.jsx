@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Mail, Lock, User, ArrowRight } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
+import { supabase, isSupabaseConfigured } from '../supabaseClient';
 
 const AuthPage = () => {
   const { t, i18n } = useTranslation();
@@ -12,13 +13,39 @@ const AuthPage = () => {
   const [error, setError] = useState('');
   const navigate = useNavigate();
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
 
     if (password.length < 6) {
       setError(isRtl ? 'يجب ألا تقل كلمة المرور عن 6 أحرف' : 'Password must be at least 6 characters');
       return;
+    }
+
+    // 0. Search in Supabase registrations (if configured)
+    if (isSupabaseConfigured) {
+      try {
+        const { data, error: sbError } = await supabase
+          .from('registrations')
+          .select('*')
+          .eq('email', email.trim())
+          .maybeSingle();
+
+        if (sbError) throw sbError;
+
+        if (data) {
+          if (data.password === password) {
+            localStorage.setItem('current_user', JSON.stringify(data));
+            navigate('/dashboard');
+            return;
+          } else {
+            setError(isRtl ? 'كلمة المرور غير صحيحة' : 'Incorrect password');
+            return;
+          }
+        }
+      } catch (err) {
+        console.error("Supabase auth error:", err);
+      }
     }
 
     // 1. Search in local_registrations (localStorage)

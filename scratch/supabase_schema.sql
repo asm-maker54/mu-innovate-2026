@@ -6,7 +6,8 @@ CREATE TABLE IF NOT EXISTS public.registrations (
     email TEXT NOT NULL,
     phone TEXT NOT NULL,
     organization TEXT NOT NULL,
-    role TEXT NOT NULL, -- speaker, startup, investor, mentor, attendee, partner
+    role TEXT NOT NULL, -- speaker, startup, investor, mentor, attendee, partner, researcher, volunteer
+    password TEXT,
     details JSONB DEFAULT '{}'::jsonb,
     cv_url TEXT
 );

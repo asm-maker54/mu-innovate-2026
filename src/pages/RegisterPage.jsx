@@ -263,7 +263,7 @@ const RegisterPage = () => {
         }
 
         if (isSupabaseConfigured) {
-          const { fullName, email, phone, organization, attachment, acceptTerms, ...otherDetails } = formData;
+          const { fullName, email, phone, organization, password, attachment, acceptTerms, ...otherDetails } = formData;
           
           const { data, error } = await supabase
             .from('registrations')
@@ -274,6 +274,7 @@ const RegisterPage = () => {
                 phone,
                 organization,
                 role: selectedRole,
+                password,
                 cv_url: cvUrl,
                 details: otherDetails
               }
