@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { X, CalendarDays, MapPin } from 'lucide-react';
+import { Link } from 'react-router-dom';
 
 const FloatingPromo = () => {
   const [isVisible, setIsVisible] = useState(true);
@@ -51,9 +52,12 @@ const FloatingPromo = () => {
           </div>
         </div>
 
-        <button className="w-full bg-[#ff9800] hover:bg-[#e68a00] text-white font-bold py-3.5 px-4 rounded-full transition-colors shadow-lg shadow-orange-500/20">
+        <Link 
+          to="/register"
+          className="w-full bg-[#ff9800] hover:bg-[#e68a00] text-white font-bold py-3.5 px-4 rounded-full transition-colors shadow-lg shadow-orange-500/20 block text-center"
+        >
           سجّل اهتمامك الآن
-        </button>
+        </Link>
 
       </div>
     </div>

@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Sparkles, Bell, CalendarDays, MapPin } from 'lucide-react';
+import { Link } from 'react-router-dom';
 
 const ComingSoonBanner = () => {
   const [days, setDays] = useState(0);
@@ -114,9 +115,12 @@ const ComingSoonBanner = () => {
               <span>جامعة المنيا</span>
             </div>
           </div>
-          <button className="w-full lg:w-auto px-10 py-4 bg-gradient-to-r from-[#ff9800] to-[#ff5722] text-white font-bold text-lg rounded-xl hover:from-[#f57c00] hover:to-[#e64a19] transition-all shadow-lg shadow-orange-500/30 hover:-translate-y-1">
+          <Link 
+            to="/register"
+            className="w-full lg:w-auto px-10 py-4 bg-gradient-to-r from-[#ff9800] to-[#ff5722] text-white font-bold text-center text-lg rounded-xl hover:from-[#f57c00] hover:to-[#e64a19] transition-all shadow-lg shadow-orange-500/30 hover:-translate-y-1 block"
+          >
             سجّل اهتمامك الآن
-          </button>
+          </Link>
         </div>
 
       </div>
