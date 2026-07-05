@@ -1,102 +1,82 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowLeft, Globe, Mail, Sparkles } from 'lucide-react';
+import { ArrowLeft, X, Cpu, MessageSquare, Award, Sparkles } from 'lucide-react';
 import { supabase, isSupabaseConfigured } from '../supabaseClient';
 
 const Speakers = () => {
   const [activeIndex, setActiveIndex] = useState(0);
+  const [selectedSpeaker, setSelectedSpeaker] = useState(null);
 
   const defaultSpeakers = [
     {
-      id: 'd0',
-      name: 'أحمد محمود',
-      nameEn: 'AHMED MAHMOUD',
-      role: 'مؤسس ومدير تنفيذي',
-      company: 'TechVision',
+      id: 'd0', name: 'أحمد محمود', nameEn: 'AHMED MAHMOUD',
+      role: 'مؤسس ومدير تنفيذي', company: 'TechVision',
       image: 'https://images.unsplash.com/photo-1560250097-0b93528c311a?auto=format&fit=crop&q=80&w=800',
-      color: 'from-blue-600 to-indigo-900',
-      accent: 'bg-blue-500',
-      linkedin: 'https://linkedin.com',
-      facebook: 'https://facebook.com',
-      x: 'https://x.com'
+      color: 'from-blue-600 to-indigo-900', accent: 'bg-blue-500',
+      linkedin: 'https://linkedin.com', facebook: 'https://facebook.com', x: 'https://x.com',
+      speechTopic: 'مستقبل الذكاء الاصطناعي في تمكين الشركات الناشئة',
+      speakerBio: 'القمة فرصة فريدة للربط بين البحث الأكاديمي والفرص الاستثمارية الحقيقية في صعيد مصر.',
+      skills: ['الذكاء الاصطناعي', 'ريادة الأعمال', 'إدارة المنتجات']
     },
     {
-      id: 'd1',
-      name: 'د. إسماعيل فاروق',
-      nameEn: 'ISMAEL FARO',
-      role: 'نائب رئيس الذكاء الاصطناعي',
-      company: 'IBM',
+      id: 'd1', name: 'د. إسماعيل فاروق', nameEn: 'ISMAEL FARO',
+      role: 'نائب رئيس الذكاء الاصطناعي', company: 'IBM',
       image: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&q=80&w=800',
-      color: 'from-yellow-500 to-orange-700',
-      accent: 'bg-yellow-400',
-      linkedin: 'https://linkedin.com',
-      facebook: 'https://facebook.com',
-      x: 'https://x.com'
+      color: 'from-yellow-500 to-orange-700', accent: 'bg-yellow-400',
+      linkedin: 'https://linkedin.com', facebook: 'https://facebook.com', x: 'https://x.com',
+      speechTopic: 'الحوسبة السحابية وهندسة الأنظمة الذكية للجيل القادم',
+      speakerBio: 'جامعة المنيا تخطو خطوة تاريخية نحو دعم الاقتصاد المعرفي وتوطين التقنيات الحديثة.',
+      skills: ['الحوسبة السحابية', 'هندسة البرمجيات', 'تحليل البيانات']
     },
     {
-      id: 'd2',
-      name: 'جيرجن وايتشينبيرجر',
-      nameEn: 'JUERGEN WEICHENBERGER',
-      role: 'شريك البيانات',
-      company: 'Ernst & Young',
+      id: 'd2', name: 'جيرجن وايتشينبيرجر', nameEn: 'JUERGEN WEICHENBERGER',
+      role: 'شريك البيانات', company: 'Ernst & Young',
       image: 'https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?auto=format&fit=crop&q=80&w=800',
-      color: 'from-purple-600 to-purple-900',
-      accent: 'bg-purple-500',
-      linkedin: 'https://linkedin.com',
-      facebook: 'https://facebook.com',
-      x: 'https://x.com'
+      color: 'from-purple-600 to-purple-900', accent: 'bg-purple-500',
+      linkedin: 'https://linkedin.com', facebook: 'https://facebook.com', x: 'https://x.com',
+      speechTopic: 'تحليل البيانات الضخمة وبناء النماذج الاستباقية في الصناعة',
+      speakerBio: 'توجيه الاستثمارات للشركات التقنية الناشئة هو المحرك الفعلي للنمو الاقتصادي الحديث.',
+      skills: ['تحليل البيانات', 'استشارات الأعمال', 'الذكاء الاستراتيجي']
     },
     {
-      id: 'd3',
-      name: 'سارة عبد الله',
-      nameEn: 'SARAH ABDALLAH',
-      role: 'رئيسة قسم الابتكار',
-      company: 'Microsoft',
+      id: 'd3', name: 'سارة عبد الله', nameEn: 'SARAH ABDALLAH',
+      role: 'رئيسة قسم الابتكار', company: 'Microsoft',
       image: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&q=80&w=800',
-      color: 'from-emerald-500 to-teal-900',
-      accent: 'bg-emerald-500',
-      linkedin: 'https://linkedin.com',
-      facebook: 'https://facebook.com',
-      x: 'https://x.com'
+      color: 'from-emerald-500 to-teal-900', accent: 'bg-emerald-500',
+      linkedin: 'https://linkedin.com', facebook: 'https://facebook.com', x: 'https://x.com',
+      speechTopic: 'التفكير التصميمي والابتكار الرقمي في قيادة المؤسسات',
+      speakerBio: 'يسعدني المساهمة في هذا الحدث الضخم لنقل خبرتي للشباب والمبتكرين المبدعين.',
+      skills: ['التفكير التصميمي', 'التحول الرقمي', 'القيادة التنفيذية']
     },
     {
-      id: 'd4',
-      name: 'عمر ياسين',
-      nameEn: 'OMAR YASSIN',
-      role: 'مستثمر ومبادر',
-      company: 'Venture Capital',
+      id: 'd4', name: 'عمر ياسين', nameEn: 'OMAR YASSIN',
+      role: 'مستثمر ومبادر', company: 'Venture Capital',
       image: 'https://images.unsplash.com/photo-1557862921-37829c790f19?auto=format&fit=crop&q=80&w=800',
-      color: 'from-red-500 to-rose-900',
-      accent: 'bg-red-500',
-      linkedin: 'https://linkedin.com',
-      facebook: 'https://facebook.com',
-      x: 'https://x.com'
+      color: 'from-red-500 to-rose-900', accent: 'bg-red-500',
+      linkedin: 'https://linkedin.com', facebook: 'https://facebook.com', x: 'https://x.com',
+      speechTopic: 'آليات جذب التمويل الاستثماري وجاهزية الشركات للنمو',
+      speakerBio: 'المشاريع الناشئة والبحث العلمي التطبيقي هما حجر الأساس للتنمية المستدامة.',
+      skills: ['رأس المال الجريء', 'التمويل والاستثمار', 'تقييم المشاريع']
     },
     {
-      id: 'd5',
-      name: 'ليلى منصور',
-      nameEn: 'LAYLA MANSOUR',
-      role: 'مديرة تطوير المنتجات',
-      company: 'Amazon',
+      id: 'd5', name: 'ليلى منصور', nameEn: 'LAYLA MANSOUR',
+      role: 'مديرة تطوير المنتجات', company: 'Amazon',
       image: 'https://images.unsplash.com/photo-1580489944761-15a19d654956?auto=format&fit=crop&q=80&w=800',
-      color: 'from-cyan-500 to-blue-900',
-      accent: 'bg-cyan-500',
-      linkedin: 'https://linkedin.com',
-      facebook: 'https://facebook.com',
-      x: 'https://x.com'
+      color: 'from-cyan-500 to-blue-900', accent: 'bg-cyan-500',
+      linkedin: 'https://linkedin.com', facebook: 'https://facebook.com', x: 'https://x.com',
+      speechTopic: 'بناء وتوسيع النظم التقنية وتطوير المنتجات الموجهة للمستخدم',
+      speakerBio: 'قمة الابتكار هي الجسر الحقيقي الذي يربط بين طموحات الشباب والفرص العالمية.',
+      skills: ['تطوير المنتجات', 'تجربة المستخدم', 'نمو الشركات']
     },
     {
-      id: 'd6',
-      name: 'طارق حلمي',
-      nameEn: 'TAREK HELMY',
-      role: 'مستشار الابتكار',
-      company: 'Google',
+      id: 'd6', name: 'طارق حلمي', nameEn: 'TAREK HELMY',
+      role: 'مستشار الابتكار', company: 'Google',
       image: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80&w=800',
-      color: 'from-pink-500 to-fuchsia-900',
-      accent: 'bg-pink-500',
-      linkedin: 'https://linkedin.com',
-      facebook: 'https://facebook.com',
-      x: 'https://x.com'
+      color: 'from-pink-500 to-fuchsia-900', accent: 'bg-pink-500',
+      linkedin: 'https://linkedin.com', facebook: 'https://facebook.com', x: 'https://x.com',
+      speechTopic: 'تقنيات الابتكار الرقمي وبناء الحلول البرمجية المستدامة',
+      speakerBio: 'الابتكار ليس خياراً بل ضرورة، وهذا الحشد يضع جامعة المنيا في طليعة مسار التنمية.',
+      skills: ['الابتكار الرقمي', 'التفكير الاستراتيجي', 'استشارات التقنية']
     }
   ];
 
@@ -143,7 +123,10 @@ const Speakers = () => {
           accent: 'bg-emerald-500',
           linkedin: s.details?.speakerLinkedin || '#',
           facebook: s.details?.speakerFacebook || '#',
-          x: s.details?.speakerX || '#'
+          x: s.details?.speakerX || '#',
+          speechTopic: s.details?.speechTopic || 'موضوع المشاركة في القمة',
+          speakerBio: s.details?.speakerBio || 'القمة فرصة رائعة للابتكار والتواصل مع العقول الريادية.',
+          skills: s.details?.speakerExpertise ? [s.details.speakerExpertise, 'تطوير الأعمال'] : ['الابتكار', 'الريادة']
         }));
 
         setSpeakers([...defaultSpeakers, ...formatted]);
@@ -233,11 +216,14 @@ const Speakers = () => {
                     <div className={`flex flex-col gap-2 ${isActive ? 'block' : 'hidden lg:flex lg:items-center lg:justify-center lg:h-full'}`}>
                       
                       {/* Name - Shows vertically when inactive on desktop */}
-                      <h3 className={`text-white font-black uppercase transition-all duration-700 ${
-                        isActive 
-                          ? 'text-3xl lg:text-4xl mb-1' 
-                          : 'lg:-rotate-90 lg:text-2xl lg:whitespace-nowrap lg:absolute lg:top-1/2 lg:left-1/2 lg:-translate-x-1/2 lg:-translate-y-1/2 tracking-wider'
-                      }`}>
+                      <h3 
+                        onClick={(e) => { if (isActive) { e.stopPropagation(); setSelectedSpeaker(speaker); } }}
+                        className={`text-white font-black uppercase transition-all duration-700 ${
+                          isActive 
+                            ? 'text-3xl lg:text-4xl mb-1 cursor-pointer hover:text-blue-300' 
+                            : 'lg:-rotate-90 lg:text-2xl lg:whitespace-nowrap lg:absolute lg:top-1/2 lg:left-1/2 lg:-translate-x-1/2 lg:-translate-y-1/2 tracking-wider'
+                        }`}
+                      >
                         {isActive ? speaker.name : speaker.nameEn}
                       </h3>
                       
@@ -316,6 +302,94 @@ const Speakers = () => {
         </Link>
 
       </div>
+
+      {/* Speaker Detail Modal */}
+      {selectedSpeaker && (
+        <div 
+          className="fixed inset-0 z-[100] flex items-center justify-center bg-black/70 backdrop-blur-sm p-4"
+          onClick={() => setSelectedSpeaker(null)}
+        >
+          <div 
+            className="bg-[#0d1326] border border-white/10 rounded-3xl max-w-lg w-full shadow-2xl overflow-hidden"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Header with Image */}
+            <div className="relative h-52 overflow-hidden">
+              <div className="absolute inset-0 bg-gradient-to-t from-[#0d1326] via-[#0d1326]/50 to-transparent z-10" />
+              <img src={selectedSpeaker.image} alt={selectedSpeaker.name} className="w-full h-full object-cover object-center" />
+              <button 
+                onClick={() => setSelectedSpeaker(null)}
+                className="absolute top-4 left-4 z-20 p-2 rounded-full bg-white/10 backdrop-blur-sm text-white hover:bg-white/20 transition-colors"
+              >
+                <X className="w-5 h-5" />
+              </button>
+              <div className="absolute bottom-4 right-6 z-20">
+                <h3 className="text-2xl font-black text-white">{selectedSpeaker.name}</h3>
+                <p className="text-blue-300 text-sm font-bold mt-0.5">{selectedSpeaker.role} @ <span className="text-blue-400">{selectedSpeaker.company}</span></p>
+              </div>
+            </div>
+
+            {/* Body Content */}
+            <div className="p-6 space-y-5" dir="rtl">
+              {/* Speech Topic */}
+              <div className="p-4 bg-white/5 rounded-2xl border border-white/5">
+                <div className="flex items-center gap-2 mb-1.5 text-blue-400">
+                  <Cpu className="w-4 h-4" />
+                  <span className="text-[11px] font-black uppercase tracking-wider">موضوع الكلمة</span>
+                </div>
+                <p className="text-slate-200 text-sm font-bold leading-relaxed">{selectedSpeaker.speechTopic}</p>
+              </div>
+
+              {/* Quote about Summit */}
+              <div>
+                <div className="flex items-center gap-2 mb-2 text-purple-400">
+                  <MessageSquare className="w-4 h-4" />
+                  <span className="text-[11px] font-black uppercase tracking-wider">كلمة عن القمة</span>
+                </div>
+                <blockquote className="text-slate-400 text-sm italic leading-relaxed border-r-2 border-purple-500/50 pr-3">
+                  "{selectedSpeaker.speakerBio}"
+                </blockquote>
+              </div>
+
+              {/* Skills */}
+              {selectedSpeaker.skills && selectedSpeaker.skills.length > 0 && (
+                <div>
+                  <div className="flex items-center gap-2 mb-2.5 text-slate-500">
+                    <Award className="w-3.5 h-3.5" />
+                    <span className="text-[10px] font-black uppercase tracking-wider">أهم المهارات</span>
+                  </div>
+                  <div className="flex flex-wrap gap-2">
+                    {selectedSpeaker.skills.map((skill, idx) => (
+                      <span key={idx} className="px-3 py-1.5 text-[10px] font-black bg-white/5 border border-white/10 rounded-full text-slate-300">
+                        {skill}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Social Links */}
+              <div className="flex gap-3 pt-4 border-t border-white/5">
+                {selectedSpeaker.linkedin && selectedSpeaker.linkedin !== '#' && (
+                  <a href={selectedSpeaker.linkedin} target="_blank" rel="noreferrer" className="w-9 h-9 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-slate-400 hover:text-white hover:bg-blue-600 transition-all">
+                    <svg className="w-4 h-4 fill-current" viewBox="0 0 24 24"><path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/></svg>
+                  </a>
+                )}
+                {selectedSpeaker.facebook && selectedSpeaker.facebook !== '#' && (
+                  <a href={selectedSpeaker.facebook} target="_blank" rel="noreferrer" className="w-9 h-9 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-slate-400 hover:text-white hover:bg-blue-700 transition-all">
+                    <svg className="w-4 h-4 fill-current" viewBox="0 0 24 24"><path d="M9 8h-3v4h3v12h5v-12h3.642l.358-4h-4v-1.667c0-.955.192-1.333 1.115-1.333h2.885v-5h-3.808c-3.596 0-5.192 1.583-5.192 4.615v3.385z"/></svg>
+                  </a>
+                )}
+                {selectedSpeaker.x && selectedSpeaker.x !== '#' && (
+                  <a href={selectedSpeaker.x} target="_blank" rel="noreferrer" className="w-9 h-9 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-slate-400 hover:text-white hover:bg-slate-800 transition-all">
+                    <svg className="w-4 h-4 fill-current" viewBox="0 0 24 24"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+                  </a>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </section>
   );
 };
