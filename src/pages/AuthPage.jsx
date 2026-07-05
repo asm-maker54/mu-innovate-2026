@@ -7,11 +7,80 @@ const AuthPage = () => {
   const { t, i18n } = useTranslation();
   const isRtl = i18n.language === 'ar';
   const [isLogin, setIsLogin] = useState(true);
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [error, setError] = useState('');
   const navigate = useNavigate();
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    // Simulate login
+    setError('');
+
+    if (password.length < 6) {
+      setError(isRtl ? 'يجب ألا تقل كلمة المرور عن 6 أحرف' : 'Password must be at least 6 characters');
+      return;
+    }
+
+    // 1. Search in local_registrations (localStorage)
+    const localRegs = JSON.parse(localStorage.getItem('local_registrations') || '[]');
+    const matchedUser = localRegs.find(u => u.email.toLowerCase() === email.toLowerCase());
+
+    if (matchedUser) {
+      // Set session
+      localStorage.setItem('current_user', JSON.stringify(matchedUser));
+      navigate('/dashboard');
+      return;
+    }
+
+    // 2. Search in mock registrations
+    const mockUsers = [
+      {
+        id: "reg1",
+        full_name: "م. كريم عبد العزيز مصطفى",
+        email: "karim@startup.com",
+        phone: "01020304050",
+        organization: "شركة نماء للتكنولوجيا",
+        role: "startup",
+        details: { startupName: "نماء تيك", industry: "الذكاء الاصطناعي والتحول الرقمي", stage: "نموذج أولي مجرب", elevatorPitch: "منصة ذكية لربط المزارعين بالأسواق مباشرة لتقليل الحلقات الوسيطة." }
+      },
+      {
+        id: "reg2",
+        full_name: "أ.د. سلوى عبد الرحمن حسن",
+        email: "salwa@knowledge.com",
+        phone: "01122334455",
+        organization: "جامعة القاهرة",
+        role: "speaker",
+        details: { speechTopic: "مستقبل ريادة الأعمال في الجامعات المصرية", speakerExpertise: "الابتكار الجامعي", speakerBio: "خبيرة في نقل التكنولوجيا وتأسيس الحاضنات الجامعية لأكثر من ١٥ عاماً." }
+      },
+      {
+        id: "reg3",
+        full_name: "د. طارق جلال فوزي",
+        email: "tarek@angelinvest.net",
+        phone: "01599887766",
+        organization: "صندوق مصر للاستثمار الملائكي",
+        role: "investor",
+        details: { investorEntity: "مستثمر فردي", investmentType: "تمويل أولي / Seed Capital" }
+      }
+    ];
+
+    const matchedMock = mockUsers.find(u => u.email.toLowerCase() === email.toLowerCase());
+    if (matchedMock) {
+      localStorage.setItem('current_user', JSON.stringify(matchedMock));
+      navigate('/dashboard');
+      return;
+    }
+
+    // 3. Fallback: Log in as default user
+    const defaultUser = {
+      id: `user_${Date.now()}`,
+      full_name: email.split('@')[0],
+      email: email,
+      phone: '01000000000',
+      organization: 'منصة الابتكار',
+      role: 'user',
+      details: {}
+    };
+    localStorage.setItem('current_user', JSON.stringify(defaultUser));
     navigate('/dashboard');
   };
 
@@ -91,6 +160,8 @@ const AuthPage = () => {
                 <input
                   type="email"
                   required
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
                   className="w-full bg-[#d1d5db]/40 border-none rounded-2xl px-5 py-4 text-gray-800 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#1b4332] focus:bg-white transition-all font-medium"
                   placeholder="example@gmail.com"
                 />
@@ -103,12 +174,20 @@ const AuthPage = () => {
                 <input
                   type="password"
                   required
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
                   className="w-full bg-[#d1d5db]/40 border-none rounded-2xl px-5 py-4 text-gray-800 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#1b4332] focus:bg-white transition-all font-medium"
                   placeholder="••••••••"
                 />
               </div>
 
             </div>
+
+            {error && (
+              <div className="p-4 bg-red-50 border border-red-200 text-red-700 rounded-2xl font-bold text-center text-sm">
+                {error}
+              </div>
+            )}
 
             {isLogin && (
               <div className="flex items-center justify-between pt-2">

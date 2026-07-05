@@ -54,6 +54,7 @@ const RegisterPage = () => {
     email: '',
     phone: '',
     organization: '',
+    password: '',
     
     // Step 2: Startup
     startupName: '',
@@ -155,6 +156,9 @@ const RegisterPage = () => {
       newErrors.phone = 'رقم الهاتف يجب أن يتكون من 11 رقماً ويبدأ بـ 01';
     }
     if (!formData.organization) newErrors.organization = 'يرجى اختيار جهة العمل/الجامعة';
+    if (!formData.password || formData.password.trim().length < 6) {
+      newErrors.password = 'كلمة المرور مطلوبة ويجب ألا تقل عن 6 أحرف';
+    }
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -321,6 +325,44 @@ const RegisterPage = () => {
           await new Promise(resolve => setTimeout(resolve, 1000));
         }
 
+        // Save user session for auto-login
+        const userSession = {
+          id: `user_${Date.now()}`,
+          full_name: formData.fullName,
+          email: formData.email,
+          phone: formData.phone,
+          organization: formData.organization,
+          role: selectedRole,
+          details: {
+            startupName: formData.startupName || '',
+            industry: formData.industry || '',
+            stage: formData.stage || '',
+            elevatorPitch: formData.elevatorPitch || '',
+            speechTopic: formData.speechTopic || '',
+            speakerExpertise: formData.speakerExpertise || '',
+            speakerBio: formData.speakerBio || '',
+            speakerLinkedin: formData.speakerLinkedin || '',
+            companyName: formData.companyName || '',
+            partnerType: formData.partnerType || '',
+            companyWebsite: formData.companyWebsite || '',
+            partnerMessage: formData.partnerMessage || '',
+            investorEntity: formData.investorEntity || '',
+            investmentType: formData.investmentType || '',
+            ticketSize: formData.ticketSize || '',
+            investorLinkedin: formData.investorLinkedin || '',
+            mentorExpertise: formData.mentorExpertise || '',
+            yearsExperience: formData.yearsExperience || '',
+            mentorLinkedin: formData.mentorLinkedin || '',
+            volunteerCommittee: formData.volunteerCommittee || '',
+            hasVolunteerExperience: formData.hasVolunteerExperience || '',
+            volunteerReason: formData.volunteerReason || '',
+            researchTitle: formData.researchTitle || '',
+            researchIdea: formData.researchIdea || '',
+            trlLevel: formData.trlLevel || ''
+          }
+        };
+        localStorage.setItem('current_user', JSON.stringify(userSession));
+
         setIsSubmitted(true);
       } catch (err) {
         console.error(err);
@@ -340,11 +382,14 @@ const RegisterPage = () => {
           </div>
           <h2 className="text-3xl font-black text-slate-900 mb-4">تم تسجيل طلبك بنجاح!</h2>
           <p className="text-slate-600 mb-10 leading-relaxed">
-            شكراً لانضمامك إلينا. سنتواصل معك قريباً لاستكمال باقي الإجراءات الخاصة بـ <span className="font-bold text-blue-600">({currentRole.title})</span>.
+            شكراً لانضمامك إلينا. تم تسجيل حسابك بنجاح. يمكنك الآن الانتقال مباشرة لمتابعة طلبك وإدارة ملفك الشخصي.
           </p>
-          <Link to="/" className="inline-flex items-center justify-center gap-2 w-full px-6 py-4 bg-blue-600 text-white rounded-xl font-bold hover:bg-blue-700 transition-all">
+          <Link to="/dashboard" className="inline-flex items-center justify-center gap-2 w-full px-6 py-4 bg-[#26462C] text-[#F4A217] rounded-xl font-bold hover:bg-[#1a301e] transition-all mb-3 shadow-lg shadow-green-900/20">
+            الانتقال لصفحتك الشخصية
+            <ArrowRight className="w-5 h-5 rotate-180" />
+          </Link>
+          <Link to="/" className="inline-flex items-center justify-center gap-2 w-full px-6 py-4 bg-slate-100 text-slate-700 rounded-xl font-bold hover:bg-slate-200 transition-all">
             العودة للرئيسية
-            <ArrowRight className="w-5 h-5" />
           </Link>
         </div>
       </div>
@@ -453,6 +498,18 @@ const RegisterPage = () => {
                       <ArrowRight className="w-4 h-4 text-slate-400 absolute left-4 top-1/2 -translate-y-1/2 rotate-90 pointer-events-none" />
                     </div>
                     {renderInputError('organization')}
+                  </div>
+                  <div>
+                    <label className="block text-sm font-bold text-slate-700 mb-2">كلمة المرور *</label>
+                    <input 
+                      type="password" 
+                      name="password" 
+                      value={formData.password} 
+                      onChange={handleChange} 
+                      className={getInputClass('password')} 
+                      placeholder="أدخل كلمة مرور قوية (6 أحرف على الأقل)" 
+                    />
+                    {renderInputError('password')}
                   </div>
                 </div>
               )}
