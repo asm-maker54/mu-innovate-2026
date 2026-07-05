@@ -30,6 +30,7 @@ import NewsListPage from './pages/NewsListPage';
 import UserDashboard from './pages/UserDashboard';
 import CenterActivitiesPage from './pages/CenterActivitiesPage';
 import CenterPage from './pages/CenterPage';
+import SpeakersPage from './pages/SpeakersPage';
 import Chatbot from './components/Chatbot';
 
 function App() {
@@ -74,6 +75,7 @@ function App() {
             <Route path="/dashboard" element={<UserDashboard />} />
             <Route path="/activities" element={<CenterActivitiesPage />} />
             <Route path="/center" element={<CenterPage />} />
+            <Route path="/speakers" element={<SpeakersPage />} />
           </Routes>
         </main>
         <Footer />
