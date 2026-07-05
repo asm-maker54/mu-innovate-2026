@@ -3,7 +3,8 @@ import { Link } from 'react-router-dom';
 import { 
   Users, Award, BookOpen, Download, Search, CheckCircle, Clock, 
   AlertTriangle, Eye, ArrowLeft, RefreshCw, KeyRound, BarChart2,
-  FileText, Briefcase, GraduationCap, Presentation, Newspaper
+  FileText, Briefcase, GraduationCap, Presentation, Newspaper,
+  Trash, FileSpreadsheet
 } from 'lucide-react';
 import { supabase, isSupabaseConfigured } from '../supabaseClient';
 import { initialMockNews } from '../data/mockNews';
@@ -279,6 +280,158 @@ const AdminDashboard = () => {
     }
   };
 
+  const handleDeleteItem = async (itemId, type) => {
+    const isConfirm = window.confirm(
+      isRtl 
+        ? "هل أنت متأكد من رغبتك في حذف هذا السجل نهائياً؟ لا يمكن التراجع عن هذا الإجراء." 
+        : "Are you sure you want to delete this record permanently? This action cannot be undone."
+    );
+    if (!isConfirm) return;
+
+    try {
+      if (isSupabaseConfigured) {
+        const table = 
+          type === 'graduation' ? 'graduation_projects' : 
+          type === 'research' ? 'applied_research' : 'registrations';
+
+        const { error } = await supabase
+          .from(table)
+          .delete()
+          .eq('id', itemId);
+        if (error) throw error;
+      } else {
+        if (type === 'registration') {
+          const localRegs = JSON.parse(localStorage.getItem('local_registrations') || '[]');
+          const updated = localRegs.filter(r => r.id !== itemId);
+          localStorage.setItem('local_registrations', JSON.stringify(updated));
+        } else if (type === 'graduation') {
+          const localProjects = JSON.parse(localStorage.getItem('local_graduation_projects') || '[]');
+          const updated = localProjects.filter(p => p.id !== itemId);
+          localStorage.setItem('local_graduation_projects', JSON.stringify(updated));
+        } else if (type === 'research') {
+          const localResearch = JSON.parse(localStorage.getItem('local_applied_research') || '[]');
+          const updated = localResearch.filter(r => r.id !== itemId);
+          localStorage.setItem('local_applied_research', JSON.stringify(updated));
+        }
+      }
+
+      // Update local state
+      if (type === 'graduation') {
+        setGradProjects(prev => prev.filter(p => p.id !== itemId));
+      } else if (type === 'research') {
+        setAppliedResearch(prev => prev.filter(r => r.id !== itemId));
+      } else if (type === 'registration') {
+        setRegistrants(prev => prev.filter(r => r.id !== itemId));
+      }
+
+      if (selectedItem && selectedItem.id === itemId) {
+        setSelectedItem(null);
+      }
+      alert(isRtl ? "تم حذف السجل بنجاح." : "Record deleted successfully.");
+    } catch (err) {
+      alert((isRtl ? "حدث خطأ أثناء الحذف: " : "Error deleting record: ") + err.message);
+    }
+  };
+
+  const handleExportToExcel = () => {
+    let dataToExport = [];
+    let headers = [];
+    let filename = '';
+
+    if (activeTab === 'graduation') {
+      const items = getFilteredGradProjects();
+      headers = ['تاريخ التقديم', 'اسم المشروع بالعربية', 'اسم المشروع بالإنجليزية', 'الكلية والجامعة', 'النوع', 'الحالة', 'البريد الإلكتروني للرائد', 'الهاتف', 'الملخص'];
+      dataToExport = items.map(p => [
+        new Date(p.created_at).toLocaleDateString('ar-EG'),
+        p.project_name_ar,
+        p.project_name_en,
+        p.college,
+        p.project_type,
+        p.status,
+        p.leader_email || '',
+        p.leader_phone || '',
+        p.abstract || ''
+      ]);
+      filename = 'مشروعات_التخرج.csv';
+    } else if (activeTab === 'research') {
+      const items = getFilteredResearch();
+      headers = ['تاريخ التقديم', 'الباحث الرئيسي', 'الدرجة العلمية', 'الكلية والجامعة', 'البريد الإلكتروني', 'الهاتف', 'الحالة', 'عنوان البحث', 'الملخص'];
+      dataToExport = items.map(r => [
+        new Date(r.created_at).toLocaleDateString('ar-EG'),
+        r.pi_name,
+        r.pi_rank,
+        r.pi_faculty,
+        r.pi_email,
+        r.pi_phone || '',
+        r.status,
+        r.research_title || '',
+        r.research_abstract || ''
+      ]);
+      filename = 'البحوث_التطبيقية.csv';
+    } else if (['speakers', 'startups', 'investors', 'mentors', 'researchers', 'partners', 'volunteers'].includes(activeTab)) {
+      const role = activeTab.slice(0, -1);
+      const items = getFilteredRegistrants(role);
+      headers = ['التاريخ', 'الاسم الكامل', 'الجهة / المؤسسة', 'البريد الإلكتروني', 'رقم الهاتف', 'الرقم القومي', 'الحالة', 'رابط السيرة الذاتية'];
+      dataToExport = items.map(r => [
+        new Date(r.created_at).toLocaleDateString('ar-EG'),
+        r.full_name,
+        r.organization,
+        r.email,
+        r.phone,
+        r.details?.nationalId || '',
+        r.status || 'تحت الفحص الإداري',
+        r.cv_url || ''
+      ]);
+      
+      const roleNamesAr = {
+        speaker: 'المتحدثون',
+        startup: 'الشركات_الناشئة',
+        investor: 'المستثمرون',
+        mentor: 'الموجهون',
+        researcher: 'الباحثون_والمبتكرون',
+        partner: 'الشركاء_والرعاة',
+        volunteer: 'المتطوعون'
+      };
+      filename = `${roleNamesAr[role] || 'المسجلون'}.csv`;
+    } else if (activeTab === 'news') {
+      headers = ['التاريخ', 'العنوان', 'الكاتب / الناشر', 'المحتوى'];
+      dataToExport = newsList.map(n => [
+        new Date(n.created_at).toLocaleDateString('ar-EG'),
+        n.title,
+        n.uploader_name,
+        n.content
+      ]);
+      filename = 'الأخبار.csv';
+    } else {
+      return;
+    }
+
+    // Convert data to CSV format with UTF-8 BOM so Excel opens it with Arabic characters correctly
+    let csvContent = '\uFEFF'; // UTF-8 BOM
+    
+    // Add header row
+    csvContent += headers.map(header => `"${header.replace(/"/g, '""')}"`).join(',') + '\n';
+    
+    // Add data rows
+    dataToExport.forEach(row => {
+      csvContent += row.map(value => {
+        const strValue = String(value === null || value === undefined ? '' : value);
+        return `"${strValue.replace(/"/g, '""')}"`;
+      }).join(',') + '\n';
+    });
+
+    // Create a download link and trigger it
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.setAttribute('href', url);
+    link.setAttribute('download', filename);
+    link.style.visibility = 'hidden';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
   // Filter Functions
   const getFilteredGradProjects = () => {
     return gradProjects.filter(p => {
@@ -491,6 +644,14 @@ const AdminDashboard = () => {
                 <option value="مقبول للعرض في القمة">مقبول للعرض في القمة</option>
               </select>
             )}
+            <button
+              onClick={handleExportToExcel}
+              className="bg-emerald-600 hover:bg-emerald-700 text-white px-5 py-3 rounded-2xl font-bold text-sm flex items-center justify-center gap-2 transition-all shadow-md active:scale-95 shrink-0"
+              title="تصدير هذه القائمة إلى ملف إكسيل CSV"
+            >
+              <FileSpreadsheet className="w-4 h-4" />
+              <span>تصدير إلى إكسيل</span>
+            </button>
           </div>
         )}
 
@@ -644,9 +805,14 @@ const AdminDashboard = () => {
                               }`}>{p.status}</span>
                             </td>
                             <td className="p-4 text-center">
-                              <button onClick={() => { setSelectedItem(p); setSelectedType('graduation'); }} className="p-2 text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-lg inline-flex items-center gap-1.5 font-bold text-xs">
-                                <Eye className="w-4 h-4" /> فحص التفاصيل
-                              </button>
+                              <div className="flex items-center justify-center gap-2">
+                                <button onClick={() => { setSelectedItem(p); setSelectedType('graduation'); }} className="p-2 text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-lg inline-flex items-center gap-1.5 font-bold text-xs">
+                                  <Eye className="w-4 h-4" /> فحص التفاصيل
+                                </button>
+                                <button onClick={() => handleDeleteItem(p.id, 'graduation')} className="p-2 text-red-600 bg-red-50 hover:bg-red-100 rounded-lg inline-flex items-center gap-1.5 font-bold text-xs" title="حذف">
+                                  <Trash className="w-3.5 h-3.5" /> حذف
+                                </button>
+                              </div>
                             </td>
                           </tr>
                         ))
@@ -690,9 +856,14 @@ const AdminDashboard = () => {
                               }`}>{r.status}</span>
                             </td>
                             <td className="p-4 text-center">
-                              <button onClick={() => { setSelectedItem(r); setSelectedType('research'); }} className="p-2 text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-lg inline-flex items-center gap-1.5 font-bold text-xs">
-                                <Eye className="w-4 h-4" /> فحص التفاصيل
-                              </button>
+                              <div className="flex items-center justify-center gap-2">
+                                <button onClick={() => { setSelectedItem(r); setSelectedType('research'); }} className="p-2 text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-lg inline-flex items-center gap-1.5 font-bold text-xs">
+                                  <Eye className="w-4 h-4" /> فحص التفاصيل
+                                </button>
+                                <button onClick={() => handleDeleteItem(r.id, 'research')} className="p-2 text-red-600 bg-red-50 hover:bg-red-100 rounded-lg inline-flex items-center gap-1.5 font-bold text-xs" title="حذف">
+                                  <Trash className="w-3.5 h-3.5" /> حذف
+                                </button>
+                              </div>
                             </td>
                           </tr>
                         ))
@@ -727,6 +898,7 @@ const AdminDashboard = () => {
                             <td className="p-4 font-semibold text-slate-500">{new Date(r.created_at).toLocaleDateString('ar-EG')}</td>
                             <td className="p-4 font-black text-slate-800">
                               <div>{r.full_name}</div>
+                              {r.details.nationalId && <div className="text-xs text-purple-700 font-bold mt-1">الرقم القومي: {r.details.nationalId}</div>}
                               {r.details.speechTopic && <div className="text-xs text-[#26462C] font-bold mt-1">الموضوع: {r.details.speechTopic}</div>}
                               {r.details.startupName && <div className="text-xs text-[#F4A217] font-bold mt-1">الشركة الناشئة: {r.details.startupName}</div>}
                               {r.details.researchTitle && <div className="text-xs text-blue-600 font-bold mt-1">عنوان البحث: {r.details.researchTitle}</div>}
@@ -752,32 +924,41 @@ const AdminDashboard = () => {
                               }`}>{r.status || 'تحت الفحص الإداري'}</span>
                             </td>
                             <td className="p-4 text-center">
-                              {r.status === 'مقبول للعرض في القمة' ? (
-                                <button 
-                                  onClick={() => handleStatusChange(r.id, 'registration', 'تحت الفحص الإداري')}
-                                  className="px-3 py-1.5 bg-amber-50 hover:bg-amber-100 text-amber-700 rounded-lg font-bold text-xs transition-colors"
-                                >
-                                  إلغاء القبول
-                                </button>
-                              ) : (
-                                <div className="flex flex-col items-center gap-1">
+                              <div className="flex flex-col sm:flex-row items-center justify-center gap-2">
+                                {r.status === 'مقبول للعرض في القمة' ? (
                                   <button 
-                                    onClick={() => handleStatusChange(r.id, 'registration', 'مقبول للعرض في القمة')}
-                                    disabled={!r.cv_url || r.cv_url === '#'}
-                                    className={`px-3 py-1.5 rounded-lg font-bold text-xs transition-all shadow-sm ${
-                                      (!r.cv_url || r.cv_url === '#') 
-                                        ? 'bg-slate-100 text-slate-400 cursor-not-allowed border border-slate-200' 
-                                        : 'bg-green-600 hover:bg-green-700 text-white'
-                                    }`}
-                                    title={(!r.cv_url || r.cv_url === '#') ? 'يرجى رفع السيرة الذاتية أولاً لتتمكن من القبول' : ''}
+                                    onClick={() => handleStatusChange(r.id, 'registration', 'تحت الفحص الإداري')}
+                                    className="px-3 py-1.5 bg-amber-50 hover:bg-amber-100 text-amber-700 rounded-lg font-bold text-xs transition-colors whitespace-nowrap"
                                   >
-                                    موافقة وقبول
+                                    إلغاء القبول
                                   </button>
-                                  {(!r.cv_url || r.cv_url === '#') && (
-                                    <span className="text-[9px] text-red-500 font-bold whitespace-nowrap">يجب رفع الـ CV أولاً</span>
-                                  )}
-                                </div>
-                              )}
+                                ) : (
+                                  <div className="flex flex-col items-center gap-1">
+                                    <button 
+                                      onClick={() => handleStatusChange(r.id, 'registration', 'مقبول للعرض في القمة')}
+                                      disabled={!r.cv_url || r.cv_url === '#'}
+                                      className={`px-3 py-1.5 rounded-lg font-bold text-xs transition-all shadow-sm whitespace-nowrap ${
+                                        (!r.cv_url || r.cv_url === '#') 
+                                          ? 'bg-slate-100 text-slate-400 cursor-not-allowed border border-slate-200' 
+                                          : 'bg-green-600 hover:bg-green-700 text-white'
+                                      }`}
+                                      title={(!r.cv_url || r.cv_url === '#') ? 'يرجى رفع السيرة الذاتية أولاً لتتمكن من القبول' : ''}
+                                    >
+                                      موافقة وقبول
+                                    </button>
+                                    {(!r.cv_url || r.cv_url === '#') && (
+                                      <span className="text-[9px] text-red-500 font-bold whitespace-nowrap">يجب رفع الـ CV أولاً</span>
+                                    )}
+                                  </div>
+                                )}
+                                <button 
+                                  onClick={() => handleDeleteItem(r.id, 'registration')} 
+                                  className="p-1.5 text-red-600 bg-red-50 hover:bg-red-100 rounded-lg inline-flex items-center gap-1 font-bold text-xs" 
+                                  title="حذف الحساب"
+                                >
+                                  <Trash className="w-3.5 h-3.5" />
+                                </button>
+                              </div>
                             </td>
                           </tr>
                         ))

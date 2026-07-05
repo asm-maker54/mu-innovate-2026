@@ -55,6 +55,7 @@ const RegisterPage = () => {
     phone: '',
     organization: '',
     password: '',
+    nationalId: '',
     
     // Step 2: Startup
     startupName: '',
@@ -161,6 +162,11 @@ const RegisterPage = () => {
     if (!formData.organization) newErrors.organization = 'يرجى اختيار جهة العمل/الجامعة';
     if (!formData.password || formData.password.trim().length < 6) {
       newErrors.password = 'كلمة المرور مطلوبة ويجب ألا تقل عن 6 أحرف';
+    }
+    if (!formData.nationalId || !formData.nationalId.trim()) {
+      newErrors.nationalId = 'الرقم القومي مطلوب';
+    } else if (!/^[0-9]{14}$/.test(formData.nationalId.trim())) {
+      newErrors.nationalId = 'الرقم القومي يجب أن يتكون من 14 رقماً';
     }
 
     setErrors(newErrors);
@@ -325,7 +331,8 @@ const RegisterPage = () => {
               volunteerReason: formData.volunteerReason || '',
               researchTitle: formData.researchTitle || '',
               researchIdea: formData.researchIdea || '',
-              trlLevel: formData.trlLevel || ''
+              trlLevel: formData.trlLevel || '',
+              nationalId: formData.nationalId || ''
             }
           };
           const localRegs = JSON.parse(localStorage.getItem('local_registrations') || '[]');
@@ -370,7 +377,8 @@ const RegisterPage = () => {
             volunteerReason: formData.volunteerReason || '',
             researchTitle: formData.researchTitle || '',
             researchIdea: formData.researchIdea || '',
-            trlLevel: formData.trlLevel || ''
+            trlLevel: formData.trlLevel || '',
+            nationalId: formData.nationalId || ''
           }
         };
         localStorage.setItem('current_user', JSON.stringify(userSession));
@@ -495,6 +503,11 @@ const RegisterPage = () => {
                     <label className="block text-sm font-bold text-slate-700 mb-2">رقم الهاتف *</label>
                     <input type="tel" name="phone" value={formData.phone} onChange={handleChange} className={getInputClass('phone')} placeholder="01xxxxxxxxx" dir="ltr" />
                     {renderInputError('phone')}
+                  </div>
+                  <div>
+                    <label className="block text-sm font-bold text-slate-700 mb-2">الرقم القومي *</label>
+                    <input type="text" name="nationalId" value={formData.nationalId} onChange={handleChange} className={getInputClass('nationalId')} placeholder="29910xxxxxxxx" maxLength={14} dir="ltr" />
+                    {renderInputError('nationalId')}
                   </div>
                   <div>
                     <label className="block text-sm font-bold text-slate-700 mb-2">جهة العمل / الجامعة *</label>
