@@ -3,7 +3,8 @@ import { useTranslation } from 'react-i18next';
 import { 
   User, BookOpen, GraduationCap, Mic, Settings, LayoutDashboard, 
   Calendar, Clock, FileText, CheckCircle, AlertCircle, LogOut,
-  Upload, Camera, FileCheck, X, XCircle, ExternalLink
+  Upload, Camera, FileCheck, X, XCircle, ExternalLink,
+  Play, Pause, Bell, ChevronUp, ChevronDown, ChevronRight, Check
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
@@ -63,6 +64,40 @@ const UserDashboard = () => {
 
   // Lightbox Modal for profile image preview
   const [imageLightboxOpen, setImageLightboxOpen] = useState(false);
+
+  // Interactive Dashboard States (Crextio layout)
+  const [trackerPlaying, setTrackerPlaying] = useState(false);
+  const [trackerTime, setTrackerTime] = useState(225); // 3 minutes 45 seconds (03:45)
+  const [activeAccordion, setActiveAccordion] = useState('personal'); // 'personal', 'docs', 'support'
+  const [tasks, setTasks] = useState([
+    { id: 1, text: 'استكمال ملف البيانات الشخصية', checked: true },
+    { id: 2, text: 'تعديل وتأكيد الصورة الشخصية', checked: true },
+    { id: 3, text: 'رفع ملف السيرة الذاتية (CV)', checked: true },
+    { id: 4, text: 'مراجعة جدول الفعاليات والورش', checked: false },
+    { id: 5, text: 'تأكيد الحضور في الجلسة الافتتاحية', checked: false },
+    { id: 6, text: 'مشاركة رابط بطاقة المتحدث', checked: false },
+    { id: 7, text: 'تنزيل كتيب المبتكرين للقمة', checked: false },
+    { id: 8, text: 'التواصل مع الموجه الخاص بك', checked: false }
+  ]);
+
+  // Live stopwatch timer effect
+  useEffect(() => {
+    let interval = null;
+    if (trackerPlaying) {
+      interval = setInterval(() => {
+        setTrackerTime(prev => prev + 1);
+      }, 1000);
+    } else {
+      clearInterval(interval);
+    }
+    return () => clearInterval(interval);
+  }, [trackerPlaying]);
+
+  const formatTrackerTime = (totalSeconds) => {
+    const mins = Math.floor(totalSeconds / 60);
+    const secs = totalSeconds % 60;
+    return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+  };
 
   useEffect(() => {
     if (user) {
@@ -649,347 +684,753 @@ const UserDashboard = () => {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 pt-20">
-      <div className="max-w-[95rem] mx-auto px-4 sm:px-6 lg:px-8 py-10 flex flex-col lg:flex-row gap-8">
+    <div className="min-h-screen bg-[#eef2f6] p-3 md:p-6" dir={isRtl ? 'rtl' : 'ltr'}>
+      {/* Main Crextio-styled Dashboard Container */}
+      <div className="max-w-[98rem] mx-auto bg-white rounded-[2.5rem] border border-slate-200/50 shadow-2xl p-6 md:p-8 flex flex-col gap-6 relative overflow-hidden">
         
-        {/* Sidebar */}
-        <div className="w-full lg:w-80 shrink-0">
-          <div className="bg-white rounded-3xl shadow-xl shadow-slate-200/40 border border-slate-100 overflow-hidden sticky top-28">
-            <div className="p-8 border-b border-slate-100 flex items-center gap-4 bg-slate-50/50">
-              {user?.details?.speakerImage ? (
-                <img 
-                  src={user.details.speakerImage} 
-                  alt={user.full_name} 
-                  className="w-16 h-16 rounded-full object-cover shadow-lg border-2 border-blue-500 shrink-0" 
-                />
-              ) : (
-                <div className="w-16 h-16 bg-gradient-to-tr from-blue-600 to-blue-400 rounded-full flex items-center justify-center text-white shadow-lg shadow-blue-500/30 shrink-0">
-                  <User className="w-8 h-8" />
-                </div>
-              )}
-              <div>
-                <h2 className="font-black text-xl text-slate-900 mb-1">{user?.full_name || 'أحمد محمد'}</h2>
-                <p className="text-xs bg-blue-50 text-blue-700 px-2 py-0.5 rounded font-black mb-1 w-fit">{getRoleLabel(activeRole)}</p>
-                <p className="text-xs font-semibold text-slate-400 truncate max-w-[150px]" dir="ltr">{user?.email}</p>
-              </div>
+        {/* Top Navbar inside the Dashboard */}
+        <div className="flex flex-col md:flex-row items-center justify-between gap-4 pb-6 border-b border-slate-100">
+          {/* Logo & Platform Name */}
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-blue-600 flex items-center justify-center text-white font-black shadow-md shadow-blue-500/20">
+              C
             </div>
-            
-            <nav className="p-4 space-y-2">
-              <button 
-                onClick={() => setActiveTab('overview')}
-                className={`w-full flex items-center gap-3 px-5 py-4 rounded-2xl font-bold transition-all ${activeTab === 'overview' ? 'bg-blue-50 text-blue-700' : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'}`}
-              >
-                <LayoutDashboard className="w-5 h-5" />
-                {isRtl ? 'نظرة عامة' : 'Overview'}
+            <div>
+              <span className="font-black text-lg text-slate-800 tracking-tight">Crextio Minia</span>
+              <span className="text-[10px] block font-semibold text-slate-400 -mt-1">{isRtl ? 'منصة الابتكار وريادة الأعمال' : 'Innovation & Entrepreneurship Platform'}</span>
+            </div>
+          </div>
+
+          {/* Navigation links (styled as Crextio horizontal pill tabs) */}
+          <div className="flex flex-wrap items-center justify-center gap-1.5 bg-slate-100 p-1.5 rounded-full">
+            <button 
+              onClick={() => setActiveTab('overview')}
+              className={`px-6 py-2.5 rounded-full text-xs font-black transition-all ${
+                activeTab === 'overview' 
+                  ? 'bg-blue-600 text-white shadow-md shadow-blue-500/20' 
+                  : 'text-slate-600 hover:text-slate-800 hover:bg-slate-50'
+              }`}
+            >
+              {isRtl ? 'لوحة التحكم' : 'Dashboard'}
+            </button>
+            <button 
+              onClick={() => setActiveTab('settings')}
+              className={`px-6 py-2.5 rounded-full text-xs font-black transition-all ${
+                activeTab === 'settings' 
+                  ? 'bg-blue-600 text-white shadow-md shadow-blue-500/20' 
+                  : 'text-slate-600 hover:text-slate-800 hover:bg-slate-50'
+              }`}
+            >
+              {isRtl ? 'الإعدادات والملف' : 'Settings & Profile'}
+            </button>
+            <a 
+              href="/agenda"
+              className="px-6 py-2.5 rounded-full text-xs font-black text-slate-600 hover:text-slate-800 hover:bg-slate-50 transition-all"
+            >
+              {isRtl ? 'الفعاليات' : 'Calendar'}
+            </a>
+            <a 
+              href="/speakers"
+              className="px-6 py-2.5 rounded-full text-xs font-black text-slate-600 hover:text-slate-800 hover:bg-slate-50 transition-all"
+            >
+              {isRtl ? 'المتحدثين' : 'People'}
+            </a>
+          </div>
+
+          {/* Right actions: Settings Cog, Notification Bell, Logout */}
+          <div className="flex items-center gap-3">
+            <button 
+              onClick={() => setActiveTab('settings')}
+              className="w-10 h-10 rounded-full border border-slate-200 flex items-center justify-center text-slate-500 hover:bg-slate-50 transition-colors"
+              title={isRtl ? 'الإعدادات' : 'Settings'}
+            >
+              <Settings className="w-4 h-4" />
+            </button>
+            <div className="relative">
+              <button className="w-10 h-10 rounded-full border border-slate-200 flex items-center justify-center text-slate-500 hover:bg-slate-50 transition-colors">
+                <Bell className="w-4 h-4" />
               </button>
-              <button 
-                onClick={() => setActiveTab('settings')}
-                className={`w-full flex items-center gap-3 px-5 py-4 rounded-2xl font-bold transition-all ${activeTab === 'settings' ? 'bg-blue-50 text-blue-700' : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'}`}
-              >
-                <Settings className="w-5 h-5" />
-                {isRtl ? 'الإعدادات' : 'Settings'}
-              </button>
-              
-              <div className="pt-4 mt-4 border-t border-slate-100 px-2">
-                <button 
-                  onClick={handleLogout}
-                  className="w-full flex items-center gap-3 px-3 py-3 rounded-xl font-bold text-red-500 hover:bg-red-50 hover:text-red-600 transition-colors"
-                >
-                  <LogOut className="w-5 h-5" />
-                  {isRtl ? 'تسجيل الخروج' : 'Logout'}
-                </button>
-              </div>
-            </nav>
+              <span className="absolute top-2 right-2.5 w-2 h-2 rounded-full bg-red-500 animate-ping" />
+            </div>
+            <button 
+              onClick={handleLogout}
+              className="px-4 py-2 rounded-full bg-red-50 hover:bg-red-100 text-red-600 border border-red-100 font-bold text-xs flex items-center gap-1.5 transition-colors"
+            >
+              <LogOut className="w-3.5 h-3.5" />
+              <span>{isRtl ? 'خروج' : 'Logout'}</span>
+            </button>
           </div>
         </div>
 
-        {/* Main Content */}
-        <div className="flex-1 min-w-0">
+        {/* Tab Switch View */}
+        {activeTab === 'overview' ? (
+          <div className="flex flex-col gap-6">
+            
+            {/* Header: Welcome banner & Stats Pill row */}
+            <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
+              <div>
+                <h1 className="text-3xl font-black text-slate-800 flex items-center gap-2">
+                  {isRtl ? `مرحباً بك، ${user?.full_name?.split(' ')[0] || 'مبتكرنا'}` : `Welcome back, ${user?.full_name?.split(' ')[0] || 'User'}`}
+                  <span className="text-2xl animate-bounce">👋</span>
+                </h1>
+                <p className="text-slate-400 text-sm mt-1 font-semibold">{isRtl ? 'تابع آخر إنجازاتك وتحديثات طلبك للقمة.' : 'Monitor your dashboard work progress and summit application.'}</p>
+              </div>
 
+              {/* Crextio Stats row */}
+              <div className="flex flex-wrap items-center gap-4">
+                {/* Stats Pill 1 */}
+                <div className="flex items-center gap-3 bg-slate-50 border border-slate-100 px-4 py-2.5 rounded-full">
+                  <span className="text-xs font-black text-slate-500">{isRtl ? 'جاهزية الملف' : 'Profile info'}</span>
+                  <div className="w-16 h-2 bg-slate-200 rounded-full overflow-hidden">
+                    <div className="bg-blue-600 h-full rounded-full" style={{ width: '85%' }} />
+                  </div>
+                  <span className="text-xs font-black text-blue-600">85%</span>
+                </div>
 
-          {/* Header */}
-          <div className="mb-8 px-2">
-            <h1 className="text-3xl font-black text-slate-900">{activeTab === 'overview' ? (isRtl ? 'لوحة التحكم' : 'Dashboard') : (isRtl ? 'الإعدادات' : 'Settings')}</h1>
-            <p className="text-slate-500 mt-2 font-medium">
-              {isRtl ? 'تابع آخر تحديثات نشاطك على المنصة.' : 'Follow the latest updates of your activity on the platform.'}
-            </p>
-          </div>
+                {/* Stats Pill 2 */}
+                <div className="flex items-center gap-3 bg-slate-50 border border-slate-100 px-4 py-2.5 rounded-full">
+                  <span className="text-xs font-black text-slate-500">{isRtl ? 'الالتزام بالوقت' : 'Project time'}</span>
+                  <div className="w-16 h-2 bg-slate-200 rounded-full overflow-hidden">
+                    <div className="bg-[#1e40af] h-full rounded-full" style={{ width: '45%' }} />
+                  </div>
+                  <span className="text-xs font-black text-[#1e40af]">45%</span>
+                </div>
 
-          {/* Tab Content */}
-          {activeTab === 'overview' ? renderOverviewTab() : (
-            <form onSubmit={handleProfileSave} className="bg-white p-8 md:p-10 rounded-3xl shadow-sm border border-slate-100 space-y-8">
+                {/* Vertical Separator */}
+                <div className="hidden sm:block w-px h-6 bg-slate-200 mx-2" />
+
+                {/* Numerical counters */}
+                <div className="flex items-center gap-4">
+                  <div className="text-right">
+                    <span className="text-xl font-black text-slate-800">315</span>
+                    <span className="text-[10px] font-bold text-slate-400 block -mt-1">{isRtl ? 'مشروع ابتكاري' : 'Projects'}</span>
+                  </div>
+                  <div className="text-right">
+                    <span className="text-xl font-black text-slate-800">75</span>
+                    <span className="text-[10px] font-bold text-slate-400 block -mt-1">{isRtl ? 'متحدث القمة' : 'Speakers'}</span>
+                  </div>
+                  <div className="text-right">
+                    <span className="text-xl font-black text-slate-800">92</span>
+                    <span className="text-[10px] font-bold text-slate-400 block -mt-1">{isRtl ? 'شريك ومرشد' : 'Mentors'}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* 3-Column main layout grid */}
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
               
-              {/* Form Title & Success Alert */}
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-slate-100">
-                <div>
-                  <h3 className="text-2xl font-black text-slate-800">{isRtl ? 'تعديل الملف الشخصي' : 'Edit Profile Settings'}</h3>
-                  <p className="text-slate-400 text-xs mt-1 font-bold">{isRtl ? 'قم بتحديث صورتك، وسيرتك الذاتية، وبياناتك الشخصية' : 'Update your photo, resume, and info'}</p>
+              {/* Column 1 (Left - Profile Card & Accordions) - span 3 */}
+              <div className="lg:col-span-3 flex flex-col gap-5">
+                {/* Profile Avatar Card (styled in premium soft gradient) */}
+                <div className="bg-gradient-to-b from-sky-100 to-blue-200/60 rounded-[2rem] p-6 text-center border border-sky-200/50 shadow-md relative overflow-hidden flex flex-col items-center">
+                  {/* Decorative soft white circle bg */}
+                  <div className="absolute -top-12 -left-12 w-28 h-28 rounded-full bg-white/20 blur-xl pointer-events-none" />
+                  
+                  {/* Circular Avatar */}
+                  <div className="relative w-28 h-28 mb-4 cursor-pointer group shrink-0">
+                    {formData.speakerImage ? (
+                      <img 
+                        src={formData.speakerImage} 
+                        alt={formData.full_name} 
+                        onClick={() => setImageLightboxOpen(true)}
+                        className="w-full h-full rounded-full object-cover shadow-xl border-4 border-white hover:scale-105 transition-transform duration-300"
+                        title={isRtl ? 'تكبير الصورة' : 'Zoom Image'}
+                      />
+                    ) : (
+                      <div className="w-full h-full rounded-full bg-blue-600 text-white flex items-center justify-center font-black text-3xl shadow-xl border-4 border-white">
+                        {formData.full_name?.charAt(0) || 'U'}
+                      </div>
+                    )}
+                    {/* Camera Upload Overlay Button */}
+                    <label className="absolute bottom-0 right-0 bg-blue-600 hover:bg-blue-700 text-white p-2 rounded-full shadow-md cursor-pointer transition-colors border-2 border-white">
+                      <Camera className="w-3.5 h-3.5" />
+                      <input 
+                        type="file" 
+                        accept="image/*" 
+                        onChange={handleImageFileChange} 
+                        className="hidden" 
+                      />
+                    </label>
+                  </div>
+
+                  {/* Name and Designation */}
+                  <h3 className="font-black text-slate-800 text-lg leading-tight">{user?.full_name || 'أحمد محمد'}</h3>
+                  <p className="text-xs font-bold text-blue-800/80 mt-1">{getRoleLabel(activeRole)}</p>
+                  
+                  {/* Status Badge */}
+                  <div className="mt-4 px-4 py-1.5 rounded-full bg-white/95 text-blue-900 border border-sky-200 font-black text-[11px] shadow-sm flex items-center gap-1">
+                    <span className="w-1.5 h-1.5 rounded-full bg-blue-600 animate-pulse" />
+                    {user?.status === 'مقبول للعرض في القمة' ? (isRtl ? 'معتمد ومقبول' : 'Approved') : (isRtl ? 'حالة نشطة' : 'Active Account')}
+                  </div>
                 </div>
-                {saveSuccess && (
-                  <span className="text-emerald-600 bg-emerald-50 px-4 py-2 rounded-full text-xs font-black border border-emerald-100 flex items-center gap-1.5 animate-bounce">
-                    <CheckCircle className="w-4 h-4" /> {isRtl ? 'تم حفظ التغييرات بنجاح!' : 'Changes saved successfully!'}
-                  </span>
-                )}
+
+                {/* Sidebar Accordion (Pension Contributions, Devices, Compensation, Benefits) */}
+                <div className="bg-white rounded-[2rem] border border-slate-100 p-4 shadow-sm flex flex-col gap-2">
+                  {/* Accordion Item 1: Personal Details */}
+                  <div className="border-b border-slate-100 pb-2">
+                    <button 
+                      onClick={() => setActiveAccordion(activeAccordion === 'personal' ? null : 'personal')}
+                      className="w-full py-3 flex items-center justify-between text-slate-700 font-black text-xs px-2 hover:bg-slate-50 rounded-xl transition-all"
+                    >
+                      <span>{isRtl ? 'البيانات الشخصية والمهنية' : 'Personal & Pro Details'}</span>
+                      <ChevronDown className={`w-4 h-4 text-slate-400 transition-transform ${activeAccordion === 'personal' && 'rotate-180'}`} />
+                    </button>
+                    {activeAccordion === 'personal' && (
+                      <div className="px-3 pb-3 pt-1 space-y-2.5 text-[11px] font-bold text-slate-500 text-right">
+                        <div>
+                          <span className="text-slate-400 block mb-0.5">{isRtl ? 'رقم الهاتف' : 'Phone'}</span>
+                          <span className="text-slate-700">{user?.phone || '010xxxxxx'}</span>
+                        </div>
+                        <div>
+                          <span className="text-slate-400 block mb-0.5">{isRtl ? 'المؤسسة / الجامعة' : 'Organization'}</span>
+                          <span className="text-slate-700">{user?.organization || 'جامعة المنيا'}</span>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Accordion Item 2: Attachments (CV) */}
+                  <div className="border-b border-slate-100 pb-2">
+                    <button 
+                      onClick={() => setActiveAccordion(activeAccordion === 'docs' ? null : 'docs')}
+                      className="w-full py-3 flex items-center justify-between text-slate-700 font-black text-xs px-2 hover:bg-slate-50 rounded-xl transition-all"
+                    >
+                      <span>{isRtl ? 'المستندات والمرفقات' : 'Documents & CV'}</span>
+                      <ChevronDown className={`w-4 h-4 text-slate-400 transition-transform ${activeAccordion === 'docs' && 'rotate-180'}`} />
+                    </button>
+                    {activeAccordion === 'docs' && (
+                      <div className="px-3 pb-3 pt-1 space-y-2.5 text-[11px] font-bold text-slate-500">
+                        <div className="flex items-center justify-between">
+                          <span>{isRtl ? 'السيرة الذاتية (CV)' : 'CV Document'}</span>
+                          {user?.cv_url || user?.details?.cv_url ? (
+                            <a href={user.cv_url || user.details?.cv_url} target="_blank" rel="noreferrer" className="text-blue-600 hover:underline">
+                              {isRtl ? 'عرض ↗' : 'View ↗'}
+                            </a>
+                          ) : (
+                            <span className="text-red-500">{isRtl ? 'غير مرفوع' : 'Not uploaded'}</span>
+                          )}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Accordion Item 3: Support */}
+                  <div>
+                    <button 
+                      onClick={() => setActiveAccordion(activeAccordion === 'support' ? null : 'support')}
+                      className="w-full py-3 flex items-center justify-between text-slate-700 font-black text-xs px-2 hover:bg-slate-50 rounded-xl transition-all"
+                    >
+                      <span>{isRtl ? 'الدعم الفني للقمة' : 'Technical Summit Support'}</span>
+                      <ChevronDown className={`w-4 h-4 text-slate-400 transition-transform ${activeAccordion === 'support' && 'rotate-180'}`} />
+                    </button>
+                    {activeAccordion === 'support' && (
+                      <div className="px-3 pb-3 pt-1 text-[11px] font-bold text-slate-500 leading-relaxed">
+                        {isRtl ? 'إذا واجهت أي مشكلة تقنية في حسابك أو الصورة الشخصية، يُرجى التواصل معنا عبر الدعم الفني للجامعة.' : 'If you face any issues, please reach out to our university web support desk.'}
+                      </div>
+                    )}
+                  </div>
+                </div>
               </div>
 
-              {/* Profile Photo Uploader Section */}
-              <div className="flex flex-col items-center justify-center py-6 bg-slate-50/50 rounded-3xl border border-slate-100 p-6">
-                <div className="relative group w-44 h-44 mb-4 cursor-pointer">
-                  {formData.speakerImage ? (
-                    <img 
-                      src={formData.speakerImage} 
-                      alt={formData.full_name} 
-                      onClick={() => setImageLightboxOpen(true)}
-                      className="w-full h-full rounded-full object-cover shadow-lg border-4 border-white group-hover:opacity-90 transition-opacity cursor-zoom-in" 
-                      title={isRtl ? 'انقر لتكبير الصورة' : 'Click to enlarge'}
-                    />
-                  ) : (
-                    <div className="w-full h-full rounded-full bg-blue-100 text-blue-600 flex items-center justify-center font-black text-4xl shadow-lg border-4 border-white">
-                      {formData.full_name?.charAt(0) || 'U'}
+              {/* Column 2 (Center - Progress, Time Tracker, Calendar) - span 6 */}
+              <div className="lg:col-span-6 flex flex-col gap-6">
+                {/* Top Row: Progress and Time Tracker side-by-side */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  {/* Progress Card (Crextio Styled) */}
+                  <div className="bg-white rounded-[2rem] border border-slate-100 p-6 shadow-sm flex flex-col justify-between min-h-[220px]">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <span className="text-[10px] font-black text-slate-400 uppercase tracking-wider">{isRtl ? 'توقيت العمل الأسبوعي' : 'Work Time Progress'}</span>
+                        <h4 className="text-3xl font-black text-slate-800 mt-1">6.1 h</h4>
+                        <p className="text-[11px] font-bold text-slate-400">{isRtl ? 'معدل الأداء هذا الأسبوع' : 'Average rate this week'}</p>
+                      </div>
+                      <span className="px-2.5 py-1 rounded-full bg-blue-50 text-blue-600 font-black text-[10px] border border-blue-100">
+                        1h 25m
+                      </span>
                     </div>
-                  )}
-                  <label className="absolute bottom-2 right-2 bg-blue-600 hover:bg-blue-700 text-white p-2.5 rounded-full shadow-lg cursor-pointer transition-colors border border-white">
-                    <Camera className="w-4 h-4" />
-                    <input 
-                      type="file" 
-                      accept="image/*" 
-                      onChange={handleImageFileChange} 
-                      className="hidden" 
-                    />
-                  </label>
-                </div>
-                <div className="text-center">
-                  <label className="bg-white hover:bg-slate-50 text-slate-700 font-bold px-4 py-2 rounded-xl border border-slate-200 shadow-sm cursor-pointer inline-flex items-center gap-2 text-xs transition-colors">
-                    <Upload className="w-3.5 h-3.5" />
-                    {uploadingImage ? (isRtl ? 'جاري الرفع...' : 'Uploading...') : (isRtl ? 'اختر صورة شخصية جديدة' : 'Upload New Photo')}
-                    <input 
-                      type="file" 
-                      accept="image/*" 
-                      onChange={handleImageFileChange} 
-                      className="hidden" 
-                    />
-                  </label>
-                  <p className="text-slate-400 text-[10px] mt-2 font-semibold">{isRtl ? 'JPG, PNG أو WebP. بحد أقصى 5 ميجابايت.' : 'JPG, PNG or WebP. Max 5MB.'}</p>
-                </div>
-              </div>
-
-              {/* General Info Grid */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
-                  <label className="block text-sm font-bold text-slate-700 mb-2">{isRtl ? 'الاسم الكامل *' : 'Full Name *'}</label>
-                  <input
-                    type="text"
-                    name="full_name"
-                    value={formData.full_name}
-                    onChange={handleChange}
-                    required
-                    className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500 font-bold text-slate-700 transition-shadow focus:border-blue-500"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-bold text-slate-700 mb-2">{isRtl ? 'رقم الهاتف *' : 'Phone Number *'}</label>
-                  <input
-                    type="text"
-                    name="phone"
-                    value={formData.phone}
-                    onChange={handleChange}
-                    required
-                    className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500 font-bold text-slate-700 transition-shadow focus:border-blue-500"
-                  />
-                </div>
-                <div className="md:col-span-2">
-                  <label className="block text-sm font-bold text-slate-700 mb-2">{isRtl ? 'الجهة / المؤسسة *' : 'Organization *'}</label>
-                  <input
-                    type="text"
-                    name="organization"
-                    value={formData.organization}
-                    onChange={handleChange}
-                    required
-                    className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500 font-bold text-slate-700 transition-shadow focus:border-blue-500"
-                  />
-                </div>
-              </div>
-
-              {/* CV Attachment Section */}
-              <div className="pt-6 border-t border-slate-100">
-                <h4 className="font-black text-slate-800 text-lg mb-4">{isRtl ? 'السيرة الذاتية والملف المهني (CV)' : 'CV & Professional Resume'}</h4>
-                <div className="p-5 bg-blue-50/30 rounded-3xl border border-blue-100/50 flex flex-col sm:flex-row items-center justify-between gap-4">
-                  <div className="flex items-center gap-3">
-                    <div className="w-12 h-12 rounded-2xl bg-blue-50 flex items-center justify-center text-blue-600 shrink-0">
-                      <FileText className="w-6 h-6" />
-                    </div>
-                    <div>
-                      <p className="font-bold text-slate-700 text-sm">{isRtl ? 'ملف السيرة الذاتية المرفوع' : 'CV / Resume File'}</p>
-                      {formData.cv_url && formData.cv_url !== '#' ? (
-                        <a href={formData.cv_url} target="_blank" rel="noreferrer" className="text-xs font-bold text-blue-600 hover:underline inline-block mt-0.5">
-                          {isRtl ? 'تحميل أو عرض السيرة الذاتية الحالية ↗' : 'Download current CV ↗'}
-                        </a>
-                      ) : (
-                        <p className="text-xs font-bold text-slate-400 mt-0.5">{isRtl ? 'لم يتم إرفاق سيرة ذاتية بعد' : 'No CV uploaded yet'}</p>
-                      )}
+                    {/* Mock bar chart with labels */}
+                    <div className="flex items-end justify-between gap-1.5 pt-6 h-24">
+                      {[15, 45, 25, 75, 35, 90, 50].map((h, i) => (
+                        <div key={i} className="flex-1 flex flex-col items-center gap-2 group cursor-pointer">
+                          <div className="w-full bg-slate-100 rounded-full h-16 relative overflow-hidden">
+                            <div 
+                              className={`w-full rounded-full absolute bottom-0 transition-all duration-500 ${
+                                i === 5 ? 'bg-blue-600' : 'bg-blue-900'
+                              }`} 
+                              style={{ height: `${h}%` }} 
+                            />
+                          </div>
+                          <span className="text-[9px] font-black text-slate-400">
+                            {['S', 'M', 'T', 'W', 'T', 'F', 'S'][i]}
+                          </span>
+                        </div>
+                      ))}
                     </div>
                   </div>
-                  <label className="bg-white hover:bg-slate-50 text-blue-600 border border-blue-200 font-black px-6 py-2.5 rounded-xl text-xs cursor-pointer shadow-sm transition-colors inline-flex items-center gap-2">
-                    <Upload className="w-4 h-4" />
-                    {uploadingCv ? (isRtl ? 'جاري الرفع...' : 'Uploading...') : (isRtl ? 'تحديث / رفع ملف CV جديد' : 'Upload New CV')}
-                    <input 
-                      type="file" 
-                      accept=".pdf,.doc,.docx" 
-                      onChange={handleCvFileChange} 
-                      className="hidden" 
-                    />
-                  </label>
-                </div>
-              </div>
 
-              {/* Role-Specific Info */}
-              {activeRole === 'speaker' && (
-                <div className="pt-6 border-t border-slate-100 space-y-6">
-                  <h4 className="font-black text-slate-800 text-lg">{isRtl ? 'بيانات التحدث والمشاركة' : 'Speaking & Topic Details'}</h4>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div className="md:col-span-2">
-                      <label className="block text-sm font-bold text-slate-700 mb-2">{isRtl ? 'موضوع التحدث المقترح *' : 'Proposed Speech Topic *'}</label>
-                      <input
-                        type="text"
-                        name="speechTopic"
-                        value={formData.speechTopic}
-                        onChange={handleChange}
-                        required
-                        className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500 font-bold text-slate-700"
-                      />
+                  {/* Time Tracker Card (Crextio Styled stopwatch) */}
+                  <div className="bg-white rounded-[2rem] border border-slate-100 p-6 shadow-sm flex flex-col items-center justify-between min-h-[220px]">
+                    <div className="w-full flex items-center justify-between mb-2">
+                      <span className="text-[10px] font-black text-slate-400 uppercase tracking-wider">{isRtl ? 'متتبع وقت الحضور' : 'Summit Timer Tracker'}</span>
+                      <span className="w-2 h-2 rounded-full bg-blue-600" />
                     </div>
-                    <div>
-                      <label className="block text-sm font-bold text-slate-700 mb-2">{isRtl ? 'مجال التخصص *' : 'Expertise *'}</label>
-                      <select
-                        name="speakerExpertise"
-                        value={formData.speakerExpertise}
-                        onChange={handleChange}
-                        required
-                        className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500 font-bold text-slate-700"
+                    
+                    {/* Circular clock layout */}
+                    <div className="relative w-28 h-28 flex items-center justify-center">
+                      <svg className="w-full h-full transform -rotate-90" viewBox="0 0 100 100">
+                        <circle cx="50" cy="50" r="42" stroke="#f1f5f9" strokeWidth="8" fill="transparent" />
+                        <circle 
+                          cx="50" 
+                          cy="50" 
+                          r="42" 
+                          stroke="#2563eb" 
+                          strokeWidth="8" 
+                          fill="transparent" 
+                          strokeDasharray="264"
+                          strokeDashoffset={264 - (264 * (trackerTime % 3600)) / 3600}
+                          className="transition-all duration-1000"
+                        />
+                      </svg>
+                      <div className="absolute flex flex-col items-center">
+                        <span className="text-xl font-black text-slate-800 leading-none">
+                          {formatTrackerTime(trackerTime)}
+                        </span>
+                        <span className="text-[9px] font-black text-slate-400 mt-1 uppercase tracking-widest">{isRtl ? 'وقت النشاط' : 'Work Time'}</span>
+                      </div>
+                    </div>
+
+                    {/* Play/Pause controls */}
+                    <div className="flex items-center gap-3">
+                      <button 
+                        onClick={() => setTrackerPlaying(!trackerPlaying)}
+                        className={`w-9 h-9 rounded-full flex items-center justify-center transition-colors shadow-md ${
+                          trackerPlaying 
+                            ? 'bg-amber-500 hover:bg-amber-600 text-white shadow-amber-500/25' 
+                            : 'bg-blue-600 hover:bg-blue-700 text-white shadow-blue-500/25'
+                        }`}
                       >
-                        <option value="ريادة الأعمال">{isRtl ? 'ريادة الأعمال' : 'Entrepreneurship'}</option>
-                        <option value="التكنولوجيا والذكاء الاصطناعي">{isRtl ? 'التكنولوجيا والذكاء الاصطناعي' : 'Tech & AI'}</option>
-                        <option value="الاستثمار والتمويل">{isRtl ? 'الاستثمار والتمويل' : 'Investment'}</option>
-                        <option value="التسويق والمبيعات">{isRtl ? 'التسويق والمبيعات' : 'Marketing'}</option>
-                        <option value="أخرى">{isRtl ? 'أخرى' : 'Other'}</option>
-                      </select>
-                    </div>
-                    <div>
-                      <label className="block text-sm font-bold text-slate-700 mb-2">{isRtl ? 'رابط LinkedIn (اختياري)' : 'LinkedIn Link (Optional)'}</label>
-                      <input
-                        type="url"
-                        name="speakerLinkedin"
-                        value={formData.speakerLinkedin}
-                        onChange={handleChange}
-                        className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500 font-bold text-slate-700"
-                        dir="ltr"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-bold text-slate-700 mb-2">{isRtl ? 'رابط Facebook (اختياري)' : 'Facebook Link (Optional)'}</label>
-                      <input
-                        type="url"
-                        name="speakerFacebook"
-                        value={formData.speakerFacebook}
-                        onChange={handleChange}
-                        className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500 font-bold text-slate-700"
-                        dir="ltr"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-bold text-slate-700 mb-2">{isRtl ? 'رابط X (تويتر) (اختياري)' : 'X (Twitter) Link (Optional)'}</label>
-                      <input
-                        type="url"
-                        name="speakerX"
-                        value={formData.speakerX}
-                        onChange={handleChange}
-                        className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500 font-bold text-slate-700"
-                        dir="ltr"
-                      />
-                    </div>
-                    <div className="md:col-span-2">
-                      <label className="block text-sm font-bold text-slate-700 mb-2">{isRtl ? 'النبذة التعريفية (Bio) *' : 'Speaker Bio *'}</label>
-                      <textarea
-                        name="speakerBio"
-                        value={formData.speakerBio}
-                        onChange={handleChange}
-                        rows={4}
-                        required
-                        className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500 font-bold text-slate-700"
-                      />
+                        {trackerPlaying ? <Pause className="w-4 h-4" /> : <Play className="w-4 h-4 fill-current" />}
+                      </button>
                     </div>
                   </div>
                 </div>
-              )}
 
-              {activeRole === 'startup' && (
-                <div className="pt-6 border-t border-slate-100 space-y-6">
-                  <h4 className="font-black text-slate-800 text-lg">{isRtl ? 'تفاصيل الشركة الناشئة' : 'Startup Details'}</h4>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div>
-                      <label className="block text-sm font-bold text-slate-700 mb-2">{isRtl ? 'اسم الشركة الناشئة *' : 'Startup Name *'}</label>
-                      <input
-                        type="text"
-                        name="startupName"
-                        value={formData.startupName}
-                        onChange={handleChange}
-                        required
-                        className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500 font-bold text-slate-700"
-                      />
+                {/* Calendar Timeline Section (Crextio Styled schedule timeline) */}
+                <div className="bg-white rounded-[2rem] border border-slate-100 p-6 shadow-sm flex flex-col gap-4">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-black text-slate-400 uppercase tracking-wider">{isRtl ? 'أجندة الفعاليات والمواعيد' : 'Summit Agenda Planner'}</span>
+                    <span className="text-xs font-black text-slate-800">{isRtl ? 'سبتمبر 2026' : 'September 2026'}</span>
+                  </div>
+
+                  {/* Horizontal Dates row */}
+                  <div className="flex justify-between items-center bg-slate-50 p-2.5 rounded-2xl border border-slate-100 gap-1 overflow-x-auto">
+                    {[22, 23, 24, 25, 26, 27].map((day, idx) => (
+                      <div 
+                        key={idx} 
+                        className={`flex-1 min-w-[45px] py-2 rounded-xl text-center cursor-pointer transition-colors ${
+                          day === 24 ? 'bg-blue-600 text-white shadow-sm shadow-blue-500/20' : 'hover:bg-slate-100 text-slate-600'
+                        }`}
+                      >
+                        <span className="block text-[10px] font-bold opacity-60 uppercase">{['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'][idx]}</span>
+                        <span className="text-sm font-black mt-0.5 block">{day}</span>
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* Timeline Events schedule */}
+                  <div className="space-y-3 pt-2">
+                    {/* Event block 1 */}
+                    <div className="p-4 bg-slate-50 rounded-2xl border border-slate-100/70 flex items-center justify-between gap-4">
+                      <div>
+                        <span className="text-[10px] font-black text-blue-600 uppercase block">{isRtl ? '9:00 صباحاً - 10:30 صباحاً' : '9:00 am - 10:30 am'}</span>
+                        <h5 className="font-black text-slate-800 text-sm mt-0.5">{isRtl ? 'اللقاء التنسيقي لفريق عمل الابتكار' : 'Weekly Innovation Team Sync'}</h5>
+                        <p className="text-[11px] font-bold text-slate-400 mt-0.5">{isRtl ? 'مناقشة خطة المشاريع وتوزيع المهام' : 'Discuss project guidelines & plans'}</p>
+                      </div>
+                      <div className="flex -space-x-2 overflow-hidden rtl:space-x-reverse shrink-0">
+                        <img className="inline-block h-6.5 w-6.5 rounded-full ring-2 ring-white" src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&q=80&w=200" alt="team" />
+                        <img className="inline-block h-6.5 w-6.5 rounded-full ring-2 ring-white" src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80&w=200" alt="team" />
+                        <img className="inline-block h-6.5 w-6.5 rounded-full ring-2 ring-white" src="https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&q=80&w=200" alt="team" />
+                      </div>
                     </div>
-                    <div>
-                      <label className="block text-sm font-bold text-slate-700 mb-2">{isRtl ? 'مجال القطاع *' : 'Industry *'}</label>
-                      <input
-                        type="text"
-                        name="industry"
-                        value={formData.industry}
-                        onChange={handleChange}
-                        required
-                        className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500 font-bold text-slate-700"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-bold text-slate-700 mb-2">{isRtl ? 'مرحلة المشروع *' : 'Stage *'}</label>
-                      <input
-                        type="text"
-                        name="stage"
-                        value={formData.stage}
-                        onChange={handleChange}
-                        required
-                        className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500 font-bold text-slate-700"
-                      />
-                    </div>
-                    <div className="md:col-span-2">
-                      <label className="block text-sm font-bold text-slate-700 mb-2">{isRtl ? 'الوصف المختصر (Elevator Pitch) *' : 'Elevator Pitch *'}</label>
-                      <textarea
-                        name="elevatorPitch"
-                        value={formData.elevatorPitch}
-                        onChange={handleChange}
-                        rows={3}
-                        required
-                        className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500 font-bold text-slate-700"
-                      />
+
+                    {/* Event block 2 */}
+                    <div className="p-4 bg-blue-50/50 rounded-2xl border border-blue-100/50 flex items-center justify-between gap-4">
+                      <div>
+                        <span className="text-[10px] font-black text-blue-700 uppercase block">{isRtl ? '11:00 صباحاً - 12:30 مساءً' : '11:00 am - 12:30 pm'}</span>
+                        <h5 className="font-black text-blue-900 text-sm mt-0.5">{isRtl ? 'جلسة تمهيدية للمبتكرين والشركات' : 'Startup Onboarding Session'}</h5>
+                        <p className="text-[11px] font-bold text-blue-700/70 mt-0.5">{isRtl ? 'استعراض نظم الجوائز وفرص التمويل' : 'Introduction to funding structures'}</p>
+                      </div>
+                      <div className="flex -space-x-2 overflow-hidden rtl:space-x-reverse shrink-0">
+                        <img className="inline-block h-6.5 w-6.5 rounded-full ring-2 ring-white" src="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&q=80&w=200" alt="team" />
+                        <img className="inline-block h-6.5 w-6.5 rounded-full ring-2 ring-white" src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=200" alt="team" />
+                      </div>
                     </div>
                   </div>
                 </div>
-              )}
+              </div>
 
-              {activeRole === 'researcher' && (
-                <div className="pt-6 border-t border-slate-100 space-y-6">
-                  <h4 className="font-black text-slate-800 text-lg">{isRtl ? 'بيانات الابتكار والبحث العلمي' : 'Research Details'}</h4>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div className="md:col-span-2">
-                      <label className="block text-sm font-bold text-slate-700 mb-2">{isRtl ? 'عنوان البحث التطبيقي *' : 'Research Title *'}</label>
-                      <input
-                        type="text"
-                        name="researchTitle"
-                        value={formData.researchTitle}
-                        onChange={handleChange}
-                        required
-                        className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500 font-bold text-slate-700"
-                      />
-                    </div>
+              {/* Column 3 (Right - Onboarding Progress & Checklist) - span 3 */}
+              <div className="lg:col-span-3 flex flex-col gap-6">
+                {/* Onboarding Progress Card */}
+                <div className="bg-white rounded-[2rem] border border-slate-100 p-6 shadow-sm flex flex-col justify-between min-h-[170px]">
+                  <div className="flex items-center justify-between">
+                    <span className="text-[10px] font-black text-slate-400 uppercase tracking-wider">{isRtl ? 'اكتمال خطوات القبول' : 'Onboarding Step'}</span>
+                    <h4 className="text-2xl font-black text-slate-800">
+                      {Math.round((tasks.filter(t => t.checked).length / tasks.length) * 100)}%
+                    </h4>
+                  </div>
+                  {/* Styled linear progress blocks */}
+                  <div className="flex items-center gap-1.5 pt-4">
+                    {[1, 2, 3].map((step) => {
+                      const completedCount = tasks.filter(t => t.checked).length;
+                      const ratio = completedCount / tasks.length;
+                      let active = false;
+                      if (step === 1 && ratio >= 0.2) active = true;
+                      if (step === 2 && ratio >= 0.6) active = true;
+                      if (step === 3 && ratio >= 0.9) active = true;
+
+                      return (
+                        <div 
+                          key={step} 
+                          className={`h-7.5 flex-1 rounded-lg transition-all flex items-center justify-center text-[10px] font-black ${
+                            active ? 'bg-blue-600 text-white shadow-sm' : 'bg-slate-100 text-slate-400'
+                          }`}
+                        >
+                          {step === 1 ? 'Task' : step === 2 ? 'Review' : 'Approved'}
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                {/* Onboarding Task Checklist widget (fully interactive) */}
+                <div className="bg-blue-950 rounded-[2.5rem] p-6 text-white shadow-lg shadow-blue-950/20 flex flex-col gap-4">
+                  <div className="flex items-center justify-between">
                     <div>
+                      <h4 className="font-black text-base">{isRtl ? 'المهام والخطوات المطلوبة' : 'Onboarding Checklist'}</h4>
+                      <span className="text-[10px] font-bold text-blue-300 uppercase tracking-wider block mt-0.5">{isRtl ? 'خطوة بخطوة للقمة' : 'Step-by-step to summit'}</span>
+                    </div>
+                    <span className="text-xl font-black text-white bg-white/10 px-3 py-1 rounded-2xl text-xs">
+                      {tasks.filter(t => t.checked).length}/{tasks.length}
+                    </span>
+                  </div>
+
+                  {/* Tasks List */}
+                  <div className="space-y-3 max-h-[300px] overflow-y-auto pr-1">
+                    {tasks.map((task) => (
+                      <div 
+                        key={task.id} 
+                        onClick={() => {
+                          setTasks(prev => prev.map(t => t.id === task.id ? { ...t, checked: !t.checked } : t));
+                        }}
+                        className="flex items-center gap-3 p-3 rounded-2xl bg-white/5 border border-white/5 hover:bg-white/10 transition-colors cursor-pointer"
+                      >
+                        <div className={`w-5 h-5 rounded-full flex items-center justify-center border transition-all ${
+                          task.checked 
+                            ? 'bg-blue-500 border-blue-400 text-white' 
+                            : 'border-white/30 text-transparent'
+                        }`}>
+                          <Check className="w-3 h-3 stroke-[3]" />
+                        </div>
+                        <span className={`text-[11px] font-bold leading-tight transition-all ${
+                          task.checked ? 'text-slate-300 line-through opacity-75' : 'text-slate-100'
+                        }`}>
+                          {task.text}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+
+            </div>
+
+            {/* Unified Status and CV block under role specific views (using renderOverviewTab's core components) */}
+            {renderOverviewTab()}
+
+          </div>
+        ) : (
+          <form onSubmit={handleProfileSave} className="bg-white p-8 md:p-10 rounded-[2.5rem] border border-slate-100 space-y-8 shadow-sm">
+            
+            {/* Form Title & Success Alert */}
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-slate-100">
+              <div>
+                <h3 className="text-2xl font-black text-slate-800">{isRtl ? 'تعديل بيانات الملف الشخصي' : 'Edit Profile Settings'}</h3>
+                <p className="text-slate-400 text-xs mt-1 font-bold">{isRtl ? 'قم بتحديث صورتك، وسيرتك الذاتية، وبياناتك الشخصية' : 'Update your photo, resume, and info'}</p>
+              </div>
+              {saveSuccess && (
+                <span className="text-emerald-600 bg-emerald-50 px-4 py-2 rounded-full text-xs font-black border border-emerald-100 flex items-center gap-1.5 animate-bounce">
+                  <CheckCircle className="w-4 h-4" /> {isRtl ? 'تم حفظ التغييرات بنجاح!' : 'Changes saved successfully!'}
+                </span>
+              )}
+            </div>
+
+            {/* Profile Photo Uploader Section */}
+            <div className="flex flex-col items-center justify-center py-6 bg-slate-50/50 rounded-3xl border border-slate-100 p-6">
+              <div className="relative group w-44 h-44 mb-4 cursor-pointer">
+                {formData.speakerImage ? (
+                  <img 
+                    src={formData.speakerImage} 
+                    alt={formData.full_name} 
+                    onClick={() => setImageLightboxOpen(true)}
+                    className="w-full h-full rounded-full object-cover shadow-lg border-4 border-white group-hover:opacity-90 transition-opacity cursor-zoom-in" 
+                    title={isRtl ? 'انقر لتكبير الصورة' : 'Click to enlarge'}
+                  />
+                ) : (
+                  <div className="w-full h-full rounded-full bg-blue-100 text-blue-600 flex items-center justify-center font-black text-4xl shadow-lg border-4 border-white">
+                    {formData.full_name?.charAt(0) || 'U'}
+                  </div>
+                )}
+                <label className="absolute bottom-2 right-2 bg-blue-600 hover:bg-blue-700 text-white p-2.5 rounded-full shadow-lg cursor-pointer transition-colors border border-white">
+                  <Camera className="w-4 h-4" />
+                  <input 
+                    type="file" 
+                    accept="image/*" 
+                    onChange={handleImageFileChange} 
+                    className="hidden" 
+                  />
+                </label>
+              </div>
+              <div className="text-center">
+                <label className="bg-white hover:bg-slate-50 text-slate-700 font-bold px-4 py-2 rounded-xl border border-slate-200 shadow-sm cursor-pointer inline-flex items-center gap-2 text-xs transition-colors">
+                  <Upload className="w-3.5 h-3.5" />
+                  {uploadingImage ? (isRtl ? 'جاري الرفع...' : 'Uploading...') : (isRtl ? 'اختر صورة شخصية جديدة' : 'Upload New Photo')}
+                  <input 
+                    type="file" 
+                    accept="image/*" 
+                    onChange={handleImageFileChange} 
+                    className="hidden" 
+                  />
+                </label>
+                <p className="text-slate-400 text-[10px] mt-2 font-semibold">{isRtl ? 'JPG, PNG أو WebP. بحد أقصى 5 ميجابايت.' : 'JPG, PNG or WebP. Max 5MB.'}</p>
+              </div>
+            </div>
+
+            {/* Core Fields */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div>
+                <label className="block text-sm font-bold text-slate-700 mb-2">{isRtl ? 'الاسم بالكامل *' : 'Full Name *'}</label>
+                <input
+                  type="text"
+                  name="full_name"
+                  value={formData.full_name}
+                  onChange={handleChange}
+                  required
+                  className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500 font-bold text-slate-700"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-bold text-slate-700 mb-2">{isRtl ? 'البريد الإلكتروني *' : 'Email Address *'}</label>
+                <input
+                  type="email"
+                  name="email"
+                  value={user?.email || ''}
+                  disabled
+                  className="w-full px-4 py-3 rounded-xl border border-slate-100 bg-slate-50 font-bold text-slate-400 cursor-not-allowed"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-bold text-slate-700 mb-2">{isRtl ? 'رقم الهاتف *' : 'Phone Number *'}</label>
+                <input
+                  type="text"
+                  name="phone"
+                  value={formData.phone}
+                  onChange={handleChange}
+                  required
+                  className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500 font-bold text-slate-700"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-bold text-slate-700 mb-2">{isRtl ? 'الجامعة / جهة العمل *' : 'Organization *'}</label>
+                <input
+                  type="text"
+                  name="organization"
+                  value={formData.organization}
+                  onChange={handleChange}
+                  required
+                  className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500 font-bold text-slate-700"
+                />
+              </div>
+            </div>
+
+            {/* CV Attachment Section */}
+            <div className="pt-6 border-t border-slate-100">
+              <h4 className="font-black text-slate-800 text-lg mb-4">{isRtl ? 'السيرة الذاتية والملف المهني (CV)' : 'CV & Professional Resume'}</h4>
+              <div className="p-5 bg-blue-50/30 rounded-3xl border border-blue-100/50 flex flex-col sm:flex-row items-center justify-between gap-4">
+                <div className="flex items-center gap-3">
+                  <div className="w-12 h-12 rounded-2xl bg-blue-50 flex items-center justify-center text-blue-600 shrink-0">
+                    <FileText className="w-6 h-6" />
+                  </div>
+                  <div>
+                    <p className="font-bold text-slate-700 text-sm">{isRtl ? 'ملف السيرة الذاتية المرفوع' : 'CV / Resume File'}</p>
+                    {formData.cv_url && formData.cv_url !== '#' ? (
+                      <a href={formData.cv_url} target="_blank" rel="noreferrer" className="text-xs font-bold text-blue-600 hover:underline inline-block mt-0.5">
+                        {isRtl ? 'تحميل أو عرض السيرة الذاتية الحالية ↗' : 'Download current CV ↗'}
+                      </a>
+                    ) : (
+                      <p className="text-xs font-bold text-slate-400 mt-0.5">{isRtl ? 'لم يتم إرفاق سيرة ذاتية بعد' : 'No CV uploaded yet'}</p>
+                    )}
+                  </div>
+                </div>
+                <label className="bg-white hover:bg-slate-50 text-blue-600 border border-blue-200 font-black px-6 py-2.5 rounded-xl text-xs cursor-pointer shadow-sm transition-colors inline-flex items-center gap-2">
+                  <Upload className="w-4 h-4" />
+                  {uploadingCv ? (isRtl ? 'جاري الرفع...' : 'Uploading...') : (isRtl ? 'تحديث / رفع ملف CV جديد' : 'Upload New CV')}
+                  <input 
+                    type="file" 
+                    accept=".pdf,.doc,.docx" 
+                    onChange={handleCvFileChange} 
+                    className="hidden" 
+                  />
+                </label>
+              </div>
+            </div>
+
+            {/* Role-Specific Info */}
+            {activeRole === 'speaker' && (
+              <div className="pt-6 border-t border-slate-100 space-y-6">
+                <h4 className="font-black text-slate-800 text-lg">{isRtl ? 'بيانات التحدث والمشاركة' : 'Speaking & Topic Details'}</h4>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="md:col-span-2">
+                    <label className="block text-sm font-bold text-slate-700 mb-2">{isRtl ? 'موضوع التحدث المقترح *' : 'Proposed Speech Topic *'}</label>
+                    <input
+                      type="text"
+                      name="speechTopic"
+                      value={formData.speechTopic}
+                      onChange={handleChange}
+                      required
+                      className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500 font-bold text-slate-700"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-bold text-slate-700 mb-2">{isRtl ? 'مجال التخصص *' : 'Expertise *'}</label>
+                    <select
+                      name="speakerExpertise"
+                      value={formData.speakerExpertise}
+                      onChange={handleChange}
+                      required
+                      className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500 font-bold text-slate-700"
+                    >
+                      <option value="ريادة الأعمال">{isRtl ? 'ريادة الأعمال' : 'Entrepreneurship'}</option>
+                      <option value="التكنولوجيا والذكاء الاصطناعي">{isRtl ? 'التكنولوجيا والذكاء الاصطناعي' : 'Tech & AI'}</option>
+                      <option value="الاستثمار والتمويل">{isRtl ? 'الاستثمار والتمويل' : 'Investment'}</option>
+                      <option value="التسويق والمبيعات">{isRtl ? 'التسويق والمبيعات' : 'Marketing'}</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-bold text-slate-700 mb-2">{isRtl ? 'السيرة الذاتية المختصرة (Bio) *' : 'Short Speaker Bio *'}</label>
+                    <textarea
+                      name="speakerBio"
+                      value={formData.speakerBio}
+                      onChange={handleChange}
+                      rows={3}
+                      required
+                      className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500 font-bold text-slate-700"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-bold text-slate-700 mb-2">LinkedIn Profile URL</label>
+                    <input
+                      type="url"
+                      name="speakerLinkedin"
+                      value={formData.speakerLinkedin}
+                      onChange={handleChange}
+                      className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500 font-bold text-slate-700"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-bold text-slate-700 mb-2">Facebook Profile URL</label>
+                    <input
+                      type="url"
+                      name="speakerFacebook"
+                      value={formData.speakerFacebook}
+                      onChange={handleChange}
+                      className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500 font-bold text-slate-700"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-bold text-slate-700 mb-2">X / Twitter URL</label>
+                    <input
+                      type="url"
+                      name="speakerX"
+                      value={formData.speakerX}
+                      onChange={handleChange}
+                      className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500 font-bold text-slate-700"
+                    />
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Other roles: startup, researcher details fields etc. */}
+            {activeRole === 'startup' && (
+              <div className="pt-6 border-t border-slate-100 space-y-6">
+                <h4 className="font-black text-slate-800 text-lg">{isRtl ? 'تفاصيل الشركة الناشئة' : 'Startup Details'}</h4>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div>
+                    <label className="block text-sm font-bold text-slate-700 mb-2">{isRtl ? 'اسم الشركة *' : 'Startup Name *'}</label>
+                    <input
+                      type="text"
+                      name="startupName"
+                      value={formData.startupName}
+                      onChange={handleChange}
+                      required
+                      className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500 font-bold text-slate-700"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-bold text-slate-700 mb-2">{isRtl ? 'المجال / القطاع *' : 'Industry Sector *'}</label>
+                    <input
+                      type="text"
+                      name="industry"
+                      value={formData.industry}
+                      onChange={handleChange}
+                      required
+                      className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500 font-bold text-slate-700"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-bold text-slate-700 mb-2">{isRtl ? 'مرحلة المشروع *' : 'Startup Stage *'}</label>
+                    <input
+                      type="text"
+                      name="stage"
+                      value={formData.stage}
+                      onChange={handleChange}
+                      required
+                      className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500 font-bold text-slate-700"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-bold text-slate-700 mb-2">{isRtl ? 'وصف مختصر (Elevator Pitch) *' : 'Elevator Pitch *'}</label>
+                    <textarea
+                      name="elevatorPitch"
+                      value={formData.elevatorPitch}
+                      onChange={handleChange}
+                      rows={3}
+                      required
+                      className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500 font-bold text-slate-700"
+                    />
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {activeRole === 'researcher' && (
+              <div className="pt-6 border-t border-slate-100 space-y-6">
+                <h4 className="font-black text-slate-800 text-lg">{isRtl ? 'تفاصيل البحث العلمي' : 'Scientific Research Details'}</h4>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div>
+                    <label className="block text-sm font-bold text-slate-700 mb-2">{isRtl ? 'عنوان الورقة البحثية *' : 'Research Title *'}</label>
+                    <input
+                      type="text"
+                      name="researchTitle"
+                      value={formData.researchTitle}
+                      onChange={handleChange}
+                      required
+                      className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500 font-bold text-slate-700"
+                    />
+                  </div>
+                  <div>
                       <label className="block text-sm font-bold text-slate-700 mb-2">{isRtl ? 'مستوى الجاهزية TRL *' : 'TRL Level *'}</label>
                       <input
                         type="text"
@@ -1029,7 +1470,7 @@ const UserDashboard = () => {
           )}
 
         </div>
-      </div>
+
 
       {/* Image Editor Crop/Brightness Modal */}
       {imageEditorOpen && (
