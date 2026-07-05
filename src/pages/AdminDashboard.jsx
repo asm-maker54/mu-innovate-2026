@@ -219,10 +219,14 @@ const AdminDashboard = () => {
         if (regErr) throw regErr;
         setRegistrants(regData || []);
       } else {
-        // Use Mock Data
-        setGradProjects(mockGraduationProjects);
-        setAppliedResearch(mockAppliedResearch);
-        setRegistrants(mockRegistrations);
+        // Use Mock Data merged with localStorage Data for offline/demo persistence
+        const localRegs = JSON.parse(localStorage.getItem('local_registrations') || '[]');
+        const localGradProjects = JSON.parse(localStorage.getItem('local_graduation_projects') || '[]');
+        const localAppliedResearch = JSON.parse(localStorage.getItem('local_applied_research') || '[]');
+
+        setGradProjects([...localGradProjects, ...mockGraduationProjects]);
+        setAppliedResearch([...localAppliedResearch, ...mockAppliedResearch]);
+        setRegistrants([...localRegs, ...mockRegistrations]);
       }
     } catch (err) {
       console.error("Error fetching data:", err);
@@ -288,7 +292,6 @@ const AdminDashboard = () => {
     });
   };
 
-  // Stats Counters
   const getStats = () => {
     const totalGP = gradProjects.length;
     const totalAR = appliedResearch.length;
@@ -296,7 +299,21 @@ const AdminDashboard = () => {
     const totalStartups = registrants.filter(r => r.role === 'startup').length;
     const totalInvestors = registrants.filter(r => r.role === 'investor').length;
     const totalMentors = registrants.filter(r => r.role === 'mentor').length;
-    return { totalGP, totalAR, totalSpeakers, totalStartups, totalInvestors, totalMentors, totalReg: registrants.length };
+    const totalResearchers = registrants.filter(r => r.role === 'researcher').length;
+    const totalPartners = registrants.filter(r => r.role === 'partner').length;
+    const totalVolunteers = registrants.filter(r => r.role === 'volunteer').length;
+    return { 
+      totalGP, 
+      totalAR, 
+      totalSpeakers, 
+      totalStartups, 
+      totalInvestors, 
+      totalMentors, 
+      totalResearchers,
+      totalPartners,
+      totalVolunteers,
+      totalReg: registrants.length 
+    };
   };
 
   const stats = getStats();
@@ -413,7 +430,10 @@ const AdminDashboard = () => {
             { id: 'speakers', label: `المتحدثون (${stats.totalSpeakers})`, icon: Presentation },
             { id: 'startups', label: `الشركات الناشئة (${stats.totalStartups})`, icon: Briefcase },
             { id: 'investors', label: `المستثمرون (${stats.totalInvestors})`, icon: Users },
-            { id: 'mentors', label: `الموجهون (${stats.totalMentors})`, icon: Users }
+            { id: 'mentors', label: `الموجهون (${stats.totalMentors})`, icon: Users },
+            { id: 'researchers', label: `الباحثون / المبتكرون (${stats.totalResearchers})`, icon: BookOpen },
+            { id: 'partners', label: `الشركاء / الرعاة (${stats.totalPartners})`, icon: Users },
+            { id: 'volunteers', label: `المتطوعون (${stats.totalVolunteers})`, icon: Users }
           ].map(tab => (
             <button
               key={tab.id}
@@ -664,8 +684,8 @@ const AdminDashboard = () => {
                 </div>
               )}
 
-              {/* --- REGISTRATIONS TABS (SPEAKERS, STARTUPS, INVESTORS, MENTORS) --- */}
-              {['speakers', 'startups', 'investors', 'mentors'].includes(activeTab) && !selectedItem && (
+              {/* --- REGISTRATIONS TABS (SPEAKERS, STARTUPS, INVESTORS, MENTORS, RESEARCHERS, PARTNERS, VOLUNTEERS) --- */}
+              {['speakers', 'startups', 'investors', 'mentors', 'researchers', 'partners', 'volunteers'].includes(activeTab) && !selectedItem && (
                 <div className="overflow-x-auto">
                   <table className="w-full text-right border-collapse text-sm">
                     <thead>
@@ -688,7 +708,10 @@ const AdminDashboard = () => {
                             <td className="p-4 font-black text-slate-800">
                               <div>{r.full_name}</div>
                               {r.details.speechTopic && <div className="text-xs text-[#26462C] font-bold mt-1">الموضوع: {r.details.speechTopic}</div>}
-                              {r.details.startupName && <div className="text-xs text-[#F4A217] font-bold mt-1">الشركة: {r.details.startupName}</div>}
+                              {r.details.startupName && <div className="text-xs text-[#F4A217] font-bold mt-1">الشركة الناشئة: {r.details.startupName}</div>}
+                              {r.details.researchTitle && <div className="text-xs text-blue-600 font-bold mt-1">عنوان البحث: {r.details.researchTitle}</div>}
+                              {r.details.companyName && <div className="text-xs text-indigo-600 font-bold mt-1">المؤسسة: {r.details.companyName} ({r.details.partnerType})</div>}
+                              {r.details.volunteerCommittee && <div className="text-xs text-emerald-600 font-bold mt-1">لجنة التطوع: {r.details.volunteerCommittee}</div>}
                             </td>
                             <td className="p-4 font-bold text-slate-600">{r.organization}</td>
                             <td className="p-4 font-semibold text-slate-500">{r.email}</td>

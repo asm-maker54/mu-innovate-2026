@@ -277,8 +277,48 @@ const RegisterPage = () => {
 
           if (error) throw error;
         } else {
-          console.warn("Supabase is not configured. Mocking registration submission...");
-          await new Promise(resolve => setTimeout(resolve, 2000));
+          console.warn("Supabase is not configured. Saving registration to localStorage...");
+          const newReg = {
+            id: `reg_${Date.now()}`,
+            created_at: new Date().toISOString(),
+            full_name: formData.fullName,
+            email: formData.email,
+            phone: formData.phone,
+            organization: formData.organization,
+            role: selectedRole,
+            cv_url: cvUrl || '#',
+            details: {
+              startupName: formData.startupName || '',
+              industry: formData.industry || '',
+              stage: formData.stage || '',
+              elevatorPitch: formData.elevatorPitch || '',
+              speechTopic: formData.speechTopic || '',
+              speakerExpertise: formData.speakerExpertise || '',
+              speakerBio: formData.speakerBio || '',
+              speakerLinkedin: formData.speakerLinkedin || '',
+              companyName: formData.companyName || '',
+              partnerType: formData.partnerType || '',
+              companyWebsite: formData.companyWebsite || '',
+              partnerMessage: formData.partnerMessage || '',
+              investorEntity: formData.investorEntity || '',
+              investmentType: formData.investmentType || '',
+              ticketSize: formData.ticketSize || '',
+              investorLinkedin: formData.investorLinkedin || '',
+              mentorExpertise: formData.mentorExpertise || '',
+              yearsExperience: formData.yearsExperience || '',
+              mentorLinkedin: formData.mentorLinkedin || '',
+              volunteerCommittee: formData.volunteerCommittee || '',
+              hasVolunteerExperience: formData.hasVolunteerExperience || '',
+              volunteerReason: formData.volunteerReason || '',
+              researchTitle: formData.researchTitle || '',
+              researchIdea: formData.researchIdea || '',
+              trlLevel: formData.trlLevel || ''
+            }
+          };
+          const localRegs = JSON.parse(localStorage.getItem('local_registrations') || '[]');
+          localRegs.unshift(newReg);
+          localStorage.setItem('local_registrations', JSON.stringify(localRegs));
+          await new Promise(resolve => setTimeout(resolve, 1000));
         }
 
         setIsSubmitted(true);

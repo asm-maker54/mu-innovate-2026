@@ -163,8 +163,30 @@ const SubmitGraduationProjectPage = () => {
 
         if (error) throw error;
       } else {
-        console.warn("Supabase is not configured. Mocking form submission...");
-        await new Promise(resolve => setTimeout(resolve, 2000));
+        console.warn("Supabase is not configured. Saving graduation project to localStorage...");
+        const newProject = {
+          id: `gp_${Date.now()}`,
+          created_at: new Date().toISOString(),
+          project_name_ar: formData.projectNameAr,
+          project_name_en: formData.projectNameEn,
+          college: formData.college === 'أخرى' ? formData.customCollege : formData.college,
+          department: formData.department,
+          year: formData.year,
+          course_name: formData.courseName,
+          project_type: formData.projectType,
+          team_members: formData.teamMembers,
+          status: 'تم استلام الطلب',
+          files: { summaryPdf: '#', pitchDeck: '#' },
+          details: {
+            projectSummary: formData.projectSummary,
+            problemAddressed: formData.problemAddressed,
+            solutionProvided: formData.solutionProvided
+          }
+        };
+        const localProjects = JSON.parse(localStorage.getItem('local_graduation_projects') || '[]');
+        localProjects.unshift(newProject);
+        localStorage.setItem('local_graduation_projects', JSON.stringify(localProjects));
+        await new Promise(resolve => setTimeout(resolve, 1000));
       }
 
       setSubmitSuccess(true);

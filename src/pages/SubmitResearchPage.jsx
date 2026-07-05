@@ -125,8 +125,28 @@ const SubmitResearchPage = () => {
 
         if (error) throw error;
       } else {
-        console.warn("Supabase is not configured. Mocking research submission...");
-        await new Promise(resolve => setTimeout(resolve, 2000));
+        console.warn("Supabase is not configured. Saving applied research to localStorage...");
+        const newResearch = {
+          id: `r_${Date.now()}`,
+          created_at: new Date().toISOString(),
+          pi_name: formData.piName,
+          pi_faculty: formData.piFaculty === 'أخرى' ? formData.customFaculty : formData.piFaculty,
+          pi_dept: formData.piDept,
+          pi_rank: formData.piRank,
+          pi_email: formData.piEmail,
+          pi_phone: formData.piPhone,
+          pi_orcid: formData.piOrcid,
+          status: 'تم استلام الطلب',
+          files: { researchPdf: '#', marketSummaryPdf: '#' },
+          details: {
+            problem: formData.researchSummary || '',
+            solution: formData.solution || ''
+          }
+        };
+        const localResearchList = JSON.parse(localStorage.getItem('local_applied_research') || '[]');
+        localResearchList.unshift(newResearch);
+        localStorage.setItem('local_applied_research', JSON.stringify(localResearchList));
+        await new Promise(resolve => setTimeout(resolve, 1000));
       }
 
       setSubmitSuccess(true);
