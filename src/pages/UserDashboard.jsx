@@ -87,6 +87,46 @@ const UserDashboard = () => {
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 
+  const saveUserRecord = async (updatedUser) => {
+    const { supabase, isSupabaseConfigured } = await import('../supabaseClient');
+    if (isSupabaseConfigured) {
+      const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+      const isUuid = uuidRegex.test(user.id);
+      
+      let query = supabase
+        .from('registrations')
+        .update({
+          full_name: updatedUser.full_name,
+          phone: updatedUser.phone,
+          organization: updatedUser.organization,
+          cv_url: updatedUser.cv_url,
+          details: updatedUser.details
+        });
+
+      if (isUuid) {
+        query = query.eq('id', user.id);
+      } else {
+        query = query.eq('email', user.email);
+      }
+
+      const { error } = await query;
+      if (error) throw error;
+    } else {
+      const localRegs = JSON.parse(localStorage.getItem('local_registrations') || '[]');
+      const updatedRegs = localRegs.map(r => (r.id === user.id || r.email === user.email) ? {
+        ...r,
+        full_name: updatedUser.full_name,
+        phone: updatedUser.phone,
+        organization: updatedUser.organization,
+        cv_url: updatedUser.cv_url,
+        details: updatedUser.details
+      } : r);
+      localStorage.setItem('local_registrations', JSON.stringify(updatedRegs));
+    }
+    localStorage.setItem('current_user', JSON.stringify(updatedUser));
+    setUser(updatedUser);
+  };
+
   const handleImageFileChange = async (e) => {
     const file = e.target.files[0];
     if (!file) return;
@@ -119,7 +159,18 @@ const UserDashboard = () => {
           reader.readAsDataURL(file);
         });
       }
+      
+      const updatedUser = {
+        ...user,
+        details: {
+          ...user.details,
+          speakerImage: finalUrl
+        }
+      };
+      await saveUserRecord(updatedUser);
       setFormData(prev => ({ ...prev, speakerImage: finalUrl }));
+      setSaveSuccess(true);
+      setTimeout(() => setSaveSuccess(false), 3000);
     } catch (err) {
       alert("حدث خطأ أثناء رفع الصورة: " + err.message);
     } finally {
@@ -159,7 +210,15 @@ const UserDashboard = () => {
           reader.readAsDataURL(file);
         });
       }
+      
+      const updatedUser = {
+        ...user,
+        cv_url: finalUrl
+      };
+      await saveUserRecord(updatedUser);
       setFormData(prev => ({ ...prev, cv_url: finalUrl }));
+      setSaveSuccess(true);
+      setTimeout(() => setSaveSuccess(false), 3000);
     } catch (err) {
       alert("حدث خطأ أثناء رفع السيرة الذاتية: " + err.message);
     } finally {
@@ -205,45 +264,7 @@ const UserDashboard = () => {
         }
       };
 
-      const { supabase, isSupabaseConfigured } = await import('../supabaseClient');
-      if (isSupabaseConfigured) {
-        // Validate if ID is a standard UUID format
-        const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
-        const isUuid = uuidRegex.test(user.id);
-        
-        let query = supabase
-          .from('registrations')
-          .update({
-            full_name: updatedUser.full_name,
-            phone: updatedUser.phone,
-            organization: updatedUser.organization,
-            cv_url: updatedUser.cv_url,
-            details: updatedUser.details
-          });
-
-        if (isUuid) {
-          query = query.eq('id', user.id);
-        } else {
-          query = query.eq('email', user.email);
-        }
-
-        const { error } = await query;
-        if (error) throw error;
-      } else {
-        const localRegs = JSON.parse(localStorage.getItem('local_registrations') || '[]');
-        const updatedRegs = localRegs.map(r => (r.id === user.id || r.email === user.email) ? {
-          ...r,
-          full_name: updatedUser.full_name,
-          phone: updatedUser.phone,
-          organization: updatedUser.organization,
-          cv_url: updatedUser.cv_url,
-          details: updatedUser.details
-        } : r);
-        localStorage.setItem('local_registrations', JSON.stringify(updatedRegs));
-      }
-
-      localStorage.setItem('current_user', JSON.stringify(updatedUser));
-      setUser(updatedUser);
+      await saveUserRecord(updatedUser);
       setSaveSuccess(true);
       setTimeout(() => setSaveSuccess(false), 3000);
     } catch (err) {

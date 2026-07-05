@@ -760,12 +760,23 @@ const AdminDashboard = () => {
                                   إلغاء القبول
                                 </button>
                               ) : (
-                                <button 
-                                  onClick={() => handleStatusChange(r.id, 'registration', 'مقبول للعرض في القمة')}
-                                  className="px-3 py-1.5 bg-green-600 hover:bg-green-700 text-white rounded-lg font-bold text-xs transition-colors shadow-sm"
-                                >
-                                  موافقة وقبول
-                                </button>
+                                <div className="flex flex-col items-center gap-1">
+                                  <button 
+                                    onClick={() => handleStatusChange(r.id, 'registration', 'مقبول للعرض في القمة')}
+                                    disabled={!r.cv_url || r.cv_url === '#'}
+                                    className={`px-3 py-1.5 rounded-lg font-bold text-xs transition-all shadow-sm ${
+                                      (!r.cv_url || r.cv_url === '#') 
+                                        ? 'bg-slate-100 text-slate-400 cursor-not-allowed border border-slate-200' 
+                                        : 'bg-green-600 hover:bg-green-700 text-white'
+                                    }`}
+                                    title={(!r.cv_url || r.cv_url === '#') ? 'يرجى رفع السيرة الذاتية أولاً لتتمكن من القبول' : ''}
+                                  >
+                                    موافقة وقبول
+                                  </button>
+                                  {(!r.cv_url || r.cv_url === '#') && (
+                                    <span className="text-[9px] text-red-500 font-bold whitespace-nowrap">يجب رفع الـ CV أولاً</span>
+                                  )}
+                                </div>
                               )}
                             </td>
                           </tr>
