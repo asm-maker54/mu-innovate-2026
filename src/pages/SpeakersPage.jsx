@@ -204,7 +204,7 @@ const SpeakersPage = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-[#070b15] text-white overflow-hidden relative" dir="rtl">
+    <div className="min-h-screen bg-[#070b15] text-white relative">
       {/* Background Neon Orbs */}
       <div className="absolute top-20 right-0 w-[500px] h-[500px] rounded-full bg-blue-500/10 blur-[120px] pointer-events-none" />
       <div className="absolute top-1/2 left-0 w-[450px] h-[450px] rounded-full bg-purple-500/10 blur-[130px] pointer-events-none" />
