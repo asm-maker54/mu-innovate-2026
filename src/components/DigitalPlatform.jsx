@@ -153,11 +153,11 @@ const DigitalPlatform = () => {
             <ListItem colorHex="#6b21a8" isRtl={isRtl} link="/employment-fair">طلب المقابلات</ListItem>
           </FeatureBox3D>
 
-          <FeatureBox3D title="الاستثمار والملكية الفكرية" colorHex="#1d4ed8" icon={Handshake} link="/stakeholders" isRtl={isRtl}>
-            <ListItem colorHex="#1d4ed8" isRtl={isRtl} link="/stakeholders">Investor Matchmaking</ListItem>
-            <ListItem colorHex="#1d4ed8" isRtl={isRtl} link="/stakeholders">Founder Services Pavilion</ListItem>
-            <ListItem colorHex="#1d4ed8" isRtl={isRtl} link="/stakeholders">Startup Readiness Desk</ListItem>
-            <ListItem colorHex="#1d4ed8" isRtl={isRtl} link="/stakeholders">عيادة الملكية الفكرية</ListItem>
+          <FeatureBox3D title="الاستثمار والملكية الفكرية" colorHex="#1d4ed8" icon={Handshake} link="/investment-ip" isRtl={isRtl}>
+            <ListItem colorHex="#1d4ed8" isRtl={isRtl} link="/investment-ip">Investor Matchmaking</ListItem>
+            <ListItem colorHex="#1d4ed8" isRtl={isRtl} link="/investment-ip">Founder Services Pavilion</ListItem>
+            <ListItem colorHex="#1d4ed8" isRtl={isRtl} link="/investment-ip">Startup Readiness Desk</ListItem>
+            <ListItem colorHex="#1d4ed8" isRtl={isRtl} link="/investment-ip">عيادة الملكية الفكرية</ListItem>
             <ListItem colorHex="#1d4ed8" isRtl={isRtl} link="/register?role=investor">طلب اجتماع أو استشارة</ListItem>
           </FeatureBox3D>
         </div>

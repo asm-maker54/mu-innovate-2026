@@ -67,7 +67,8 @@ const Navbar = () => {
       titleEn: 'Research & Projects',
       dropdown: [
         { label: 'تسويق البحوث', labelEn: 'Applied Research', href: '/applied-research' },
-        { label: 'مشروعات التخرج', labelEn: 'Graduation Projects', href: '/graduation-projects' }
+        { label: 'مشروعات التخرج', labelEn: 'Graduation Projects', href: '/graduation-projects' },
+        { label: 'الاستثمار والملكية الفكرية', labelEn: 'Investment & IP', href: '/investment-ip' }
       ]
     },
     {

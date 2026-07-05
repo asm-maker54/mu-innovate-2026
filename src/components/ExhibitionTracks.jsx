@@ -73,7 +73,7 @@ const ExhibitionTracks = () => {
       id: 6,
       title: 'الاستثمار والملكية الفكرية',
       icon: Handshake,
-      link: '/stakeholders',
+      link: '/investment-ip',
       description: 'Investor Matchmaking، Founder Services Pavilion، Startup Readiness Desk، عيادة الملكية الفكرية، طلب اجتماع أو استشارة.',
       colors: {
         bg: 'bg-[#fff6f4]',
