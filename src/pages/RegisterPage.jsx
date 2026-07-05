@@ -274,6 +274,36 @@ const RegisterPage = () => {
         if (isSupabaseConfigured) {
           const { fullName, email, phone, organization, password, attachment, acceptTerms, ...otherDetails } = formData;
           
+          // 1. Fetch existing registrants to check for duplicates
+          const { data: allRegs, error: fetchError } = await supabase
+            .from('registrations')
+            .select('full_name, email, phone, details');
+          if (fetchError) throw fetchError;
+
+          // 2. Check duplicate email
+          const dupEmail = allRegs.find(r => r.email?.toLowerCase().trim() === email.toLowerCase().trim());
+          if (dupEmail) {
+            throw new Error('عذراً، هذا البريد الإلكتروني مسجل مسبقاً لمشترك آخر.');
+          }
+
+          // 3. Check duplicate full name
+          const dupName = allRegs.find(r => r.full_name?.toLowerCase().trim() === fullName.toLowerCase().trim());
+          if (dupName) {
+            throw new Error('عذراً، هذا الاسم بالكامل مسجل مسبقاً لمشترك آخر. يرجى إدخال اسمك ثلاثياً بشكل صحيح.');
+          }
+
+          // 4. Check duplicate phone
+          const dupPhone = allRegs.find(r => r.phone?.trim() === phone.trim());
+          if (dupPhone) {
+            throw new Error('عذراً، رقم الهاتف هذا مسجل مسبقاً لمشترك آخر.');
+          }
+
+          // 5. Check duplicate national ID
+          const dupNationalId = allRegs.find(r => r.details?.nationalId?.trim() === otherDetails.nationalId?.trim());
+          if (dupNationalId) {
+            throw new Error('عذراً، الرقم القومي هذا مسجل مسبقاً لمشترك آخر.');
+          }
+
           const { data, error } = await supabase
             .from('registrations')
             .insert([
@@ -293,6 +323,29 @@ const RegisterPage = () => {
           if (error) throw error;
         } else {
           console.warn("Supabase is not configured. Saving registration to localStorage...");
+          const localRegs = JSON.parse(localStorage.getItem('local_registrations') || '[]');
+
+          // Local checks
+          const dupEmail = localRegs.find(r => r.email?.toLowerCase().trim() === formData.email.toLowerCase().trim());
+          if (dupEmail) {
+            throw new Error('عذراً، هذا البريد الإلكتروني مسجل مسبقاً (محلياً).');
+          }
+
+          const dupName = localRegs.find(r => r.full_name?.toLowerCase().trim() === formData.fullName.toLowerCase().trim());
+          if (dupName) {
+            throw new Error('عذراً، هذا الاسم بالكامل مسجل مسبقاً (محلياً).');
+          }
+
+          const dupPhone = localRegs.find(r => r.phone?.trim() === formData.phone.trim());
+          if (dupPhone) {
+            throw new Error('عذراً، رقم الهاتف هذا مسجل مسبقاً (محلياً).');
+          }
+
+          const dupNationalId = localRegs.find(r => r.details?.nationalId?.trim() === formData.nationalId?.trim());
+          if (dupNationalId) {
+            throw new Error('عذراً، الرقم القومي هذا مسجل مسبقاً (محلياً).');
+          }
+
           const newReg = {
             id: `reg_${Date.now()}`,
             created_at: new Date().toISOString(),
@@ -335,7 +388,6 @@ const RegisterPage = () => {
               nationalId: formData.nationalId || ''
             }
           };
-          const localRegs = JSON.parse(localStorage.getItem('local_registrations') || '[]');
           localRegs.unshift(newReg);
           localStorage.setItem('local_registrations', JSON.stringify(localRegs));
           await new Promise(resolve => setTimeout(resolve, 1000));
