@@ -207,7 +207,11 @@ const UserDashboard = () => {
 
       const { supabase, isSupabaseConfigured } = await import('../supabaseClient');
       if (isSupabaseConfigured) {
-        const { error } = await supabase
+        // Validate if ID is a standard UUID format
+        const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+        const isUuid = uuidRegex.test(user.id);
+        
+        let query = supabase
           .from('registrations')
           .update({
             full_name: updatedUser.full_name,
@@ -215,12 +219,19 @@ const UserDashboard = () => {
             organization: updatedUser.organization,
             cv_url: updatedUser.cv_url,
             details: updatedUser.details
-          })
-          .eq('id', user.id);
+          });
+
+        if (isUuid) {
+          query = query.eq('id', user.id);
+        } else {
+          query = query.eq('email', user.email);
+        }
+
+        const { error } = await query;
         if (error) throw error;
       } else {
         const localRegs = JSON.parse(localStorage.getItem('local_registrations') || '[]');
-        const updatedRegs = localRegs.map(r => r.id === user.id ? {
+        const updatedRegs = localRegs.map(r => (r.id === user.id || r.email === user.email) ? {
           ...r,
           full_name: updatedUser.full_name,
           phone: updatedUser.phone,
