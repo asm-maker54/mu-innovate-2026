@@ -70,6 +70,7 @@ const UserDashboard = () => {
   const [trackerPlaying, setTrackerPlaying] = useState(false);
   const [trackerTime, setTrackerTime] = useState(225); // 3 minutes 45 seconds (03:45)
   const [activeAccordion, setActiveAccordion] = useState('personal'); // 'personal', 'docs', 'support'
+  const [settingsSubTab, setSettingsSubTab] = useState('profile');
   const [tasks, setTasks] = useState([
     { id: 1, text: 'استكمال ملف البيانات الشخصية', checked: true },
     { id: 2, text: 'تعديل وتأكيد الصورة الشخصية', checked: true },
