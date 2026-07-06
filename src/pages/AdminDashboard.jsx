@@ -676,37 +676,55 @@ const AdminDashboard = () => {
 
   const handleLogin = (e) => {
     e.preventDefault();
-    const usernameKey = username.trim().toLowerCase();
+    const inputValue = username.trim().toLowerCase();
     
-    let account = ADMIN_ACCOUNTS[usernameKey];
-    if (!account) {
-      const customAdmins = JSON.parse(localStorage.getItem('custom_admins') || '[]');
-      const found = customAdmins.find(a => a.username.toLowerCase() === usernameKey);
-      if (found) account = { ...found, role: 'custom_admin' };
+    let accountKey = inputValue;
+    let account = ADMIN_ACCOUNTS[accountKey];
+    
+    const customAdmins = JSON.parse(localStorage.getItem('custom_admins') || '[]');
+    let found = customAdmins.find(a => 
+      a.username.toLowerCase() === inputValue || 
+      (a.displayName && a.displayName.trim().toLowerCase() === inputValue) ||
+      (a.title && a.title.trim().toLowerCase() === inputValue)
+    );
+    
+    if (found) {
+      account = { ...found, role: 'custom_admin' };
+      accountKey = found.username.toLowerCase();
+    } else if (!account) {
+      for (const [k, v] of Object.entries(ADMIN_ACCOUNTS)) {
+        if (
+          (v.displayName && v.displayName.trim().toLowerCase() === inputValue) ||
+          (v.title && v.title.trim().toLowerCase() === inputValue)
+        ) {
+          account = v;
+          accountKey = k;
+          break;
+        }
+      }
     }
 
     if (account) {
-      const savedPw = localStorage.getItem('admin_password_' + usernameKey);
+      const savedPw = localStorage.getItem('admin_password_' + accountKey);
       const validPassword = savedPw || account.password;
       
-      // If user types the valid saved password OR the master original password (in case they forgot what they changed it to)
       if (password === validPassword || password === account.password) {
         setIsAuthenticated(true);
         setAdminRole(account.role);
         
         if (account.role === 'superAdmin') {
-          setAdminPermissions(['overview', 'graduation', 'research', 'news', 'jobs', 'exhibition_innovations', 'exhibition_products', 'speakers', 'startups', 'investors', 'mentors', 'researchers', 'partners', 'volunteers', 'profile', 'admins']);
+          setAdminPermissions(['overview', 'projects', 'research', 'jobs', 'news', 'registrations', 'admins', 'profile']);
         } else if (account.role === 'academic') {
-          setAdminPermissions(['overview', 'graduation', 'research', 'researchers', 'profile']);
+          setAdminPermissions(['overview', 'projects', 'research', 'registrations', 'profile']);
         } else {
           setAdminPermissions(account.permissions || []);
         }
 
-        const savedProfile = localStorage.getItem('admin_profile_' + usernameKey);
+        const savedProfile = localStorage.getItem('admin_profile_' + accountKey);
         const loadedProfile = savedProfile ? JSON.parse(savedProfile) : { name: account.displayName, title: account.title, avatar: account.avatar || '' };
         setAdminProfile(loadedProfile);
         sessionStorage.setItem('isAdminAuthenticated', 'true');
-        sessionStorage.setItem('adminUsername', usernameKey);
+        sessionStorage.setItem('adminUsername', accountKey);
         setLoginError('');
         return;
       }
