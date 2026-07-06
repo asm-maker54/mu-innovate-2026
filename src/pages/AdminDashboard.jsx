@@ -8,8 +8,8 @@ import {
 } from 'lucide-react';
 import { supabase, isSupabaseConfigured } from '../supabaseClient';
 
-const isUUID = (str) => { const regexExp = /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/; return regexExp.test(str); };
 import { initialMockNews } from '../data/mockNews';
+const isUUID = (str) => { const regexExp = /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/; return regexExp.test(str); };
 
 // Mock Data for Fallback
 const mockGraduationProjects = [
