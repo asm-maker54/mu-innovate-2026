@@ -121,7 +121,8 @@ const AdminDashboard = () => {
     try { return JSON.parse(localStorage.getItem('admin_profile')) || defaultProfile; }
     catch { return defaultProfile; }
   });
-  const [profileForm, setProfileForm] = useState({ name: '', title: '', avatar: '', newPassword: '', currentPassword: '' });
+  const [profileForm, setProfileForm] = useState({ name: '', title: '', avatar: '' });
+  const [passwordForm, setPasswordForm] = useState({ currentPassword: '', newPassword: '' });
   const [profileSaved, setProfileSaved] = useState(false);
   
   // Database state
