@@ -606,25 +606,102 @@ const AdminDashboard = () => {
         setRegistrants(regData || []);
 
         // Fetch Jobs
+        let jobsResult = [];
         const { data: jData, error: jErr } = await supabase
           .from('jobs')
           .select('*')
           .order('created_at', { ascending: false });
         if (!jErr) {
-          setJobs(jData || []);
+          if (jData && jData.length > 0) {
+            jobsResult = jData;
+          } else {
+            // Seed default jobs
+            const defaultJobsToSeed = [
+              {
+                title: 'مهندس برمجيات واجهات أمامية (Frontend)',
+                company: 'TechVision Solutions',
+                location: 'القرية الذكية، القاهرة',
+                type: 'دوام كامل',
+                experience: '1-3 سنوات',
+                logo: 'https://images.unsplash.com/photo-1560179707-f14e90ef3623?auto=format&fit=crop&q=80&w=200',
+                details: 'تطوير وتصميم واجهات وتطبيقات الويب باستخدام React.js و TailwindCSS.'
+              },
+              {
+                title: 'أخصائي تسويق إلكتروني',
+                company: 'Global Media',
+                location: 'عن بُعد (Remote)',
+                type: 'دوام كامل',
+                experience: 'حديث التخرج',
+                logo: 'https://images.unsplash.com/photo-1572044162444-ad60f128bdea?auto=format&fit=crop&q=80&w=200',
+                details: 'إدارة حملات التواصل الاجتماعي وجوجل أدز وتهيئة محركات البحث.'
+              },
+              {
+                title: 'محلل بيانات',
+                company: 'Data Insights',
+                location: 'المعادي، القاهرة',
+                type: 'دوام جزئي',
+                experience: '0-2 سنوات',
+                logo: 'https://images.unsplash.com/photo-1551434678-e076c223a692?auto=format&fit=crop&q=80&w=200',
+                details: 'تحليل البيانات واستخراج التقارير وتصميم لوحات عرض البيانات Power BI.'
+              },
+              {
+                title: 'مهندس جودة برمجيات (QA)',
+                company: 'SoftCore',
+                location: 'المنيا الجديدة',
+                type: 'دوام كامل',
+                experience: '2+ سنوات',
+                logo: 'https://images.unsplash.com/photo-1496200502058-a73099b244ce?auto=format&fit=crop&q=80&w=200',
+                details: 'اختبار البرمجيات وتحديد الأخطاء وإعداد التقارير الفنية وعمل أتمتة للاختبارات.'
+              }
+            ];
+            const { data: seededJobs, error: seedJobsErr } = await supabase
+              .from('jobs')
+              .insert(defaultJobsToSeed)
+              .select();
+            if (!seedJobsErr && seededJobs) {
+              jobsResult = seededJobs;
+            } else {
+              console.error("Error seeding default jobs:", seedJobsErr);
+              jobsResult = [];
+            }
+          }
+          setJobs(jobsResult);
         } else {
           console.error("Error fetching jobs from supabase:", jErr);
         }
 
         // Fetch News
+        let newsResult = [];
         const { data: nData, error: nErr } = await supabase
           .from('news')
           .select('*')
           .order('created_at', { ascending: false });
         if (!nErr) {
-          setNewsList(nData || []);
+          if (nData && nData.length > 0) {
+            newsResult = nData;
+          } else {
+            // Seed initial mock news
+            const newsToSeed = initialMockNews.map(n => ({
+              title: n.title,
+              content: n.content,
+              image_url: n.image_url,
+              uploader_name: n.uploader_name
+            }));
+            const { data: seededNews, error: seedNewsErr } = await supabase
+              .from('news')
+              .insert(newsToSeed)
+              .select();
+            if (!seedNewsErr && seededNews) {
+              newsResult = seededNews;
+            } else {
+              console.error("Error seeding default news:", seedNewsErr);
+              newsResult = initialMockNews;
+            }
+          }
+          setNewsList(newsResult);
         } else {
           console.error("Error fetching news from supabase:", nErr);
+          setNewsList(initialMockNews);
         }
       } else {
         // Use Mock Data merged with localStorage Data for offline/demo persistence

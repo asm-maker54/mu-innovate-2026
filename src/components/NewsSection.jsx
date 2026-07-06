@@ -15,9 +15,27 @@ const NewsSection = () => {
             .from('news')
             .select('*')
             .order('created_at', { ascending: false });
-          if (!error && data && data.length > 0) {
-            setNews(data);
-            return;
+          if (!error) {
+            if (data && data.length > 0) {
+              setNews(data);
+              return;
+            } else {
+              // Seed default news
+              const newsToSeed = initialMockNews.map(n => ({
+                title: n.title,
+                content: n.content,
+                image_url: n.image_url,
+                uploader_name: n.uploader_name
+              }));
+              const { data: seededNews, error: seedNewsErr } = await supabase
+                .from('news')
+                .insert(newsToSeed)
+                .select();
+              if (!seedNewsErr && seededNews) {
+                setNews(seededNews);
+                return;
+              }
+            }
           }
         }
       } catch (err) {

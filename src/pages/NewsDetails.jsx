@@ -20,8 +20,25 @@ const NewsDetails = () => {
             .from('news')
             .select('*')
             .order('created_at', { ascending: false });
-          if (!error && data && data.length > 0) {
-            newsList = data;
+          if (!error) {
+            if (data && data.length > 0) {
+              newsList = data;
+            } else {
+              // Seed default news
+              const newsToSeed = initialMockNews.map(n => ({
+                title: n.title,
+                content: n.content,
+                image_url: n.image_url,
+                uploader_name: n.uploader_name
+              }));
+              const { data: seededNews, error: seedNewsErr } = await supabase
+                .from('news')
+                .insert(newsToSeed)
+                .select();
+              if (!seedNewsErr && seededNews) {
+                newsList = seededNews;
+              }
+            }
           }
         }
       } catch (err) {
@@ -43,11 +60,20 @@ const NewsDetails = () => {
         newsList = initialMockNews;
       }
 
-      const foundNews = newsList.find(n => String(n.id) === String(id));
+      let foundNews = newsList.find(n => String(n.id) === String(id));
+      
+      // Fallback for old mock IDs ('1', '2', '3') if not found by string matching
+      if (!foundNews && (id === '1' || id === '2' || id === '3')) {
+        const index = parseInt(id) - 1;
+        if (newsList[index]) {
+          foundNews = newsList[index];
+        }
+      }
+      
       setNewsItem(foundNews);
       
       // Filter other news to show in sidebar (up to 4 items)
-      const filtered = newsList.filter(n => String(n.id) !== String(id));
+      const filtered = newsList.filter(n => String(n.id) !== String(id) && (!foundNews || String(n.id) !== String(foundNews.id)));
       setOtherNews(filtered.slice(0, 4));
     };
 
