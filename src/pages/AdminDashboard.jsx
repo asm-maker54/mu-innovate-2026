@@ -159,6 +159,10 @@ const AdminDashboard = () => {
 
   // --- Jobs states ---
   const [jobs, setJobs] = useState([]);
+  const [digitalMentors, setDigitalMentors] = useState([]);
+  const [editingMentorId, setEditingMentorId] = useState(null);
+  const [isMentorModalOpen, setIsMentorModalOpen] = useState(false);
+  const [newMentorData, setNewMentorData] = useState({ name: '', title: '', specialty: '', category: 'web', rating: 5.0, sessions: 0, email: '', image: '' });
   const [isJobModalOpen, setIsJobModalOpen] = useState(false);
   const [jobEditItem, setJobEditItem] = useState(null);
   const [jobFormData, setJobFormData] = useState({
@@ -356,6 +360,50 @@ const AdminDashboard = () => {
       } else {
         alert("حدث خطأ أثناء حفظ الوظيفة: " + err.message);
       }
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleSaveMentor = async (e) => {
+    e.preventDefault();
+    if (!newMentorData.name || !newMentorData.title) return alert('يرجى إدخال اسم المدرب ومسماه الوظيفي.');
+    setLoading(true);
+    try {
+      if (isSupabaseConfigured) {
+        if (editingMentorId) {
+          const { error } = await supabase.from('mentors').update(newMentorData).eq('id', editingMentorId);
+          if (error) throw error;
+        } else {
+          const { error } = await supabase.from('mentors').insert([newMentorData]);
+          if (error) throw error;
+        }
+      }
+      setIsMentorModalOpen(false);
+      setNewMentorData({ name: '', title: '', specialty: '', category: 'web', rating: 5.0, sessions: 0, email: '', image: '' });
+      setEditingMentorId(null);
+      await fetchData();
+      alert('تم حفظ بيانات المدرب بنجاح!');
+    } catch (err) {
+      console.error(err);
+      alert('حدث خطأ أثناء حفظ المدرب.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleDeleteMentor = async (id) => {
+    if (!window.confirm('هل أنت متأكد من الحذف؟')) return;
+    setLoading(true);
+    try {
+      if (isSupabaseConfigured) {
+        const { error } = await supabase.from('mentors').delete().eq('id', id);
+        if (error) throw error;
+      }
+      await fetchData();
+    } catch (err) {
+      console.error(err);
+      alert('حدث خطأ أثناء الحذف.');
     } finally {
       setLoading(false);
     }
@@ -658,7 +706,7 @@ const AdminDashboard = () => {
         if (account) {
           setAdminRole(account.role);
           if (account.role === 'superAdmin') {
-            setAdminPermissions(['overview', 'projects', 'research', 'jobs', 'news', 'registrations', 'admins', 'profile']);
+            setAdminPermissions(['overview', 'projects', 'research', 'jobs', 'news', 'digital_mentors', 'registrations', 'admins', 'profile']);
           } else if (account.role === 'academic') {
             setAdminPermissions(['overview', 'projects', 'research', 'registrations', 'profile']);
           } else {
@@ -719,7 +767,7 @@ const AdminDashboard = () => {
         setAdminRole(account.role);
         
         if (account.role === 'superAdmin') {
-          setAdminPermissions(['overview', 'graduation', 'research', 'news', 'jobs', 'exhibition_innovations', 'exhibition_products', 'speakers', 'startups', 'investors', 'mentors', 'researchers', 'partners', 'volunteers', 'profile', 'admins']);
+          setAdminPermissions(['overview', 'graduation', 'research', 'news', 'jobs', 'exhibition_innovations', 'exhibition_products', 'speakers', 'startups', 'investors', 'mentors', 'digital_mentors', 'researchers', 'partners', 'volunteers', 'profile', 'admins']);
         } else if (account.role === 'academic') {
           setAdminPermissions(['overview', 'graduation', 'research', 'researchers', 'profile']);
         } else {
@@ -1621,6 +1669,7 @@ const AdminDashboard = () => {
             { id: 'speakers', label: 'المتحدثون والمدربون', count: stats.totalSpeakers, icon: Presentation },
             { id: 'startups', label: 'الشركات الناشئة', count: stats.totalStartups, icon: Briefcase },
             { id: 'investors', label: 'المستثمرون للتمويل', count: stats.totalInvestors, icon: Users },
+            { id: 'digital_mentors', label: 'شبكة المدربين الرقمية', count: digitalMentors.length, icon: Users },
             { id: 'mentors', label: 'الموجهون والإرشاد', count: stats.totalMentors, icon: Users },
             { id: 'researchers', label: 'الباحثون / المبتكرون', count: stats.totalResearchers, icon: BookOpen },
             { id: 'partners', label: 'الشركاء والجهات الراعية', count: stats.totalPartners, icon: Users },

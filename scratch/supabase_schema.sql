@@ -96,3 +96,25 @@ CREATE POLICY "Allow public insert on jobs" ON public.jobs FOR INSERT TO public 
 CREATE POLICY "Allow public update on jobs" ON public.jobs FOR UPDATE TO public USING (true);
 CREATE POLICY "Allow public delete on jobs" ON public.jobs FOR DELETE TO public USING (true);
 
+
+
+/* إنشاء جدول شبكة المدربين الرقمية */
+CREATE TABLE IF NOT EXISTS public.mentors (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    created_at TIMESTAMPTZ DEFAULT now(),
+    name TEXT NOT NULL,
+    title TEXT NOT NULL,
+    specialty TEXT NOT NULL,
+    category TEXT NOT NULL,
+    rating NUMERIC(2,1) DEFAULT 5.0,
+    sessions INTEGER DEFAULT 0,
+    email TEXT,
+    image TEXT
+);
+
+ALTER TABLE public.mentors ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "Allow public select on mentors" ON public.mentors FOR SELECT TO public USING (true);
+CREATE POLICY "Allow public insert on mentors" ON public.mentors FOR INSERT TO public WITH CHECK (true);
+CREATE POLICY "Allow public update on mentors" ON public.mentors FOR UPDATE TO public USING (true);
+CREATE POLICY "Allow public delete on mentors" ON public.mentors FOR DELETE TO public USING (true);
+

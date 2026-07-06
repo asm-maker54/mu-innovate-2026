@@ -6,6 +6,7 @@ import {
   FileText, CalendarDays
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { supabase, isSupabaseConfigured } from '../supabaseClient';
 
 const DigitalMentorsPage = () => {
   useEffect(() => {
@@ -29,8 +30,22 @@ const DigitalMentorsPage = () => {
     message: ''
   });
 
+  const [dbMentors, setDbMentors] = useState([]);
+
+  useEffect(() => {
+    const fetchMentors = async () => {
+      if (isSupabaseConfigured) {
+        const { data, error } = await supabase.from('mentors').select('*');
+        if (!error && data) {
+          setDbMentors(data);
+        }
+      }
+    };
+    fetchMentors();
+  }, []);
+
   // Expanded Mentors List
-  const mentors = [
+  const defaultMentors = [
     {
       id: 1,
       name: 'د. أحمد محمود',
@@ -98,6 +113,8 @@ const DigitalMentorsPage = () => {
       image: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&q=80&w=400'
     }
   ];
+
+  const mentors = dbMentors.length > 0 ? dbMentors : defaultMentors;
 
   // Expanded Learning Topics
   const topics = [
