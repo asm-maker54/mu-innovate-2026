@@ -1,11 +1,47 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Calendar, ChevronRight, Newspaper, ArrowRight, User } from 'lucide-react';
 import { initialMockNews } from '../data/mockNews';
 import FadeInView from '../components/FadeInView';
+import { supabase, isSupabaseConfigured } from '../supabaseClient';
 
 const NewsListPage = () => {
   const [selectedCategory, setSelectedCategory] = useState('all');
+  const [news, setNews] = useState([]);
+
+  useEffect(() => {
+    const fetchNews = async () => {
+      try {
+        if (isSupabaseConfigured) {
+          const { data, error } = await supabase
+            .from('news')
+            .select('*')
+            .order('created_at', { ascending: false });
+          if (!error && data && data.length > 0) {
+            setNews(data);
+            return;
+          }
+        }
+      } catch (err) {
+        console.error("Error loading news from Supabase:", err);
+      }
+
+      const local = localStorage.getItem('local_news');
+      if (local) {
+        try {
+          setNews(JSON.parse(local));
+          return;
+        } catch (e) {
+          console.error(e);
+        }
+      }
+
+      localStorage.setItem('local_news', JSON.stringify(initialMockNews));
+      setNews(initialMockNews);
+    };
+
+    fetchNews();
+  }, []);
 
   const categories = [
     { id: 'all', label: 'جميع الأخبار' },
@@ -23,8 +59,8 @@ const NewsListPage = () => {
     }
   };
 
-  const featuredNews = initialMockNews[0];
-  const remainingNews = initialMockNews.slice(1);
+  const featuredNews = news[0];
+  const remainingNews = news.slice(1);
 
   return (
     <div className="min-h-screen bg-slate-50 text-slate-950 pt-28 pb-20 font-cairo relative overflow-hidden" dir="rtl">

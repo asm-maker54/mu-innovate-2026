@@ -3,6 +3,7 @@ import { useParams, Link } from 'react-router-dom';
 import { initialMockNews } from '../data/mockNews';
 import { Calendar, Clock, User, ArrowRight, Share2, Award } from 'lucide-react';
 import FadeInView from '../components/FadeInView';
+import { supabase, isSupabaseConfigured } from '../supabaseClient';
 
 const NewsDetails = () => {
   const { id } = useParams();
@@ -11,12 +12,46 @@ const NewsDetails = () => {
 
   useEffect(() => {
     window.scrollTo(0, 0);
-    const foundNews = initialMockNews.find(n => n.id === id);
-    setNewsItem(foundNews);
-    
-    // Filter other news to show in sidebar
-    const filtered = initialMockNews.filter(n => n.id !== id);
-    setOtherNews(filtered);
+    const fetchNewsItem = async () => {
+      let newsList = [];
+      try {
+        if (isSupabaseConfigured) {
+          const { data, error } = await supabase
+            .from('news')
+            .select('*')
+            .order('created_at', { ascending: false });
+          if (!error && data && data.length > 0) {
+            newsList = data;
+          }
+        }
+      } catch (err) {
+        console.error("Error loading news details from Supabase:", err);
+      }
+
+      if (newsList.length === 0) {
+        const local = localStorage.getItem('local_news');
+        if (local) {
+          try {
+            newsList = JSON.parse(local);
+          } catch (e) {
+            console.error(e);
+          }
+        }
+      }
+
+      if (newsList.length === 0) {
+        newsList = initialMockNews;
+      }
+
+      const foundNews = newsList.find(n => String(n.id) === String(id));
+      setNewsItem(foundNews);
+      
+      // Filter other news to show in sidebar (up to 4 items)
+      const filtered = newsList.filter(n => String(n.id) !== String(id));
+      setOtherNews(filtered.slice(0, 4));
+    };
+
+    fetchNewsItem();
   }, [id]);
 
   if (!newsItem) {

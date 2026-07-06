@@ -439,24 +439,69 @@ const AdminDashboard = () => {
     setIsExhibitionModalOpen(true);
   };
 
-  const handleSaveNews = (e) => {
+  const handleSaveNews = async (e) => {
     e.preventDefault();
     if (!newNewsData.title || !newNewsData.content) return;
-    
-    if (editingNewsId) {
-      setNewsList(newsList.map(news => news.id === editingNewsId ? { ...news, ...newNewsData } : news));
-    } else {
-      const newNews = {
-        ...newNewsData,
-        id: Date.now().toString(),
-        created_at: new Date().toISOString()
-      };
-      setNewsList([newNews, ...newsList]);
+    setLoading(true);
+    try {
+      if (isSupabaseConfigured) {
+        if (editingNewsId) {
+          const { error } = await supabase
+            .from('news')
+            .update({
+              title: newNewsData.title,
+              content: newNewsData.content,
+              image_url: newNewsData.image_url,
+              uploader_name: newNewsData.uploader_name
+            })
+            .eq('id', editingNewsId);
+          if (error) throw error;
+        } else {
+          const { error } = await supabase
+            .from('news')
+            .insert([{
+              title: newNewsData.title,
+              content: newNewsData.content,
+              image_url: newNewsData.image_url,
+              uploader_name: newNewsData.uploader_name
+            }]);
+          if (error) throw error;
+        }
+      }
+
+      // Sync state & local storage fallback
+      let updated;
+      if (editingNewsId) {
+        updated = newsList.map(news => news.id === editingNewsId ? { ...news, ...newNewsData } : news);
+      } else {
+        const newNews = {
+          ...newNewsData,
+          id: isSupabaseConfigured ? undefined : Date.now().toString(),
+          created_at: new Date().toISOString()
+        };
+        updated = isSupabaseConfigured ? newsList : [newNews, ...newsList];
+      }
+
+      if (!isSupabaseConfigured) {
+        setNewsList(updated);
+        localStorage.setItem('local_news', JSON.stringify(updated));
+      } else {
+        // Re-fetch news from database
+        const { data, error } = await supabase
+          .from('news')
+          .select('*')
+          .order('created_at', { ascending: false });
+        if (!error) setNewsList(data || []);
+      }
+
+      setIsNewsModalOpen(false);
+      setEditingNewsId(null);
+      setNewNewsData({ title: '', content: '', image_url: '', uploader_name: 'أدمن النظام' });
+    } catch (err) {
+      alert("حدث خطأ أثناء حفظ الخبر: " + err.message);
+    } finally {
+      setLoading(false);
     }
-    
-    setIsNewsModalOpen(false);
-    setEditingNewsId(null);
-    setNewNewsData({ title: '', content: '', image_url: '', uploader_name: 'أدمن النظام' });
   };
 
   const openEditNewsModal = (newsItem) => {
@@ -470,9 +515,35 @@ const AdminDashboard = () => {
     setIsNewsModalOpen(true);
   };
 
-  const handleDeleteNews = (id) => {
-    if(window.confirm('هل أنت متأكد من رغبتك في حذف هذا الخبر؟')) {
-      setNewsList(newsList.filter(news => news.id !== id));
+  const handleDeleteNews = async (id) => {
+    if (window.confirm('هل أنت متأكد من رغبتك في حذف هذا الخبر نهائياً؟')) {
+      setLoading(true);
+      try {
+        if (isSupabaseConfigured) {
+          const { error } = await supabase
+            .from('news')
+            .delete()
+            .eq('id', id);
+          if (error) throw error;
+        }
+
+        const updated = newsList.filter(news => news.id !== id);
+        setNewsList(updated);
+        if (!isSupabaseConfigured) {
+          localStorage.setItem('local_news', JSON.stringify(updated));
+        } else {
+          // Re-fetch news
+          const { data, error } = await supabase
+            .from('news')
+            .select('*')
+            .order('created_at', { ascending: false });
+          if (!error) setNewsList(data || []);
+        }
+      } catch (err) {
+        alert("حدث خطأ أثناء حذف الخبر: " + err.message);
+      } finally {
+        setLoading(false);
+      }
     }
   };
 
@@ -544,6 +615,17 @@ const AdminDashboard = () => {
         } else {
           console.error("Error fetching jobs from supabase:", jErr);
         }
+
+        // Fetch News
+        const { data: nData, error: nErr } = await supabase
+          .from('news')
+          .select('*')
+          .order('created_at', { ascending: false });
+        if (!nErr) {
+          setNewsList(nData || []);
+        } else {
+          console.error("Error fetching news from supabase:", nErr);
+        }
       } else {
         // Use Mock Data merged with localStorage Data for offline/demo persistence
         const localRegs = JSON.parse(localStorage.getItem('local_registrations') || '[]');
@@ -603,6 +685,15 @@ const AdminDashboard = () => {
           setJobs(defaultJobs);
         } else {
           setJobs(localJobs);
+        }
+
+        // News local fallback
+        const localNews = JSON.parse(localStorage.getItem('local_news') || '[]');
+        if (!localStorage.getItem('local_news')) {
+          localStorage.setItem('local_news', JSON.stringify(initialMockNews));
+          setNewsList(initialMockNews);
+        } else {
+          setNewsList(localNews);
         }
       }
 

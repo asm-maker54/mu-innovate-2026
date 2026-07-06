@@ -1,10 +1,47 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { ArrowLeft, Calendar, ChevronRight, Newspaper } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { initialMockNews } from '../data/mockNews';
+import { supabase, isSupabaseConfigured } from '../supabaseClient';
 
 const NewsSection = () => {
-  const news = initialMockNews;
+  const [news, setNews] = useState([]);
+
+  useEffect(() => {
+    const fetchNews = async () => {
+      try {
+        if (isSupabaseConfigured) {
+          const { data, error } = await supabase
+            .from('news')
+            .select('*')
+            .order('created_at', { ascending: false });
+          if (!error && data && data.length > 0) {
+            setNews(data);
+            return;
+          }
+        }
+      } catch (err) {
+        console.error("Error loading news from Supabase:", err);
+      }
+
+      // Local storage fallback
+      const local = localStorage.getItem('local_news');
+      if (local) {
+        try {
+          setNews(JSON.parse(local));
+          return;
+        } catch (e) {
+          console.error(e);
+        }
+      }
+
+      // Default mock news
+      localStorage.setItem('local_news', JSON.stringify(initialMockNews));
+      setNews(initialMockNews);
+    };
+
+    fetchNews();
+  }, []);
 
   return (
     <section className="py-10 md:py-12 bg-slate-50 relative overflow-hidden font-cairo" dir="rtl">
