@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+﻿import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { 
   Users, Award, BookOpen, Download, Search, CheckCircle, Clock, 
@@ -9,45 +9,40 @@ import {
 import { supabase, isSupabaseConfigured } from '../supabaseClient';
 import { initialMockNews } from '../data/mockNews';
 
-const isUUID = (str) => {
-  const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
-  return uuidRegex.test(String(str));
-};
-
 // Mock Data for Fallback
 const mockGraduationProjects = [
   {
     id: "g1",
     created_at: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(),
-    project_name_ar: "Ù†Ø¸Ø§Ù… Ø§Ù„Ø±ÙŠ Ø§Ù„Ø°ÙƒÙŠ Ø¨Ø§Ù„Ø°Ùƒاء Ø§Ù„Ø§ØµØ·Ù†Ø§Ø¹ÙŠ",
+    project_name_ar: "┘å╪╕╪º┘à ╪º┘ä╪▒┘è ╪º┘ä╪░┘â┘è ╪¿╪º┘ä╪░┘â╪º╪í ╪º┘ä╪º╪╡╪╖┘å╪º╪╣┘è",
     project_name_en: "AI-Powered Smart Irrigation System",
-    college: "ÙƒÙ„ÙŠة Ø§Ù„حاسبات ÙˆØ§Ù„Ù…Ø¹Ù„ÙˆÙ…ات (Ø­ÙƒÙˆÙ…ÙŠة)",
-    department: "Ø¹Ù„ÙˆÙ… Ø§Ù„حاسب",
+    college: "┘â┘ä┘è╪⌐ ╪º┘ä╪¡╪º╪│╪¿╪º╪¬ ┘ê╪º┘ä┘à╪╣┘ä┘ê┘à╪º╪¬ (╪¡┘â┘ê┘à┘è╪⌐)",
+    department: "╪╣┘ä┘ê┘à ╪º┘ä╪¡╪º╪│╪¿",
     year: "2025/2026",
-    project_type: "Ø¬Ù…Ø§Ø¹ÙŠ",
-    status: "ØªÙ… Ø§Ø³ØªÙ„Ø§Ù… Ø§Ù„Ø·Ù„ب",
+    project_type: "╪¼┘à╪º╪╣┘è",
+    status: "╪¬┘à ╪º╪│╪¬┘ä╪º┘à ╪º┘ä╪╖┘ä╪¿",
     team_members: [
-      { name: "Ø£Ø­Ù…د Ù…Ø­Ù…د Ø¹Ù„ÙŠ", id: "202201", college: "Ø§Ù„حاسبات", email: "ahmed@example.com", phone: "01000000001", role: "Ù‚ائد Ø§Ù„ÙØ±ÙŠÙ‚" },
-      { name: "سارة Ù…Ø­Ù…Ùˆد Ø­Ø³Ù†", id: "202202", college: "Ø§Ù„حاسبات", email: "sara@example.com", phone: "01000000002", role: "Ù…Ø·Ùˆر Ø¨Ø±Ù…Ø¬ÙŠات" }
+      { name: "╪ú╪¡┘à╪» ┘à╪¡┘à╪» ╪╣┘ä┘è", id: "202201", college: "╪º┘ä╪¡╪º╪│╪¿╪º╪¬", email: "ahmed@example.com", phone: "01000000001", role: "┘é╪º╪ª╪» ╪º┘ä┘ü╪▒┘è┘é" },
+      { name: "╪│╪º╪▒╪⌐ ┘à╪¡┘à┘ê╪» ╪¡╪│┘å", id: "202202", college: "╪º┘ä╪¡╪º╪│╪¿╪º╪¬", email: "sara@example.com", phone: "01000000002", role: "┘à╪╖┘ê╪▒ ╪¿╪▒┘à╪¼┘è╪º╪¬" }
     ],
     files: { summaryPdf: "#", pitchDeck: "#", screenshot: "#" },
-    details: { projectSummary: "Ù†Ø¸Ø§Ù… Ù…ØªÙƒØ§Ù…Ù„ ÙŠØ¹ØªÙ…د Ø¹Ù„Ù‰ Ù…ستشعرات Ø§Ù„Ø±Ø·Ùˆبة ÙˆØ§Ù„Ø°Ùƒاء Ø§Ù„Ø§ØµØ·Ù†Ø§Ø¹ÙŠ Ù„ØªØ±Ø´ÙŠد Ø§Ø³ØªÙ‡Ù„Ø§Ùƒ Ø§Ù„Ù…ÙŠØ§Ù‡ ÙÙŠ Ø§Ù„Ø­Ù‚ÙˆÙ„ Ø§Ù„Ø²Ø±Ø§Ø¹ÙŠة Ø¨ØµØ¹ÙŠد Ù…صر.", problemAddressed: "Ø§Ù„Ù‡در Ø§Ù„ÙƒØ¨ÙŠر ÙÙŠ Ù…ÙŠØ§Ù‡ Ø§Ù„Ø±ÙŠ Ø§Ù„ØªÙ‚Ù„ÙŠØ¯ÙŠة.", solutionProvided: "Ø±ÙŠ Ø°ÙƒÙŠ ØªÙ„Ù‚Ø§Ø¦ÙŠ ÙŠضخ Ù…ÙŠØ§Ù‡Ù‹ا حسب حاجة Ø§Ù„تربة Ø§Ù„Ø¯Ù‚ÙŠÙ‚ة." }
+    details: { projectSummary: "┘å╪╕╪º┘à ┘à╪¬┘â╪º┘à┘ä ┘è╪╣╪¬┘à╪» ╪╣┘ä┘ë ┘à╪│╪¬╪┤╪╣╪▒╪º╪¬ ╪º┘ä╪▒╪╖┘ê╪¿╪⌐ ┘ê╪º┘ä╪░┘â╪º╪í ╪º┘ä╪º╪╡╪╖┘å╪º╪╣┘è ┘ä╪¬╪▒╪┤┘è╪» ╪º╪│╪¬┘ç┘ä╪º┘â ╪º┘ä┘à┘è╪º┘ç ┘ü┘è ╪º┘ä╪¡┘é┘ê┘ä ╪º┘ä╪▓╪▒╪º╪╣┘è╪⌐ ╪¿╪╡╪╣┘è╪» ┘à╪╡╪▒.", problemAddressed: "╪º┘ä┘ç╪»╪▒ ╪º┘ä┘â╪¿┘è╪▒ ┘ü┘è ┘à┘è╪º┘ç ╪º┘ä╪▒┘è ╪º┘ä╪¬┘é┘ä┘è╪»┘è╪⌐.", solutionProvided: "╪▒┘è ╪░┘â┘è ╪¬┘ä┘é╪º╪ª┘è ┘è╪╢╪« ┘à┘è╪º┘ç┘ï╪º ╪¡╪│╪¿ ╪¡╪º╪¼╪⌐ ╪º┘ä╪¬╪▒╪¿╪⌐ ╪º┘ä╪»┘é┘è┘é╪⌐." }
   },
   {
     id: "g2",
     created_at: new Date(Date.now() - 4 * 24 * 60 * 60 * 1000).toISOString(),
-    project_name_ar: "ÙƒØ±Ø³ÙŠ Ù…ØªØ­Ø±Ùƒ Ø°ÙƒÙŠ Ù„Ø°ÙˆÙŠ Ø§Ù„Ù‡Ù…Ù…",
+    project_name_ar: "┘â╪▒╪│┘è ┘à╪¬╪¡╪▒┘â ╪░┘â┘è ┘ä╪░┘ê┘è ╪º┘ä┘ç┘à┘à",
     project_name_en: "Smart Wheelchair for Disabled",
-    college: "ÙƒÙ„ÙŠة Ø§Ù„Ù‡Ù†دسة (Ø¨Ø±Ù†Ø§Ù…ج Ù‡Ù†دسة Ø§Ù„Ù…ÙŠÙƒØ§ØªØ±ÙˆÙ†ÙŠات ÙˆØ§Ù„Ø±ÙˆØ¨Ùˆتات Ø§Ù„ØµÙ†Ø§Ø¹ÙŠة) (Ø£Ù‡Ù„ÙŠة)",
-    department: "Ù…ÙŠÙƒØ§ØªØ±ÙˆÙ†ÙŠات",
+    college: "┘â┘ä┘è╪⌐ ╪º┘ä┘ç┘å╪»╪│╪⌐ (╪¿╪▒┘å╪º┘à╪¼ ┘ç┘å╪»╪│╪⌐ ╪º┘ä┘à┘è┘â╪º╪¬╪▒┘ê┘å┘è╪º╪¬ ┘ê╪º┘ä╪▒┘ê╪¿┘ê╪¬╪º╪¬ ╪º┘ä╪╡┘å╪º╪╣┘è╪⌐) (╪ú┘ç┘ä┘è╪⌐)",
+    department: "┘à┘è┘â╪º╪¬╪▒┘ê┘å┘è╪º╪¬",
     year: "2025/2026",
-    project_type: "Ø¬Ù…Ø§Ø¹ÙŠ",
-    status: "تحت Ø§Ù„فحص Ø§Ù„Ø¥Ø¯Ø§Ø±ÙŠ",
+    project_type: "╪¼┘à╪º╪╣┘è",
+    status: "╪¬╪¡╪¬ ╪º┘ä┘ü╪¡╪╡ ╪º┘ä╪Ñ╪»╪º╪▒┘è",
     team_members: [
-      { name: "Ù…Ø­Ù…Ùˆد Ø®Ø§Ù„د Ø³Ø¹ÙŠد", id: "302201", college: "Ø§Ù„Ù‡Ù†دسة Ø§Ù„Ø£Ù‡Ù„ÙŠة", email: "mahmoud@example.com", phone: "01100000001", role: "Ù…Ù‡Ù†دس Ù…ÙŠÙƒØ§Ù†ÙŠÙƒا" }
+      { name: "┘à╪¡┘à┘ê╪» ╪«╪º┘ä╪» ╪│╪╣┘è╪»", id: "302201", college: "╪º┘ä┘ç┘å╪»╪│╪⌐ ╪º┘ä╪ú┘ç┘ä┘è╪⌐", email: "mahmoud@example.com", phone: "01100000001", role: "┘à┘ç┘å╪»╪│ ┘à┘è┘â╪º┘å┘è┘â╪º" }
     ],
     files: { summaryPdf: "#", pitchDeck: "#" },
-    details: { projectSummary: "ÙƒØ±Ø³ÙŠ Ø°ÙƒÙŠ ÙŠØªØ­Ø±Ùƒ بإشارات Ø§Ù„رأس ÙˆØ­Ø±Ùƒات Ø§Ù„Ø¹ÙŠÙ† Ù„Ù…ساعدة Ø°ÙˆÙŠ Ø§Ù„Ù‡Ù…Ù… Ø¹Ù„Ù‰ Ø§Ù„Ø­Ø±Ùƒة Ø¨ÙŠسر ÙˆØ£Ù…Ø§Ù†.", problemAddressed: "ØµØ¹Ùˆبة Ø§Ù„ØªØ­ÙƒÙ… ÙÙŠ Ø§Ù„ÙƒØ±Ø§Ø³ÙŠ Ø§Ù„ØªÙ‚Ù„ÙŠØ¯ÙŠة.", solutionProvided: "Ø§Ù„ØªØ­ÙƒÙ… بإشارات Ø§Ù„Ø¯Ù…اغ Ø£Ùˆ Ø­Ø±Ùƒات Ø§Ù„Ø¹ÙŠÙ†." }
+    details: { projectSummary: "┘â╪▒╪│┘è ╪░┘â┘è ┘è╪¬╪¡╪▒┘â ╪¿╪Ñ╪┤╪º╪▒╪º╪¬ ╪º┘ä╪▒╪ú╪│ ┘ê╪¡╪▒┘â╪º╪¬ ╪º┘ä╪╣┘è┘å ┘ä┘à╪│╪º╪╣╪»╪⌐ ╪░┘ê┘è ╪º┘ä┘ç┘à┘à ╪╣┘ä┘ë ╪º┘ä╪¡╪▒┘â╪⌐ ╪¿┘è╪│╪▒ ┘ê╪ú┘à╪º┘å.", problemAddressed: "╪╡╪╣┘ê╪¿╪⌐ ╪º┘ä╪¬╪¡┘â┘à ┘ü┘è ╪º┘ä┘â╪▒╪º╪│┘è ╪º┘ä╪¬┘é┘ä┘è╪»┘è╪⌐.", solutionProvided: "╪º┘ä╪¬╪¡┘â┘à ╪¿╪Ñ╪┤╪º╪▒╪º╪¬ ╪º┘ä╪»┘à╪º╪║ ╪ú┘ê ╪¡╪▒┘â╪º╪¬ ╪º┘ä╪╣┘è┘å." }
   }
 ];
 
@@ -55,15 +50,15 @@ const mockAppliedResearch = [
   {
     id: "r1",
     created_at: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(),
-    pi_name: "د. Ø£Ø³Ø§Ù…ة Ù…ØµØ·ÙÙ‰ ÙƒØ§Ù…Ù„",
-    pi_faculty: "ÙƒÙ„ÙŠة Ø§Ù„Ø¹Ù„ÙˆÙ… (Ø­ÙƒÙˆÙ…ÙŠة)",
-    pi_dept: "Ø§Ù„ÙƒÙŠÙ…ÙŠاء",
-    pi_rank: "أستاذ Ù…Ø´Ø§Ø±Ùƒ",
+    pi_name: "╪». ╪ú╪│╪º┘à╪⌐ ┘à╪╡╪╖┘ü┘ë ┘â╪º┘à┘ä",
+    pi_faculty: "┘â┘ä┘è╪⌐ ╪º┘ä╪╣┘ä┘ê┘à (╪¡┘â┘ê┘à┘è╪⌐)",
+    pi_dept: "╪º┘ä┘â┘è┘à┘è╪º╪í",
+    pi_rank: "╪ú╪│╪¬╪º╪░ ┘à╪┤╪º╪▒┘â",
     pi_email: "osama@minia.edu.eg",
     pi_phone: "01200000001",
-    status: "تحت Ø§Ù„ØªÙ‚ÙŠÙŠÙ… Ø§Ù„ÙÙ†ÙŠ",
+    status: "╪¬╪¡╪¬ ╪º┘ä╪¬┘é┘è┘è┘à ╪º┘ä┘ü┘å┘è",
     files: { researchPdf: "#", marketSummaryPdf: "#" },
-    details: { problem: "ØªÙ„Ùˆث Ø§Ù„Ù…ÙŠØ§Ù‡ Ø§Ù„Ø¬ÙˆÙÙŠة ببعض Ø§Ù„Ù…Ø±Ùƒبات Ø§Ù„Ø¹Ø¶ÙˆÙŠة.", solution: "Ù…Ø±Ùƒب Ù†Ø§Ù†Ùˆ ÙƒØ±Ø¨ÙˆÙ†ÙŠ Ø¬Ø¯ÙŠد Ø±Ø®ÙŠص Ø§Ù„Ø«Ù…Ù† ÙŠÙ…تص Ø§Ù„Ù…Ù„Ùˆثات Ø¨Ùƒفاءة 99%." }
+    details: { problem: "╪¬┘ä┘ê╪½ ╪º┘ä┘à┘è╪º┘ç ╪º┘ä╪¼┘ê┘ü┘è╪⌐ ╪¿╪¿╪╣╪╢ ╪º┘ä┘à╪▒┘â╪¿╪º╪¬ ╪º┘ä╪╣╪╢┘ê┘è╪⌐.", solution: "┘à╪▒┘â╪¿ ┘å╪º┘å┘ê ┘â╪▒╪¿┘ê┘å┘è ╪¼╪»┘è╪» ╪▒╪«┘è╪╡ ╪º┘ä╪½┘à┘å ┘è┘à╪¬╪╡ ╪º┘ä┘à┘ä┘ê╪½╪º╪¬ ╪¿┘â┘ü╪º╪í╪⌐ 99%." }
   }
 ];
 
@@ -71,60 +66,44 @@ const mockRegistrations = [
   {
     id: "reg1",
     created_at: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString(),
-    full_name: "Ù…. ÙƒØ±ÙŠÙ… عبد Ø§Ù„Ø¹Ø²ÙŠز Ù…ØµØ·ÙÙ‰",
+    full_name: "┘à. ┘â╪▒┘è┘à ╪╣╪¿╪» ╪º┘ä╪╣╪▓┘è╪▓ ┘à╪╡╪╖┘ü┘ë",
     email: "karim@startup.com",
     phone: "01020304050",
-    organization: "Ø´Ø±Ùƒة Ù†Ù…اء Ù„Ù„ØªÙƒÙ†ÙˆÙ„ÙˆØ¬ÙŠا",
+    organization: "╪┤╪▒┘â╪⌐ ┘å┘à╪º╪í ┘ä┘ä╪¬┘â┘å┘ê┘ä┘ê╪¼┘è╪º",
     role: "startup",
     cv_url: "#",
-    details: { startupName: "Ù†Ù…اء ØªÙŠÙƒ", industry: "Ø§Ù„Ø°Ùƒاء Ø§Ù„Ø§ØµØ·Ù†Ø§Ø¹ÙŠ ÙˆØ§Ù„ØªØ­ÙˆÙ„ Ø§Ù„Ø±Ù‚Ù…ÙŠ", stage: "Ù†Ù…Ùˆذج Ø£ÙˆÙ„ÙŠ Ù…جرب", elevatorPitch: "Ù…Ù†صة Ø°ÙƒÙŠة Ù„ربط Ø§Ù„Ù…Ø²Ø§Ø±Ø¹ÙŠÙ† Ø¨Ø§Ù„Ø£Ø³ÙˆØ§Ù‚ Ù…باشرة Ù„ØªÙ‚Ù„ÙŠÙ„ Ø§Ù„Ø­Ù„Ù‚ات Ø§Ù„ÙˆØ³ÙŠطة." }
+    details: { startupName: "┘å┘à╪º╪í ╪¬┘è┘â", industry: "╪º┘ä╪░┘â╪º╪í ╪º┘ä╪º╪╡╪╖┘å╪º╪╣┘è ┘ê╪º┘ä╪¬╪¡┘ê┘ä ╪º┘ä╪▒┘é┘à┘è", stage: "┘å┘à┘ê╪░╪¼ ╪ú┘ê┘ä┘è ┘à╪¼╪▒╪¿", elevatorPitch: "┘à┘å╪╡╪⌐ ╪░┘â┘è╪⌐ ┘ä╪▒╪¿╪╖ ╪º┘ä┘à╪▓╪º╪▒╪╣┘è┘å ╪¿╪º┘ä╪ú╪│┘ê╪º┘é ┘à╪¿╪º╪┤╪▒╪⌐ ┘ä╪¬┘é┘ä┘è┘ä ╪º┘ä╪¡┘ä┘é╪º╪¬ ╪º┘ä┘ê╪│┘è╪╖╪⌐." }
   },
   {
     id: "reg2",
     created_at: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString(),
-    full_name: "أ.د. Ø³Ù„ÙˆÙ‰ عبد Ø§Ù„Ø±Ø­Ù…Ù† Ø­Ø³Ù†",
+    full_name: "╪ú.╪». ╪│┘ä┘ê┘ë ╪╣╪¿╪» ╪º┘ä╪▒╪¡┘à┘å ╪¡╪│┘å",
     email: "salwa@knowledge.com",
     phone: "01122334455",
-    organization: "Ø¬Ø§Ù…عة Ø§Ù„Ù‚Ø§Ù‡رة",
+    organization: "╪¼╪º┘à╪╣╪⌐ ╪º┘ä┘é╪º┘ç╪▒╪⌐",
     role: "speaker",
     cv_url: "#",
-    details: { speechTopic: "Ù…Ø³ØªÙ‚Ø¨Ù„ Ø±ÙŠادة Ø§Ù„Ø£Ø¹Ù…Ø§Ù„ ÙÙŠ Ø§Ù„Ø¬Ø§Ù…عات Ø§Ù„Ù…ØµØ±ÙŠة", speakerExpertise: "Ø§Ù„Ø§Ø¨ØªÙƒار Ø§Ù„Ø¬Ø§Ù…Ø¹ÙŠ", speakerBio: "Ø®Ø¨ÙŠرة ÙÙŠ Ù†Ù‚Ù„ Ø§Ù„ØªÙƒÙ†ÙˆÙ„ÙˆØ¬ÙŠا ÙˆØªØ£Ø³ÙŠس Ø§Ù„Ø­Ø§Ø¶Ù†ات Ø§Ù„Ø¬Ø§Ù…Ø¹ÙŠة Ù„Ø£Ùƒثر Ù…Ù† ١٥ Ø¹Ø§Ù…Ø§Ù‹." }
+    details: { speechTopic: "┘à╪│╪¬┘é╪¿┘ä ╪▒┘è╪º╪»╪⌐ ╪º┘ä╪ú╪╣┘à╪º┘ä ┘ü┘è ╪º┘ä╪¼╪º┘à╪╣╪º╪¬ ╪º┘ä┘à╪╡╪▒┘è╪⌐", speakerExpertise: "╪º┘ä╪º╪¿╪¬┘â╪º╪▒ ╪º┘ä╪¼╪º┘à╪╣┘è", speakerBio: "╪«╪¿┘è╪▒╪⌐ ┘ü┘è ┘å┘é┘ä ╪º┘ä╪¬┘â┘å┘ê┘ä┘ê╪¼┘è╪º ┘ê╪¬╪ú╪│┘è╪│ ╪º┘ä╪¡╪º╪╢┘å╪º╪¬ ╪º┘ä╪¼╪º┘à╪╣┘è╪⌐ ┘ä╪ú┘â╪½╪▒ ┘à┘å ┘í┘Ñ ╪╣╪º┘à╪º┘ï." }
   },
   {
     id: "reg3",
     created_at: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString(),
-    full_name: "د. Ø·Ø§Ø±Ù‚ Ø¬Ù„Ø§Ù„ ÙÙˆØ²ÙŠ",
+    full_name: "╪». ╪╖╪º╪▒┘é ╪¼┘ä╪º┘ä ┘ü┘ê╪▓┘è",
     email: "tarek@angelinvest.net",
     phone: "01599887766",
-    organization: "ØµÙ†Ø¯ÙˆÙ‚ Ù…صر Ù„Ù„Ø§Ø³ØªØ«Ù…ار Ø§Ù„Ù…Ù„Ø§Ø¦ÙƒÙŠ",
+    organization: "╪╡┘å╪»┘ê┘é ┘à╪╡╪▒ ┘ä┘ä╪º╪│╪¬╪½┘à╪º╪▒ ╪º┘ä┘à┘ä╪º╪ª┘â┘è",
     role: "investor",
     cv_url: null,
-    details: { investorEntity: "Ù…Ø³ØªØ«Ù…ر ÙØ±Ø¯ÙŠ", investmentType: "ØªÙ…ÙˆÙŠÙ„ Ø£ÙˆÙ„ÙŠ / Seed Capital" }
+    details: { investorEntity: "┘à╪│╪¬╪½┘à╪▒ ┘ü╪▒╪»┘è", investmentType: "╪¬┘à┘ê┘è┘ä ╪ú┘ê┘ä┘è / Seed Capital" }
   }
 ];
 
-// Default admin accounts
-const ADMIN_ACCOUNTS = {
-  admin: { password: 'admin123', role: 'superAdmin', displayName: 'أدمن القمة الرئيسي', title: 'رئيس لجنة الإشراف العام' },
-  academic: { password: 'acad123', role: 'academic', displayName: 'أدمن المشروعات والبحوث', title: 'مسؤول الأكاديمية العلمية' },
-};
-
 const AdminDashboard = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [loginError, setLoginError] = useState('');
-  const [adminRole, setAdminRole] = useState('superAdmin'); // 'superAdmin' | 'academic'
+  
   const [activeTab, setActiveTab] = useState('overview');
-
-  // Admin profile (persisted in localStorage)
-  const defaultProfile = { name: 'أدمن القمة الرئيسي', title: 'رئيس لجنة الإشراف العام', avatar: '' };
-  const [adminProfile, setAdminProfile] = useState(() => {
-    try { return JSON.parse(localStorage.getItem('admin_profile')) || defaultProfile; }
-    catch { return defaultProfile; }
-  });
-  const [profileForm, setProfileForm] = useState({ name: '', title: '', avatar: '', newPassword: '', currentPassword: '' });
-  const [profileSaved, setProfileSaved] = useState(false);
   
   // Database state
   const [gradProjects, setGradProjects] = useState([]);
@@ -138,11 +117,11 @@ const AdminDashboard = () => {
   
   // News modal state
   const [isNewsModalOpen, setIsNewsModalOpen] = useState(false);
-  const [newNewsData, setNewNewsData] = useState({ title: '', content: '', image_url: '', uploader_name: 'Ø£Ø¯Ù…Ù† Ø§Ù„Ù†Ø¸Ø§Ù…' });
+  const [newNewsData, setNewNewsData] = useState({ title: '', content: '', image_url: '', uploader_name: '╪ú╪»┘à┘å ╪º┘ä┘å╪╕╪º┘à' });
   const [selectedType, setSelectedType] = useState(null); // 'graduation', 'research', 'registration'
   
   const [searchQuery, setSearchQuery] = useState('');
-  const [statusFilter, setStatusFilter] = useState('Ø§Ù„ÙƒÙ„');
+  const [statusFilter, setStatusFilter] = useState('╪º┘ä┘â┘ä');
 
   const [editingNewsId, setEditingNewsId] = useState(null);
 
@@ -152,8 +131,6 @@ const AdminDashboard = () => {
   const [isExhibitionModalOpen, setIsExhibitionModalOpen] = useState(false);
   const [exhibitionModalType, setExhibitionModalType] = useState('innovation'); // 'innovation' or 'product'
   const [exhibitionEditItem, setExhibitionEditItem] = useState(null);
-  const [hoveredDot, setHoveredDot] = useState(null); // format: `${cardIdx}-${pointIdx}`
-  const [hoveredLegendIdx, setHoveredLegendIdx] = useState(null);
 
   // --- Jobs states ---
   const [jobs, setJobs] = useState([]);
@@ -163,8 +140,8 @@ const AdminDashboard = () => {
     title: '',
     company: '',
     location: '',
-    type: 'Ø¯ÙˆØ§Ù… ÙƒØ§Ù…Ù„',
-    experience: 'Ø­Ø¯ÙŠث Ø§Ù„تخرج',
+    type: '╪»┘ê╪º┘à ┘â╪º┘à┘ä',
+    experience: '╪¡╪»┘è╪½ ╪º┘ä╪¬╪«╪▒╪¼',
     logo: '',
     details: ''
   });
@@ -173,20 +150,20 @@ const AdminDashboard = () => {
     name: '',
     category: 'ai',
     level: 'prototype',
-    levelName: 'Ù†Ù…Ùˆذج Ø£ÙˆÙ„ÙŠ',
+    levelName: '┘å┘à┘ê╪░╪¼ ╪ú┘ê┘ä┘è',
     team: '',
     desc: '',
     image: '',
     tech: 'Python',
-    speed: 'ÙÙˆØ±ÙŠ',
+    speed: '┘ü┘ê╪▒┘è',
     accuracy: '95%',
     icon: 'Cpu'
   });
 
   const [productFormData, setProductFormData] = useState({
     name: '',
-    category: 'Ù…Ù†تجات Ø²Ø±Ø§Ø¹ÙŠة',
-    faculty: 'ÙƒÙ„ÙŠة Ø§Ù„زراعة',
+    category: '┘à┘å╪¬╪¼╪º╪¬ ╪▓╪▒╪º╪╣┘è╪⌐',
+    faculty: '┘â┘ä┘è╪⌐ ╪º┘ä╪▓╪▒╪º╪╣╪⌐',
     facultyId: 'agriculture',
     price: '',
     image: '',
@@ -216,7 +193,7 @@ const AdminDashboard = () => {
   };
 
   const handleDeleteInnovation = (id) => {
-    if (window.confirm('Ù‡Ù„ Ø£Ù†ت Ù…ØªØ£Ùƒد Ù…Ù† حذف Ù‡ذا Ø§Ù„Ø§Ø¨ØªÙƒØ§Ø±ØŸ')) {
+    if (window.confirm('┘ç┘ä ╪ú┘å╪¬ ┘à╪¬╪ú┘â╪» ┘à┘å ╪¡╪░┘ü ┘ç╪░╪º ╪º┘ä╪º╪¿╪¬┘â╪º╪▒╪ƒ')) {
       const updated = innovations.filter(item => item.id !== id);
       setInnovations(updated);
       localStorage.setItem('exhibition_innovations', JSON.stringify(updated));
@@ -242,7 +219,7 @@ const AdminDashboard = () => {
   };
 
   const handleDeleteProduct = (id) => {
-    if (window.confirm('Ù‡Ù„ Ø£Ù†ت Ù…ØªØ£Ùƒد Ù…Ù† حذف Ù‡ذا Ø§Ù„Ù…Ù†ØªØ¬ØŸ')) {
+    if (window.confirm('┘ç┘ä ╪ú┘å╪¬ ┘à╪¬╪ú┘â╪» ┘à┘å ╪¡╪░┘ü ┘ç╪░╪º ╪º┘ä┘à┘å╪¬╪¼╪ƒ')) {
       const updated = products.filter(item => item.id !== id);
       setProducts(updated);
       localStorage.setItem('exhibition_products', JSON.stringify(updated));
@@ -255,7 +232,7 @@ const AdminDashboard = () => {
     setLoading(true);
     try {
       if (isSupabaseConfigured) {
-        if (jobEditItem && isUUID(jobEditItem.id)) {
+        if (jobEditItem) {
           const { error } = await supabase
             .from('jobs')
             .update({
@@ -316,51 +293,20 @@ const AdminDashboard = () => {
         title: '',
         company: '',
         location: '',
-        type: 'Ø¯ÙˆØ§Ù… ÙƒØ§Ù…Ù„',
-        experience: 'Ø­Ø¯ÙŠث Ø§Ù„تخرج',
+        type: '╪»┘ê╪º┘à ┘â╪º┘à┘ä',
+        experience: '╪¡╪»┘è╪½ ╪º┘ä╪¬╪«╪▒╪¼',
         logo: '',
         details: ''
       });
     } catch (err) {
-      console.error("Error saving job:", err);
-      if (err.message && (err.message.includes('jobs') || err.message.includes('schema cache') || err.message.includes('relation'))) {
-        alert("ØªÙ†Ø¨ÙŠÙ‡ Ù‡Ø§Ù…: Ø¬Ø¯ÙˆÙ„ Ø§Ù„Ùˆظائف (jobs) ØºÙŠر Ù…ÙˆØ¬Ùˆد Ø­Ø§Ù„ÙŠØ§Ù‹ ÙÙŠ Ù‚اعدة Ø¨ÙŠØ§Ù†ات Supabase Ø§Ù„خاصة Ø¨Ùƒ.\n\nÙ„Ù‚د Ù‚Ù…Ù†ا بحفظ Ø§Ù„ØªØ¹Ø¯ÙŠÙ„ات Ù…Ø­Ù„ÙŠØ§Ù‹ ÙÙŠ Ø§Ù„Ù…تصفح Ø¨Ù†جاح Ù„ØªØªÙ…ÙƒÙ† Ù…Ù† Ù…Ø¹Ø§ÙŠÙ†ة ÙˆØªØ¹Ø¯ÙŠÙ„ Ø§Ù„Ùˆظائف ÙÙˆØ±Ø§Ù‹!\n\nÙ„ØªÙØ¹ÙŠÙ„ Ø§Ù„حفظ Ø§Ù„Ø¯Ø§Ø¦Ù… Ø³Ø­Ø§Ø¨ÙŠØ§Ù‹ØŒ ÙŠØ±Ø¬Ù‰ Ù†سخ ÙƒÙˆد SQL Ø§Ù„خاص Ø¨Ø§Ù„Ùˆظائف Ù…Ù† Ø§Ù„Ù…Ù„ف:\nscratch/supabase_schema.sql\nÙˆØªØ´ØºÙŠÙ„Ù‡ ÙÙŠ Ù„Ùˆحة ØªØ­ÙƒÙ… Supabase (Ù‚Ø³Ù… SQL Editor).");
-        
-        let updated;
-        if (jobEditItem) {
-          updated = jobs.map(item => item.id === jobEditItem.id ? { ...item, ...jobFormData } : item);
-        } else {
-          const newItem = {
-            ...jobFormData,
-            id: Date.now(),
-            created_at: new Date().toISOString()
-          };
-          updated = [newItem, ...jobs];
-        }
-        setJobs(updated);
-        localStorage.setItem('local_jobs', JSON.stringify(updated));
-        
-        setIsJobModalOpen(false);
-        setJobEditItem(null);
-        setJobFormData({
-          title: '',
-          company: '',
-          location: '',
-          type: 'Ø¯ÙˆØ§Ù… ÙƒØ§Ù…Ù„',
-          experience: 'Ø­Ø¯ÙŠث Ø§Ù„تخرج',
-          logo: '',
-          details: ''
-        });
-      } else {
-        alert("حدث خطأ Ø£Ø«Ù†اء حفظ Ø§Ù„ÙˆØ¸ÙŠفة: " + err.message);
-      }
+      alert("╪¡╪»╪½ ╪«╪╖╪ú ╪ú╪½┘å╪º╪í ╪¡┘ü╪╕ ╪º┘ä┘ê╪╕┘è┘ü╪⌐: " + err.message);
     } finally {
       setLoading(false);
     }
   };
 
   const handleDeleteJob = async (id) => {
-    if (window.confirm('Ù‡Ù„ Ø£Ù†ت Ù…ØªØ£Ùƒد Ù…Ù† حذف Ù‡Ø°Ù‡ Ø§Ù„ÙˆØ¸ÙŠفة Ù†Ù‡Ø§Ø¦ÙŠØ§Ù‹ØŸ')) {
+    if (window.confirm('┘ç┘ä ╪ú┘å╪¬ ┘à╪¬╪ú┘â╪» ┘à┘å ╪¡╪░┘ü ┘ç╪░┘ç ╪º┘ä┘ê╪╕┘è┘ü╪⌐ ┘å┘ç╪º╪ª┘è╪º┘ï╪ƒ')) {
       setLoading(true);
       try {
         if (isSupabaseConfigured) {
@@ -384,7 +330,7 @@ const AdminDashboard = () => {
           if (!error) setJobs(data || []);
         }
       } catch (err) {
-        alert("حدث خطأ Ø£Ø«Ù†اء حذف Ø§Ù„ÙˆØ¸ÙŠفة: " + err.message);
+        alert("╪¡╪»╪½ ╪«╪╖╪ú ╪ú╪½┘å╪º╪í ╪¡╪░┘ü ╪º┘ä┘ê╪╕┘è┘ü╪⌐: " + err.message);
       } finally {
         setLoading(false);
       }
@@ -397,8 +343,8 @@ const AdminDashboard = () => {
       title: '',
       company: '',
       location: '',
-      type: 'Ø¯ÙˆØ§Ù… ÙƒØ§Ù…Ù„',
-      experience: 'Ø­Ø¯ÙŠث Ø§Ù„تخرج',
+      type: '╪»┘ê╪º┘à ┘â╪º┘à┘ä',
+      experience: '╪¡╪»┘è╪½ ╪º┘ä╪¬╪«╪▒╪¼',
       logo: 'https://images.unsplash.com/photo-1560179707-f14e90ef3623?auto=format&fit=crop&q=80&w=200',
       details: ''
     });
@@ -411,8 +357,8 @@ const AdminDashboard = () => {
       title: item.title || '',
       company: item.company || '',
       location: item.location || '',
-      type: item.type || 'Ø¯ÙˆØ§Ù… ÙƒØ§Ù…Ù„',
-      experience: item.experience || 'Ø­Ø¯ÙŠث Ø§Ù„تخرج',
+      type: item.type || '╪»┘ê╪º┘à ┘â╪º┘à┘ä',
+      experience: item.experience || '╪¡╪»┘è╪½ ╪º┘ä╪¬╪«╪▒╪¼',
       logo: item.logo || 'https://images.unsplash.com/photo-1560179707-f14e90ef3623?auto=format&fit=crop&q=80&w=200',
       details: item.details || ''
     });
@@ -426,12 +372,12 @@ const AdminDashboard = () => {
       name: '',
       category: 'ai',
       level: 'prototype',
-      levelName: 'Ù†Ù…Ùˆذج Ø£ÙˆÙ„ÙŠ',
+      levelName: '┘å┘à┘ê╪░╪¼ ╪ú┘ê┘ä┘è',
       team: '',
       desc: '',
       image: '',
       tech: 'Python',
-      speed: 'ÙÙˆØ±ÙŠ',
+      speed: '┘ü┘ê╪▒┘è',
       accuracy: '95%',
       icon: 'Cpu'
     });
@@ -445,12 +391,12 @@ const AdminDashboard = () => {
       name: item.name || '',
       category: item.category || 'ai',
       level: item.level || 'prototype',
-      levelName: item.levelName || 'Ù†Ù…Ùˆذج Ø£ÙˆÙ„ÙŠ',
+      levelName: item.levelName || '┘å┘à┘ê╪░╪¼ ╪ú┘ê┘ä┘è',
       team: item.team || '',
       desc: item.desc || '',
       image: item.image || '',
       tech: item.stats?.tech || item.tech || 'Python',
-      speed: item.stats?.speed || item.speed || 'ÙÙˆØ±ÙŠ',
+      speed: item.stats?.speed || item.speed || '┘ü┘ê╪▒┘è',
       accuracy: item.stats?.accuracy || item.accuracy || '95%',
       icon: item.icon || 'Cpu'
     });
@@ -462,8 +408,8 @@ const AdminDashboard = () => {
     setExhibitionEditItem(null);
     setProductFormData({
       name: '',
-      category: 'Ù…Ù†تجات Ø²Ø±Ø§Ø¹ÙŠة',
-      faculty: 'ÙƒÙ„ÙŠة Ø§Ù„زراعة',
+      category: '┘à┘å╪¬╪¼╪º╪¬ ╪▓╪▒╪º╪╣┘è╪⌐',
+      faculty: '┘â┘ä┘è╪⌐ ╪º┘ä╪▓╪▒╪º╪╣╪⌐',
       facultyId: 'agriculture',
       price: '',
       image: '',
@@ -480,8 +426,8 @@ const AdminDashboard = () => {
     setExhibitionEditItem(item);
     setProductFormData({
       name: item.name || '',
-      category: item.category || 'Ù…Ù†تجات Ø²Ø±Ø§Ø¹ÙŠة',
-      faculty: item.faculty || 'ÙƒÙ„ÙŠة Ø§Ù„زراعة',
+      category: item.category || '┘à┘å╪¬╪¼╪º╪¬ ╪▓╪▒╪º╪╣┘è╪⌐',
+      faculty: item.faculty || '┘â┘ä┘è╪⌐ ╪º┘ä╪▓╪▒╪º╪╣╪⌐',
       facultyId: item.facultyId || 'agriculture',
       price: item.price || '',
       image: item.image || '',
@@ -499,7 +445,7 @@ const AdminDashboard = () => {
     setLoading(true);
     try {
       if (isSupabaseConfigured) {
-        if (editingNewsId && isUUID(editingNewsId)) {
+        if (editingNewsId) {
           const { error } = await supabase
             .from('news')
             .update({
@@ -550,32 +496,9 @@ const AdminDashboard = () => {
 
       setIsNewsModalOpen(false);
       setEditingNewsId(null);
-      setNewNewsData({ title: '', content: '', image_url: '', uploader_name: adminProfile.name });
+      setNewNewsData({ title: '', content: '', image_url: '', uploader_name: '╪ú╪»┘à┘å ╪º┘ä┘å╪╕╪º┘à' });
     } catch (err) {
-      console.error("Error saving news:", err);
-      if (err.message && (err.message.includes('news') || err.message.includes('schema cache') || err.message.includes('relation'))) {
-        alert("ØªÙ†Ø¨ÙŠÙ‡ Ù‡Ø§Ù…: Ø¬Ø¯ÙˆÙ„ Ø§Ù„أخبار (news) ØºÙŠر Ù…ÙˆØ¬Ùˆد Ø­Ø§Ù„ÙŠØ§Ù‹ Ù ÙŠ Ù‚اعدة Ø¨ÙŠØ§Ù†ات Supabase Ø§Ù„خاصة Ø¨Ùƒ.\n\nÙ„Ù‚د Ù‚Ù…Ù†ا Ø¨Ø­Ù ظ Ø§Ù„ØªØ¹Ø¯ÙŠÙ„ات Ù…Ø­Ù„ÙŠØ§Ù‹ Ù ÙŠ Ø§Ù„Ù…ØªØµÙ ح Ø¨Ù†جاح Ù„ØªØªÙ…ÙƒÙ† Ù…Ù† Ù…Ø¹Ø§ÙŠÙ†ة ÙˆØªØ¹Ø¯ÙŠÙ„ Ø§Ù„أخبار Ù ÙˆØ±Ø§Ù‹!\n\nÙ„ØªÙ Ø¹ÙŠÙ„ Ø§Ù„Ø­Ù ظ Ø§Ù„Ø¯Ø§Ø¦Ù… Ø³Ø­Ø§Ø¨ÙŠØ§Ù‹ØŒ ÙŠØ±Ø¬Ù‰ Ù†سخ ÙƒÙˆد SQL Ø§Ù„Ù…ÙˆØ¬Ùˆد Ù ÙŠ Ø§Ù„Ù…Ù„Ù :\nscratch/supabase_news_schema.sql\nÙˆØªØ´ØºÙŠÙ„Ù‡ Ù ÙŠ Ù„Ùˆحة ØªØ­ÙƒÙ… Supabase (Ù‚Ø³Ù… SQL Editor).");
-        
-        let updated;
-        if (editingNewsId) {
-          updated = newsList.map(news => news.id === editingNewsId ? { ...news, ...newNewsData } : news);
-        } else {
-          const newNews = {
-            ...newNewsData,
-            id: Date.now().toString(),
-            created_at: new Date().toISOString()
-          };
-          updated = [newNews, ...newsList];
-        }
-        setNewsList(updated);
-        localStorage.setItem('local_news', JSON.stringify(updated));
-        
-        setIsNewsModalOpen(false);
-        setEditingNewsId(null);
-        setNewNewsData({ title: '', content: '', image_url: '', uploader_name: 'Ø£Ø¯Ù…Ù† Ø§Ù„Ù†Ø¸Ø§Ù…' });
-      } else {
-        alert("حدث خطأ Ø£Ø«Ù†اء حفظ Ø§Ù„خبر: " + err.message);
-      }
+      alert("╪¡╪»╪½ ╪«╪╖╪ú ╪ú╪½┘å╪º╪í ╪¡┘ü╪╕ ╪º┘ä╪«╪¿╪▒: " + err.message);
     } finally {
       setLoading(false);
     }
@@ -593,7 +516,7 @@ const AdminDashboard = () => {
   };
 
   const handleDeleteNews = async (id) => {
-    if (window.confirm('Ù‡Ù„ Ø£Ù†ت Ù…ØªØ£Ùƒد Ù…Ù† Ø±ØºØ¨ØªÙƒ ÙÙŠ حذف Ù‡ذا Ø§Ù„خبر Ù†Ù‡Ø§Ø¦ÙŠØ§Ù‹ØŸ')) {
+    if (window.confirm('┘ç┘ä ╪ú┘å╪¬ ┘à╪¬╪ú┘â╪» ┘à┘å ╪▒╪║╪¿╪¬┘â ┘ü┘è ╪¡╪░┘ü ┘ç╪░╪º ╪º┘ä╪«╪¿╪▒ ┘å┘ç╪º╪ª┘è╪º┘ï╪ƒ')) {
       setLoading(true);
       try {
         if (isSupabaseConfigured) {
@@ -617,7 +540,7 @@ const AdminDashboard = () => {
           if (!error) setNewsList(data || []);
         }
       } catch (err) {
-        alert("حدث خطأ Ø£Ø«Ù†اء حذف Ø§Ù„خبر: " + err.message);
+        alert("╪¡╪»╪½ ╪«╪╖╪ú ╪ú╪½┘å╪º╪í ╪¡╪░┘ü ╪º┘ä╪«╪¿╪▒: " + err.message);
       } finally {
         setLoading(false);
       }
@@ -645,7 +568,7 @@ const AdminDashboard = () => {
       sessionStorage.setItem('isAdminAuthenticated', 'true');
       setLoginError('');
     } else {
-      setLoginError('ÙƒÙ„Ù…ة Ø§Ù„Ù…Ø±Ùˆر ØºÙŠر ØµØ­ÙŠحة!');
+      setLoginError('┘â┘ä┘à╪⌐ ╪º┘ä┘à╪▒┘ê╪▒ ╪║┘è╪▒ ╪╡╪¡┘è╪¡╪⌐!');
     }
   };
 
@@ -695,40 +618,40 @@ const AdminDashboard = () => {
             // Seed default jobs
             const defaultJobsToSeed = [
               {
-                title: 'Ù…Ù‡Ù†دس Ø¨Ø±Ù…Ø¬ÙŠات ÙˆØ§Ø¬Ù‡ات Ø£Ù…Ø§Ù…ÙŠة (Frontend)',
+                title: '┘à┘ç┘å╪»╪│ ╪¿╪▒┘à╪¼┘è╪º╪¬ ┘ê╪º╪¼┘ç╪º╪¬ ╪ú┘à╪º┘à┘è╪⌐ (Frontend)',
                 company: 'TechVision Solutions',
-                location: 'Ø§Ù„Ù‚Ø±ÙŠة Ø§Ù„Ø°ÙƒÙŠØ©ØŒ Ø§Ù„Ù‚Ø§Ù‡رة',
-                type: 'Ø¯ÙˆØ§Ù… ÙƒØ§Ù…Ù„',
-                experience: '1-3 Ø³Ù†Ùˆات',
+                location: '╪º┘ä┘é╪▒┘è╪⌐ ╪º┘ä╪░┘â┘è╪⌐╪î ╪º┘ä┘é╪º┘ç╪▒╪⌐',
+                type: '╪»┘ê╪º┘à ┘â╪º┘à┘ä',
+                experience: '1-3 ╪│┘å┘ê╪º╪¬',
                 logo: 'https://images.unsplash.com/photo-1560179707-f14e90ef3623?auto=format&fit=crop&q=80&w=200',
-                details: 'ØªØ·ÙˆÙŠر ÙˆØªØµÙ…ÙŠÙ… ÙˆØ§Ø¬Ù‡ات ÙˆØªØ·Ø¨ÙŠÙ‚ات Ø§Ù„ÙˆÙŠب Ø¨Ø§Ø³ØªØ®Ø¯Ø§Ù… React.js Ùˆ TailwindCSS.'
+                details: '╪¬╪╖┘ê┘è╪▒ ┘ê╪¬╪╡┘à┘è┘à ┘ê╪º╪¼┘ç╪º╪¬ ┘ê╪¬╪╖╪¿┘è┘é╪º╪¬ ╪º┘ä┘ê┘è╪¿ ╪¿╪º╪│╪¬╪«╪»╪º┘à React.js ┘ê TailwindCSS.'
               },
               {
-                title: 'Ø£Ø®ØµØ§Ø¦ÙŠ ØªØ³ÙˆÙŠÙ‚ Ø¥Ù„ÙƒØªØ±ÙˆÙ†ÙŠ',
+                title: '╪ú╪«╪╡╪º╪ª┘è ╪¬╪│┘ê┘è┘é ╪Ñ┘ä┘â╪¬╪▒┘ê┘å┘è',
                 company: 'Global Media',
-                location: 'Ø¹Ù† بُعد (Remote)',
-                type: 'Ø¯ÙˆØ§Ù… ÙƒØ§Ù…Ù„',
-                experience: 'Ø­Ø¯ÙŠث Ø§Ù„تخرج',
+                location: '╪╣┘å ╪¿┘Å╪╣╪» (Remote)',
+                type: '╪»┘ê╪º┘à ┘â╪º┘à┘ä',
+                experience: '╪¡╪»┘è╪½ ╪º┘ä╪¬╪«╪▒╪¼',
                 logo: 'https://images.unsplash.com/photo-1572044162444-ad60f128bdea?auto=format&fit=crop&q=80&w=200',
-                details: 'إدارة Ø­Ù…Ù„ات Ø§Ù„ØªÙˆØ§ØµÙ„ Ø§Ù„Ø§Ø¬ØªÙ…Ø§Ø¹ÙŠ ÙˆØ¬ÙˆØ¬Ù„ أدز ÙˆØªÙ‡ÙŠئة Ù…Ø­Ø±Ùƒات Ø§Ù„بحث.'
+                details: '╪Ñ╪»╪º╪▒╪⌐ ╪¡┘à┘ä╪º╪¬ ╪º┘ä╪¬┘ê╪º╪╡┘ä ╪º┘ä╪º╪¼╪¬┘à╪º╪╣┘è ┘ê╪¼┘ê╪¼┘ä ╪ú╪»╪▓ ┘ê╪¬┘ç┘è╪ª╪⌐ ┘à╪¡╪▒┘â╪º╪¬ ╪º┘ä╪¿╪¡╪½.'
               },
               {
-                title: 'Ù…Ø­Ù„Ù„ Ø¨ÙŠØ§Ù†ات',
+                title: '┘à╪¡┘ä┘ä ╪¿┘è╪º┘å╪º╪¬',
                 company: 'Data Insights',
-                location: 'Ø§Ù„Ù…Ø¹Ø§Ø¯ÙŠØŒ Ø§Ù„Ù‚Ø§Ù‡رة',
-                type: 'Ø¯ÙˆØ§Ù… Ø¬Ø²Ø¦ÙŠ',
-                experience: '0-2 Ø³Ù†Ùˆات',
+                location: '╪º┘ä┘à╪╣╪º╪»┘è╪î ╪º┘ä┘é╪º┘ç╪▒╪⌐',
+                type: '╪»┘ê╪º┘à ╪¼╪▓╪ª┘è',
+                experience: '0-2 ╪│┘å┘ê╪º╪¬',
                 logo: 'https://images.unsplash.com/photo-1551434678-e076c223a692?auto=format&fit=crop&q=80&w=200',
-                details: 'ØªØ­Ù„ÙŠÙ„ Ø§Ù„Ø¨ÙŠØ§Ù†ات Ùˆاستخراج Ø§Ù„ØªÙ‚Ø§Ø±ÙŠر ÙˆØªØµÙ…ÙŠÙ… Ù„Ùˆحات عرض Ø§Ù„Ø¨ÙŠØ§Ù†ات Power BI.'
+                details: '╪¬╪¡┘ä┘è┘ä ╪º┘ä╪¿┘è╪º┘å╪º╪¬ ┘ê╪º╪│╪¬╪«╪▒╪º╪¼ ╪º┘ä╪¬┘é╪º╪▒┘è╪▒ ┘ê╪¬╪╡┘à┘è┘à ┘ä┘ê╪¡╪º╪¬ ╪╣╪▒╪╢ ╪º┘ä╪¿┘è╪º┘å╪º╪¬ Power BI.'
               },
               {
-                title: 'Ù…Ù‡Ù†دس Ø¬Ùˆدة Ø¨Ø±Ù…Ø¬ÙŠات (QA)',
+                title: '┘à┘ç┘å╪»╪│ ╪¼┘ê╪»╪⌐ ╪¿╪▒┘à╪¼┘è╪º╪¬ (QA)',
                 company: 'SoftCore',
-                location: 'Ø§Ù„Ù…Ù†ÙŠا Ø§Ù„Ø¬Ø¯ÙŠدة',
-                type: 'Ø¯ÙˆØ§Ù… ÙƒØ§Ù…Ù„',
-                experience: '2+ Ø³Ù†Ùˆات',
+                location: '╪º┘ä┘à┘å┘è╪º ╪º┘ä╪¼╪»┘è╪»╪⌐',
+                type: '╪»┘ê╪º┘à ┘â╪º┘à┘ä',
+                experience: '2+ ╪│┘å┘ê╪º╪¬',
                 logo: 'https://images.unsplash.com/photo-1496200502058-a73099b244ce?auto=format&fit=crop&q=80&w=200',
-                details: 'اختبار Ø§Ù„Ø¨Ø±Ù…Ø¬ÙŠات ÙˆØªØ­Ø¯ÙŠد Ø§Ù„أخطاء Ùˆإعداد Ø§Ù„ØªÙ‚Ø§Ø±ÙŠر Ø§Ù„ÙÙ†ÙŠة ÙˆØ¹Ù…Ù„ Ø£ØªÙ…تة Ù„Ù„اختبارات.'
+                details: '╪º╪«╪¬╪¿╪º╪▒ ╪º┘ä╪¿╪▒┘à╪¼┘è╪º╪¬ ┘ê╪¬╪¡╪»┘è╪» ╪º┘ä╪ú╪«╪╖╪º╪í ┘ê╪Ñ╪╣╪»╪º╪» ╪º┘ä╪¬┘é╪º╪▒┘è╪▒ ╪º┘ä┘ü┘å┘è╪⌐ ┘ê╪╣┘à┘ä ╪ú╪¬┘à╪¬╪⌐ ┘ä┘ä╪º╪«╪¬╪¿╪º╪▒╪º╪¬.'
               }
             ];
             const { data: seededJobs, error: seedJobsErr } = await supabase
@@ -795,43 +718,43 @@ const AdminDashboard = () => {
         const defaultJobs = [
           {
             id: 1,
-            title: 'Ù…Ù‡Ù†دس Ø¨Ø±Ù…Ø¬ÙŠات ÙˆØ§Ø¬Ù‡ات Ø£Ù…Ø§Ù…ÙŠة (Frontend)',
+            title: '┘à┘ç┘å╪»╪│ ╪¿╪▒┘à╪¼┘è╪º╪¬ ┘ê╪º╪¼┘ç╪º╪¬ ╪ú┘à╪º┘à┘è╪⌐ (Frontend)',
             company: 'TechVision Solutions',
-            location: 'Ø§Ù„Ù‚Ø±ÙŠة Ø§Ù„Ø°ÙƒÙŠØ©ØŒ Ø§Ù„Ù‚Ø§Ù‡رة',
-            type: 'Ø¯ÙˆØ§Ù… ÙƒØ§Ù…Ù„',
-            experience: '1-3 Ø³Ù†Ùˆات',
+            location: '╪º┘ä┘é╪▒┘è╪⌐ ╪º┘ä╪░┘â┘è╪⌐╪î ╪º┘ä┘é╪º┘ç╪▒╪⌐',
+            type: '╪»┘ê╪º┘à ┘â╪º┘à┘ä',
+            experience: '1-3 ╪│┘å┘ê╪º╪¬',
             logo: 'https://images.unsplash.com/photo-1560179707-f14e90ef3623?auto=format&fit=crop&q=80&w=200',
-            details: 'ØªØ·ÙˆÙŠر ÙˆØªØµÙ…ÙŠÙ… ÙˆØ§Ø¬Ù‡ات ÙˆØªØ·Ø¨ÙŠÙ‚ات Ø§Ù„ÙˆÙŠب Ø¨Ø§Ø³ØªØ®Ø¯Ø§Ù… React.js Ùˆ TailwindCSS.'
+            details: '╪¬╪╖┘ê┘è╪▒ ┘ê╪¬╪╡┘à┘è┘à ┘ê╪º╪¼┘ç╪º╪¬ ┘ê╪¬╪╖╪¿┘è┘é╪º╪¬ ╪º┘ä┘ê┘è╪¿ ╪¿╪º╪│╪¬╪«╪»╪º┘à React.js ┘ê TailwindCSS.'
           },
           {
             id: 2,
-            title: 'Ø£Ø®ØµØ§Ø¦ÙŠ ØªØ³ÙˆÙŠÙ‚ Ø¥Ù„ÙƒØªØ±ÙˆÙ†ÙŠ',
+            title: '╪ú╪«╪╡╪º╪ª┘è ╪¬╪│┘ê┘è┘é ╪Ñ┘ä┘â╪¬╪▒┘ê┘å┘è',
             company: 'Global Media',
-            location: 'Ø¹Ù† بُعد (Remote)',
-            type: 'Ø¯ÙˆØ§Ù… ÙƒØ§Ù…Ù„',
-            experience: 'Ø­Ø¯ÙŠث Ø§Ù„تخرج',
+            location: '╪╣┘å ╪¿┘Å╪╣╪» (Remote)',
+            type: '╪»┘ê╪º┘à ┘â╪º┘à┘ä',
+            experience: '╪¡╪»┘è╪½ ╪º┘ä╪¬╪«╪▒╪¼',
             logo: 'https://images.unsplash.com/photo-1572044162444-ad60f128bdea?auto=format&fit=crop&q=80&w=200',
-            details: 'إدارة Ø­Ù…Ù„ات Ø§Ù„ØªÙˆØ§ØµÙ„ Ø§Ù„Ø§Ø¬ØªÙ…Ø§Ø¹ÙŠ ÙˆØ¬ÙˆØ¬Ù„ أدز ÙˆØªÙ‡ÙŠئة Ù…Ø­Ø±Ùƒات Ø§Ù„بحث.'
+            details: '╪Ñ╪»╪º╪▒╪⌐ ╪¡┘à┘ä╪º╪¬ ╪º┘ä╪¬┘ê╪º╪╡┘ä ╪º┘ä╪º╪¼╪¬┘à╪º╪╣┘è ┘ê╪¼┘ê╪¼┘ä ╪ú╪»╪▓ ┘ê╪¬┘ç┘è╪ª╪⌐ ┘à╪¡╪▒┘â╪º╪¬ ╪º┘ä╪¿╪¡╪½.'
           },
           {
             id: 3,
-            title: 'Ù…Ø­Ù„Ù„ Ø¨ÙŠØ§Ù†ات',
+            title: '┘à╪¡┘ä┘ä ╪¿┘è╪º┘å╪º╪¬',
             company: 'Data Insights',
-            location: 'Ø§Ù„Ù…Ø¹Ø§Ø¯ÙŠØŒ Ø§Ù„Ù‚Ø§Ù‡رة',
-            type: 'Ø¯ÙˆØ§Ù… Ø¬Ø²Ø¦ÙŠ',
-            experience: '0-2 Ø³Ù†Ùˆات',
+            location: '╪º┘ä┘à╪╣╪º╪»┘è╪î ╪º┘ä┘é╪º┘ç╪▒╪⌐',
+            type: '╪»┘ê╪º┘à ╪¼╪▓╪ª┘è',
+            experience: '0-2 ╪│┘å┘ê╪º╪¬',
             logo: 'https://images.unsplash.com/photo-1551434678-e076c223a692?auto=format&fit=crop&q=80&w=200',
-            details: 'ØªØ­Ù„ÙŠÙ„ Ø§Ù„Ø¨ÙŠØ§Ù†ات Ùˆاستخراج Ø§Ù„ØªÙ‚Ø§Ø±ÙŠر ÙˆØªØµÙ…ÙŠÙ… Ù„Ùˆحات عرض Ø§Ù„Ø¨ÙŠØ§Ù†ات Power BI.'
+            details: '╪¬╪¡┘ä┘è┘ä ╪º┘ä╪¿┘è╪º┘å╪º╪¬ ┘ê╪º╪│╪¬╪«╪▒╪º╪¼ ╪º┘ä╪¬┘é╪º╪▒┘è╪▒ ┘ê╪¬╪╡┘à┘è┘à ┘ä┘ê╪¡╪º╪¬ ╪╣╪▒╪╢ ╪º┘ä╪¿┘è╪º┘å╪º╪¬ Power BI.'
           },
           {
             id: 4,
-            title: 'Ù…Ù‡Ù†دس Ø¬Ùˆدة Ø¨Ø±Ù…Ø¬ÙŠات (QA)',
+            title: '┘à┘ç┘å╪»╪│ ╪¼┘ê╪»╪⌐ ╪¿╪▒┘à╪¼┘è╪º╪¬ (QA)',
             company: 'SoftCore',
-            location: 'Ø§Ù„Ù…Ù†ÙŠا Ø§Ù„Ø¬Ø¯ÙŠدة',
-            type: 'Ø¯ÙˆØ§Ù… ÙƒØ§Ù…Ù„',
-            experience: '2+ Ø³Ù†Ùˆات',
+            location: '╪º┘ä┘à┘å┘è╪º ╪º┘ä╪¼╪»┘è╪»╪⌐',
+            type: '╪»┘ê╪º┘à ┘â╪º┘à┘ä',
+            experience: '2+ ╪│┘å┘ê╪º╪¬',
             logo: 'https://images.unsplash.com/photo-1496200502058-a73099b244ce?auto=format&fit=crop&q=80&w=200',
-            details: 'اختبار Ø§Ù„Ø¨Ø±Ù…Ø¬ÙŠات ÙˆØªØ­Ø¯ÙŠد Ø§Ù„أخطاء Ùˆإعداد Ø§Ù„ØªÙ‚Ø§Ø±ÙŠر Ø§Ù„ÙÙ†ÙŠة ÙˆØ¹Ù…Ù„ Ø£ØªÙ…تة Ù„Ù„اختبارات.'
+            details: '╪º╪«╪¬╪¿╪º╪▒ ╪º┘ä╪¿╪▒┘à╪¼┘è╪º╪¬ ┘ê╪¬╪¡╪»┘è╪» ╪º┘ä╪ú╪«╪╖╪º╪í ┘ê╪Ñ╪╣╪»╪º╪» ╪º┘ä╪¬┘é╪º╪▒┘è╪▒ ╪º┘ä┘ü┘å┘è╪⌐ ┘ê╪╣┘à┘ä ╪ú╪¬┘à╪¬╪⌐ ┘ä┘ä╪º╪«╪¬╪¿╪º╪▒╪º╪¬.'
           }
         ];
         if (!localStorage.getItem('local_jobs')) {
@@ -859,69 +782,69 @@ const AdminDashboard = () => {
         const defaultInnovations = [
           {
             id: 1,
-            name: 'Ù†Ø¸Ø§Ù… ØªØ´Ø®ÙŠص Ø§Ù„Ø£ÙˆØ±Ø§Ù… Ø§Ù„Ø°ÙƒÙŠ Ø¨Ø§Ù„Ø±Ù†ÙŠÙ† Ø§Ù„Ù…ØºÙ†Ø§Ø·ÙŠØ³ÙŠ',
+            name: '┘å╪╕╪º┘à ╪¬╪┤╪«┘è╪╡ ╪º┘ä╪ú┘ê╪▒╪º┘à ╪º┘ä╪░┘â┘è ╪¿╪º┘ä╪▒┘å┘è┘å ╪º┘ä┘à╪║┘å╪º╪╖┘è╪│┘è',
             category: 'ai',
             level: 'advanced',
-            levelName: 'Ù…Ø³ØªÙˆÙ‰ Ù…ØªÙ‚Ø¯Ù…',
-            team: 'ÙØ±ÙŠÙ‚ Ø³ÙŠØ¬Ù…ا Ø§Ù„Ø·Ø¨ÙŠ',
-            desc: 'Ø¨Ø±Ù…Ø¬ÙŠات Ø°Ùƒاء Ø§ØµØ·Ù†Ø§Ø¹ÙŠ ØªÙ‚ÙˆÙ… Ø¨ØªØ­Ù„ÙŠÙ„ ØµÙˆر Ø§Ù„Ø±Ù†ÙŠÙ† Ù„سرعة رصد Ø§Ù„Ø£ÙˆØ±Ø§Ù… Ø¨Ù†سبة Ø¯Ù‚ة ØªÙÙˆÙ‚ 98% ÙˆØªÙˆÙÙŠر Ø§Ù„ÙˆÙ‚ت Ù„Ù„أطباء.',
+            levelName: '┘à╪│╪¬┘ê┘ë ┘à╪¬┘é╪»┘à',
+            team: '┘ü╪▒┘è┘é ╪│┘è╪¼┘à╪º ╪º┘ä╪╖╪¿┘è',
+            desc: '╪¿╪▒┘à╪¼┘è╪º╪¬ ╪░┘â╪º╪í ╪º╪╡╪╖┘å╪º╪╣┘è ╪¬┘é┘ê┘à ╪¿╪¬╪¡┘ä┘è┘ä ╪╡┘ê╪▒ ╪º┘ä╪▒┘å┘è┘å ┘ä╪│╪▒╪╣╪⌐ ╪▒╪╡╪» ╪º┘ä╪ú┘ê╪▒╪º┘à ╪¿┘å╪│╪¿╪⌐ ╪»┘é╪⌐ ╪¬┘ü┘ê┘é 98% ┘ê╪¬┘ê┘ü┘è╪▒ ╪º┘ä┘ê┘é╪¬ ┘ä┘ä╪ú╪╖╪¿╪º╪í.',
             image: 'https://images.unsplash.com/photo-1576091160550-2173dba999ef?w=600&auto=format&fit=crop&q=80',
-            tech: 'Python / PyTorch', speed: '3 Ø«ÙˆØ§Ù†ٍ', accuracy: '98%', icon: 'Cpu'
+            tech: 'Python / PyTorch', speed: '3 ╪½┘ê╪º┘å┘ì', accuracy: '98%', icon: 'Cpu'
           },
           {
             id: 2,
-            name: 'جدار Ø§Ù„Ø­Ù…Ø§ÙŠة Ø§Ù„ÙØ§Ø¦Ù‚ Ù„Ù„Ø£Ø¬Ù‡زة Ø§Ù„Ø·Ø¨ÙŠة Ø§Ù„Ø°ÙƒÙŠة',
+            name: '╪¼╪»╪º╪▒ ╪º┘ä╪¡┘à╪º┘è╪⌐ ╪º┘ä┘ü╪º╪ª┘é ┘ä┘ä╪ú╪¼┘ç╪▓╪⌐ ╪º┘ä╪╖╪¿┘è╪⌐ ╪º┘ä╪░┘â┘è╪⌐',
             category: 'cyber',
             level: 'ready',
-            levelName: 'Ø¬Ø§Ù‡ز Ù„Ù„ØªØ¨Ù†ÙŠ Ø§Ù„ØªØ¬Ø§Ø±ÙŠ',
-            team: 'Ø­ØµÙ† Ø§Ù„Ù…Ù†ÙŠا Ø§Ù„Ø±Ù‚Ù…ÙŠ',
-            desc: 'Ø¨Ø±ÙˆØªÙˆÙƒÙˆÙ„ Ø­Ù…Ø§ÙŠة Ø´Ø¨ÙƒÙŠة ÙŠÙ…Ù†ع Ø§Ø®ØªØ±Ø§Ù‚ات Ø£Ø¬Ù‡زة Ø¥Ù†عاش Ø§Ù„Ù‚Ù„ب ÙˆØ§Ù„Ø£Ø³Ø±Ù‘ة Ø§Ù„Ù…ØªØµÙ„ة Ø¨Ø§Ù„Ø¥Ù†ØªØ±Ù†ت Ø¯Ø§Ø®Ù„ Ø§Ù„Ù…Ø³ØªØ´ÙÙŠات ÙˆØ§Ù„Ù…Ø±Ø§Ùƒز.',
+            levelName: '╪¼╪º┘ç╪▓ ┘ä┘ä╪¬╪¿┘å┘è ╪º┘ä╪¬╪¼╪º╪▒┘è',
+            team: '╪¡╪╡┘å ╪º┘ä┘à┘å┘è╪º ╪º┘ä╪▒┘é┘à┘è',
+            desc: '╪¿╪▒┘ê╪¬┘ê┘â┘ê┘ä ╪¡┘à╪º┘è╪⌐ ╪┤╪¿┘â┘è╪⌐ ┘è┘à┘å╪╣ ╪º╪«╪¬╪▒╪º┘é╪º╪¬ ╪ú╪¼┘ç╪▓╪⌐ ╪Ñ┘å╪╣╪º╪┤ ╪º┘ä┘é┘ä╪¿ ┘ê╪º┘ä╪ú╪│╪▒┘æ╪⌐ ╪º┘ä┘à╪¬╪╡┘ä╪⌐ ╪¿╪º┘ä╪Ñ┘å╪¬╪▒┘å╪¬ ╪»╪º╪«┘ä ╪º┘ä┘à╪│╪¬╪┤┘ü┘è╪º╪¬ ┘ê╪º┘ä┘à╪▒╪º┘â╪▓.',
             image: 'https://images.unsplash.com/photo-1550751827-4bd374c3f58b?w=600&auto=format&fit=crop&q=80',
-            tech: 'Rust / C++', speed: 'ÙÙˆØ±ÙŠ', accuracy: '99.9%', icon: 'Lock'
+            tech: 'Rust / C++', speed: '┘ü┘ê╪▒┘è', accuracy: '99.9%', icon: 'Lock'
           },
           {
             id: 3,
-            name: 'Ø­Ø§ÙˆÙŠة Ø§Ù„Ù†ÙØ§ÙŠات Ø§Ù„Ø°ÙƒÙŠة Ù„حسابات Ø§Ù„Ø¨ÙŠئة Ø§Ù„Ù…Ø³ØªØ¯Ø§Ù…ة',
+            name: '╪¡╪º┘ê┘è╪⌐ ╪º┘ä┘å┘ü╪º┘è╪º╪¬ ╪º┘ä╪░┘â┘è╪⌐ ┘ä╪¡╪│╪º╪¿╪º╪¬ ╪º┘ä╪¿┘è╪ª╪⌐ ╪º┘ä┘à╪│╪¬╪»╪º┘à╪⌐',
             category: 'iot',
             level: 'prototype',
-            levelName: 'Ù†Ù…Ùˆذج Ø£ÙˆÙ„ÙŠ',
-            team: 'Ù…Ø¨ØªÙƒØ±Ùˆ Ø§Ù„غد Ø§Ù„Ø¨ÙŠØ¦ÙŠ',
-            desc: 'Ø¬Ù‡از رصد ÙŠستشعر Ø§Ù…ØªÙ„اء Ø§Ù„Ø­Ø§ÙˆÙŠات ÙˆÙŠفرز Ø§Ù„Ù†ÙØ§ÙŠات ØªÙ„Ù‚Ø§Ø¦ÙŠØ§Ù‹ Ø¨Ø§Ø³ØªØ®Ø¯Ø§Ù… حساسات Ø§Ù„Ù…سافة ÙˆÙ…Ø¹Ø§Ù„جة Ø§Ù„ØµÙˆر Ø§Ù„Ù…ØªÙ‚Ø¯Ù…ة.',
+            levelName: '┘å┘à┘ê╪░╪¼ ╪ú┘ê┘ä┘è',
+            team: '┘à╪¿╪¬┘â╪▒┘ê ╪º┘ä╪║╪» ╪º┘ä╪¿┘è╪ª┘è',
+            desc: '╪¼┘ç╪º╪▓ ╪▒╪╡╪» ┘è╪│╪¬╪┤╪╣╪▒ ╪º┘à╪¬┘ä╪º╪í ╪º┘ä╪¡╪º┘ê┘è╪º╪¬ ┘ê┘è┘ü╪▒╪▓ ╪º┘ä┘å┘ü╪º┘è╪º╪¬ ╪¬┘ä┘é╪º╪ª┘è╪º┘ï ╪¿╪º╪│╪¬╪«╪»╪º┘à ╪¡╪│╪º╪│╪º╪¬ ╪º┘ä┘à╪│╪º┘ü╪⌐ ┘ê┘à╪╣╪º┘ä╪¼╪⌐ ╪º┘ä╪╡┘ê╪▒ ╪º┘ä┘à╪¬┘é╪»┘à╪⌐.',
             image: 'https://images.unsplash.com/photo-1532996122724-e3c354a0b15b?w=600&auto=format&fit=crop&q=80',
-            tech: 'Arduino / ESP32', speed: 'ØªÙ„Ù‚Ø§Ø¦ÙŠ', accuracy: '90%', icon: 'Sprout'
+            tech: 'Arduino / ESP32', speed: '╪¬┘ä┘é╪º╪ª┘è', accuracy: '90%', icon: 'Sprout'
           },
           {
             id: 4,
-            name: 'Ù…Ù†صة ØªØ³ÙˆÙŠÙ‚ ÙˆØªÙˆØ¬ÙŠÙ‡ Ø§Ù„Ù…Ø´Ø±Ùˆعات Ø§Ù„ØªØ¹Ù„ÙŠÙ…ÙŠة Ù„Ù„شباب',
+            name: '┘à┘å╪╡╪⌐ ╪¬╪│┘ê┘è┘é ┘ê╪¬┘ê╪¼┘è┘ç ╪º┘ä┘à╪┤╪▒┘ê╪╣╪º╪¬ ╪º┘ä╪¬╪╣┘ä┘è┘à┘è╪⌐ ┘ä┘ä╪┤╪¿╪º╪¿',
             category: 'apps',
             level: 'ready',
-            levelName: 'Ø¬Ø§Ù‡ز Ù„Ù„ØªØ¨Ù†ÙŠ Ø§Ù„ØªØ¬Ø§Ø±ÙŠ',
-            team: 'ÙØ±ÙŠÙ‚ Ø¥Ù†جاز Ù„Ù„Ø¨Ø±Ù…Ø¬ÙŠات',
-            desc: 'Ø¨Ùˆابة Ø¥Ù„ÙƒØªØ±ÙˆÙ†ÙŠة تربط Ø£ÙÙƒار Ø§Ù„Ø®Ø±ÙŠØ¬ÙŠÙ† ÙˆØ§Ù„Ù…Ø¨ØªÙƒØ±ÙŠÙ† Ø¨Ø§Ù„Ù…Ø´Ø±ÙÙŠÙ† ÙˆØ§Ù„Ù…Ø³ØªØ«Ù…Ø±ÙŠÙ† Ù„ØªÙ…ÙˆÙŠÙ„ دراسات Ø§Ù„Ø¬Ø¯ÙˆÙ‰ ÙˆØ§Ù„ØªØ¯Ø±ÙŠب Ø§Ù„ÙØ¹Ù„ÙŠ.',
+            levelName: '╪¼╪º┘ç╪▓ ┘ä┘ä╪¬╪¿┘å┘è ╪º┘ä╪¬╪¼╪º╪▒┘è',
+            team: '┘ü╪▒┘è┘é ╪Ñ┘å╪¼╪º╪▓ ┘ä┘ä╪¿╪▒┘à╪¼┘è╪º╪¬',
+            desc: '╪¿┘ê╪º╪¿╪⌐ ╪Ñ┘ä┘â╪¬╪▒┘ê┘å┘è╪⌐ ╪¬╪▒╪¿╪╖ ╪ú┘ü┘â╪º╪▒ ╪º┘ä╪«╪▒┘è╪¼┘è┘å ┘ê╪º┘ä┘à╪¿╪¬┘â╪▒┘è┘å ╪¿╪º┘ä┘à╪┤╪▒┘ü┘è┘å ┘ê╪º┘ä┘à╪│╪¬╪½┘à╪▒┘è┘å ┘ä╪¬┘à┘ê┘è┘ä ╪»╪▒╪º╪│╪º╪¬ ╪º┘ä╪¼╪»┘ê┘ë ┘ê╪º┘ä╪¬╪»╪▒┘è╪¿ ╪º┘ä┘ü╪╣┘ä┘è.',
             image: 'https://images.unsplash.com/photo-1522202176988-66273c2fd55f?w=600&auto=format&fit=crop&q=80',
-            tech: 'React / Node.js', speed: 'Ø³Ø­Ø§Ø¨ÙŠ', accuracy: '100%', icon: 'Globe'
+            tech: 'React / Node.js', speed: '╪│╪¡╪º╪¿┘è', accuracy: '100%', icon: 'Globe'
           },
           {
             id: 5,
-            name: 'ذراع Ø¢Ù„ÙŠة Ù„إجراء Ø§Ù„جراحات Ø§Ù„Ø¯Ù‚ÙŠÙ‚ة Ø¹Ù† بعد',
+            name: '╪░╪▒╪º╪╣ ╪ó┘ä┘è╪⌐ ┘ä╪Ñ╪¼╪▒╪º╪í ╪º┘ä╪¼╪▒╪º╪¡╪º╪¬ ╪º┘ä╪»┘é┘è┘é╪⌐ ╪╣┘å ╪¿╪╣╪»',
             category: 'ai',
             level: 'prototype',
-            levelName: 'Ù†Ù…Ùˆذج Ø£ÙˆÙ„ÙŠ',
-            team: 'Ù†بض Ù…ÙŠÙƒØ§ØªØ±ÙˆÙ†Ùƒس',
-            desc: 'Ù†Ù…Ùˆذج Ø£ÙˆÙ„ÙŠ Ù„ذراع Ø±ÙˆØ¨ÙˆØªÙŠة ØªØ­Ø§ÙƒÙŠ Ø­Ø±Ùƒة ÙŠد Ø§Ù„Ø·Ø¨ÙŠب Ø¨Ø¥Ø­Ø¯Ø§Ø«ÙŠات Ø¯Ù‚ÙŠÙ‚ة Ø¬Ø¯Ø§Ù‹ عبر Ø§Ù„ÙˆÙŠب ÙˆØ§Ù„Ø£ÙˆØ§Ù…ر Ø§Ù„ØµÙˆØªÙŠة Ø§Ù„ÙÙˆØ±ÙŠة.',
+            levelName: '┘å┘à┘ê╪░╪¼ ╪ú┘ê┘ä┘è',
+            team: '┘å╪¿╪╢ ┘à┘è┘â╪º╪¬╪▒┘ê┘å┘â╪│',
+            desc: '┘å┘à┘ê╪░╪¼ ╪ú┘ê┘ä┘è ┘ä╪░╪▒╪º╪╣ ╪▒┘ê╪¿┘ê╪¬┘è╪⌐ ╪¬╪¡╪º┘â┘è ╪¡╪▒┘â╪⌐ ┘è╪» ╪º┘ä╪╖╪¿┘è╪¿ ╪¿╪Ñ╪¡╪»╪º╪½┘è╪º╪¬ ╪»┘é┘è┘é╪⌐ ╪¼╪»╪º┘ï ╪╣╪¿╪▒ ╪º┘ä┘ê┘è╪¿ ┘ê╪º┘ä╪ú┘ê╪º┘à╪▒ ╪º┘ä╪╡┘ê╪¬┘è╪⌐ ╪º┘ä┘ü┘ê╪▒┘è╪⌐.',
             image: 'https://images.unsplash.com/photo-1485827404703-89b55fcc595e?w=600&auto=format&fit=crop&q=80',
-            tech: 'Python / ROS', speed: 'Ù„Ø­Ø¸ÙŠ', accuracy: '95%', icon: 'Cpu'
+            tech: 'Python / ROS', speed: '┘ä╪¡╪╕┘è', accuracy: '95%', icon: 'Cpu'
           },
           {
             id: 6,
-            name: 'Ø¨Ø±ÙˆØªÙˆÙƒÙˆÙ„ ØªØ£Ù…ÙŠÙ† Ø§Ù„Ù…Ø¹Ø§Ù…Ù„ات Ø§Ù„Ø²Ø±Ø§Ø¹ÙŠة Ø¨Ø³Ù„Ø§Ø³Ù„ Ø§Ù„ÙƒØªÙ„',
+            name: '╪¿╪▒┘ê╪¬┘ê┘â┘ê┘ä ╪¬╪ú┘à┘è┘å ╪º┘ä┘à╪╣╪º┘à┘ä╪º╪¬ ╪º┘ä╪▓╪▒╪º╪╣┘è╪⌐ ╪¿╪│┘ä╪º╪│┘ä ╪º┘ä┘â╪¬┘ä',
             category: 'cyber',
             level: 'advanced',
-            levelName: 'Ù…Ø³ØªÙˆÙ‰ Ù…ØªÙ‚Ø¯Ù…',
-            team: 'Ø³Ù†Ø§Ø¨Ù„ Ø§Ù„ØªØ´ÙÙŠر',
-            desc: 'Ù†Ø¸Ø§Ù… ØªØ´ÙÙŠر ØºÙŠر Ù…Ø±ÙƒØ²ÙŠ Ù„ØªØ£Ù…ÙŠÙ† Ù…Ø¨ÙŠعات Ø§Ù„Ù…Ø­Ø§ØµÙŠÙ„ ÙˆØ§Ù„Ùˆحدات Ø§Ù„Ø¥Ù†ØªØ§Ø¬ÙŠة Ù„Ù…Ù†ع Ø§Ù„ØªÙ„اعب Ø¨Ø§Ù„أسعار ÙˆØ³Ø¬Ù„ات Ø§Ù„Ù…Ø²Ø§Ø±Ø¹ÙŠÙ†.',
+            levelName: '┘à╪│╪¬┘ê┘ë ┘à╪¬┘é╪»┘à',
+            team: '╪│┘å╪º╪¿┘ä ╪º┘ä╪¬╪┤┘ü┘è╪▒',
+            desc: '┘å╪╕╪º┘à ╪¬╪┤┘ü┘è╪▒ ╪║┘è╪▒ ┘à╪▒┘â╪▓┘è ┘ä╪¬╪ú┘à┘è┘å ┘à╪¿┘è╪╣╪º╪¬ ╪º┘ä┘à╪¡╪º╪╡┘è┘ä ┘ê╪º┘ä┘ê╪¡╪»╪º╪¬ ╪º┘ä╪Ñ┘å╪¬╪º╪¼┘è╪⌐ ┘ä┘à┘å╪╣ ╪º┘ä╪¬┘ä╪º╪╣╪¿ ╪¿╪º┘ä╪ú╪│╪╣╪º╪▒ ┘ê╪│╪¼┘ä╪º╪¬ ╪º┘ä┘à╪▓╪º╪▒╪╣┘è┘å.',
             image: 'https://images.unsplash.com/photo-1639762681485-074b7f938ba0?w=600&auto=format&fit=crop&q=80',
-            tech: 'Solidity / JS', speed: 'Ø«Ø§Ù†ÙŠØªØ§Ù†', accuracy: '100%', icon: 'Database'
+            tech: 'Solidity / JS', speed: '╪½╪º┘å┘è╪¬╪º┘å', accuracy: '100%', icon: 'Database'
           }
         ];
         localStorage.setItem('exhibition_innovations', JSON.stringify(defaultInnovations));
@@ -936,45 +859,45 @@ const AdminDashboard = () => {
         const defaultProducts = [
           {
             id: 1,
-            name: 'Ø¹Ø³Ù„ Ù†Ø­Ù„ Ø·Ø¨ÙŠØ¹ÙŠ Ù…ØµÙÙ‰ Ù†Ù‚ÙŠ', category: 'Ù…Ù†تجات Ø²Ø±Ø§Ø¹ÙŠة', faculty: 'ÙƒÙ„ÙŠة Ø§Ù„زراعة', facultyId: 'agriculture',
-            price: '150 ج.Ù…', image: 'https://images.unsplash.com/photo-1587049352846-4a222e784d38?auto=format&fit=crop&q=80&w=500',
-            rating: '4.9 (1.2K)', tag: 'Ø§Ù„Ø£Ùƒثر Ù…Ø¨ÙŠØ¹Ø§Ù‹', tagColor: 'bg-amber-500 text-white',
-            details: 'Ø¹Ø¨Ùˆة 1 ÙƒØ¬Ù… Ø¹Ø³Ù„ Ù…ØµÙÙ‰ Ù†Ù‚ÙŠ Ø®Ø§Ù„ÙŠ ØªÙ…Ø§Ù…Ø§Ù‹ Ù…Ù† Ø§Ù„Ø³Ùƒر Ø§Ù„Ù…ضاف Ø£Ùˆ Ø§Ù„Ù…Ùˆاد Ø§Ù„Ø­Ø§ÙØ¸Ø©ØŒ Ù…Ù† Ø¥Ù†تاج Ù…Ù†Ø§Ø­Ù„ ÙƒÙ„ÙŠة Ø§Ù„زراعة.'
+            name: '╪╣╪│┘ä ┘å╪¡┘ä ╪╖╪¿┘è╪╣┘è ┘à╪╡┘ü┘ë ┘å┘é┘è', category: '┘à┘å╪¬╪¼╪º╪¬ ╪▓╪▒╪º╪╣┘è╪⌐', faculty: '┘â┘ä┘è╪⌐ ╪º┘ä╪▓╪▒╪º╪╣╪⌐', facultyId: 'agriculture',
+            price: '150 ╪¼.┘à', image: 'https://images.unsplash.com/photo-1587049352846-4a222e784d38?auto=format&fit=crop&q=80&w=500',
+            rating: '4.9 (1.2K)', tag: '╪º┘ä╪ú┘â╪½╪▒ ┘à╪¿┘è╪╣╪º┘ï', tagColor: 'bg-amber-500 text-white',
+            details: '╪╣╪¿┘ê╪⌐ 1 ┘â╪¼┘à ╪╣╪│┘ä ┘à╪╡┘ü┘ë ┘å┘é┘è ╪«╪º┘ä┘è ╪¬┘à╪º┘à╪º┘ï ┘à┘å ╪º┘ä╪│┘â╪▒ ╪º┘ä┘à╪╢╪º┘ü ╪ú┘ê ╪º┘ä┘à┘ê╪º╪» ╪º┘ä╪¡╪º┘ü╪╕╪⌐╪î ┘à┘å ╪Ñ┘å╪¬╪º╪¼ ┘à┘å╪º╪¡┘ä ┘â┘ä┘è╪⌐ ╪º┘ä╪▓╪▒╪º╪╣╪⌐.'
           },
           {
             id: 2,
-            name: 'Ø²ÙŠت Ø²ÙŠØªÙˆÙ† Ø¨Ùƒر Ù…Ù…تاز Ù…Ø¹ØµÙˆر بارد', category: 'Ù…Ù†تجات Ø²Ø±Ø§Ø¹ÙŠة', faculty: 'ÙƒÙ„ÙŠة Ø§Ù„زراعة', facultyId: 'agriculture',
-            price: '180 ج.Ù…', image: 'https://images.unsplash.com/photo-1474979266404-7eaacbcd87c5?auto=format&fit=crop&q=80&w=500',
-            rating: '4.8 (850)', tag: 'عصر بارد Ø·Ø¨ÙŠØ¹ÙŠ', tagColor: 'bg-amber-600 text-white',
-            details: 'Ø²ÙŠت Ø²ÙŠØªÙˆÙ† Ø¨Ùƒر Ù…Ù…تاز درجة Ø£ÙˆÙ„Ù‰ØŒ Ù†سبة Ø­Ù…Ùˆضة Ù…Ù†خفضة Ø¬Ø¯Ø§Ù‹ØŒ Ù…Ø¹ØµÙˆر Ù…ÙŠÙƒØ§Ù†ÙŠÙƒÙŠØ§Ù‹ Ø¹Ù„Ù‰ Ø§Ù„بارد Ù„ÙÙˆائد ÙƒØ§Ù…Ù„ة.'
+            name: '╪▓┘è╪¬ ╪▓┘è╪¬┘ê┘å ╪¿┘â╪▒ ┘à┘à╪¬╪º╪▓ ┘à╪╣╪╡┘ê╪▒ ╪¿╪º╪▒╪»', category: '┘à┘å╪¬╪¼╪º╪¬ ╪▓╪▒╪º╪╣┘è╪⌐', faculty: '┘â┘ä┘è╪⌐ ╪º┘ä╪▓╪▒╪º╪╣╪⌐', facultyId: 'agriculture',
+            price: '180 ╪¼.┘à', image: 'https://images.unsplash.com/photo-1474979266404-7eaacbcd87c5?auto=format&fit=crop&q=80&w=500',
+            rating: '4.8 (850)', tag: '╪╣╪╡╪▒ ╪¿╪º╪▒╪» ╪╖╪¿┘è╪╣┘è', tagColor: 'bg-amber-600 text-white',
+            details: '╪▓┘è╪¬ ╪▓┘è╪¬┘ê┘å ╪¿┘â╪▒ ┘à┘à╪¬╪º╪▓ ╪»╪▒╪¼╪⌐ ╪ú┘ê┘ä┘ë╪î ┘å╪│╪¿╪⌐ ╪¡┘à┘ê╪╢╪⌐ ┘à┘å╪«┘ü╪╢╪⌐ ╪¼╪»╪º┘ï╪î ┘à╪╣╪╡┘ê╪▒ ┘à┘è┘â╪º┘å┘è┘â┘è╪º┘ï ╪╣┘ä┘ë ╪º┘ä╪¿╪º╪▒╪» ┘ä┘ü┘ê╪º╪ª╪» ┘â╪º┘à┘ä╪⌐.'
           },
           {
             id: 3,
-            name: 'Ù†باتات Ø²ÙŠÙ†ة ÙˆØ´ØªÙ„ات Ø²Ù‡Ùˆر Ù…Ù†Ø²Ù„ÙŠة', category: 'Ù…Ù†تجات Ø²Ø±Ø§Ø¹ÙŠة', faculty: 'ÙƒÙ„ÙŠة Ø§Ù„زراعة', facultyId: 'agriculture',
-            price: '35 ج.Ù…', image: 'https://images.unsplash.com/photo-1463936575829-25148e1db1b8?auto=format&fit=crop&q=80&w=500',
-            rating: '4.7 (310)', tag: 'Ø´ØªÙ„ات Ø²Ù‡Ùˆر', tagColor: 'bg-green-600 text-white',
-            details: 'Ù…Ø¬Ù…Ùˆعة Ù…ØªÙ…ÙŠزة Ù…Ù† Ù†باتات Ø§Ù„Ø¸Ù„ ÙˆØ§Ù„Ø²ÙŠÙ†ة Ø§Ù„Ù…Ù†Ø²Ù„ÙŠة Ø§Ù„Ù…Ø¬Ù‡زة Ù„Ù„زراعة ÙˆØªØ¬Ù…ÙŠÙ„ Ø§Ù„Ù…Ùƒاتب ÙˆØ§Ù„Ø¨Ù„ÙƒÙˆÙ†ات.'
+            name: '┘å╪¿╪º╪¬╪º╪¬ ╪▓┘è┘å╪⌐ ┘ê╪┤╪¬┘ä╪º╪¬ ╪▓┘ç┘ê╪▒ ┘à┘å╪▓┘ä┘è╪⌐', category: '┘à┘å╪¬╪¼╪º╪¬ ╪▓╪▒╪º╪╣┘è╪⌐', faculty: '┘â┘ä┘è╪⌐ ╪º┘ä╪▓╪▒╪º╪╣╪⌐', facultyId: 'agriculture',
+            price: '35 ╪¼.┘à', image: 'https://images.unsplash.com/photo-1463936575829-25148e1db1b8?auto=format&fit=crop&q=80&w=500',
+            rating: '4.7 (310)', tag: '╪┤╪¬┘ä╪º╪¬ ╪▓┘ç┘ê╪▒', tagColor: 'bg-green-600 text-white',
+            details: '┘à╪¼┘à┘ê╪╣╪⌐ ┘à╪¬┘à┘è╪▓╪⌐ ┘à┘å ┘å╪¿╪º╪¬╪º╪¬ ╪º┘ä╪╕┘ä ┘ê╪º┘ä╪▓┘è┘å╪⌐ ╪º┘ä┘à┘å╪▓┘ä┘è╪⌐ ╪º┘ä┘à╪¼┘ç╪▓╪⌐ ┘ä┘ä╪▓╪▒╪º╪╣╪⌐ ┘ê╪¬╪¼┘à┘è┘ä ╪º┘ä┘à┘â╪º╪¬╪¿ ┘ê╪º┘ä╪¿┘ä┘â┘ê┘å╪º╪¬.'
           },
           {
             id: 4,
-            name: 'Ù…Ù†ظفات ÙˆÙ…Ø·Ù‡ر Ø£Ø±Ø¶ÙŠات Ø¹Ø§Ù„ÙŠ Ø§Ù„Ø¬Ùˆدة', category: 'Ù…Ù†ظفات ØµÙ†Ø§Ø¹ÙŠة', faculty: 'ÙƒÙ„ÙŠة Ø§Ù„Ø¹Ù„ÙˆÙ…', facultyId: 'science',
-            price: '45 ج.Ù…', image: 'https://images.unsplash.com/photo-1584820927498-cfe5211fd8bf?auto=format&fit=crop&q=80&w=500',
-            rating: '4.7 (2.1K)', tag: 'Ø§Ù„Ø£Ø¹Ù„Ù‰ Ù…Ø¨ÙŠØ¹Ø§Ù‹', tagColor: 'bg-emerald-600 text-white',
-            details: 'Ù…Ø·Ù‡رات ÙˆÙ…Ù†ظفات Ø¢Ù…Ù†ة Ø¹Ø§Ù„ÙŠة Ø§Ù„ØªØ±ÙƒÙŠز Ù„Ù„Ø¥Ù†تاج Ø§Ù„Ù…Ù†Ø²Ù„ÙŠ ÙˆØ§Ù„ØªØ¬Ø§Ø±ÙŠØŒ Ù…ØµÙ†عة ÙˆÙÙ‚ Ø§Ù„Ù…Ø¹Ø§ÙŠÙŠر Ø§Ù„Ø·Ø¨ÙŠة Ø¨Ù‚Ø³Ù… Ø§Ù„ÙƒÙŠÙ…ÙŠاء.'
+            name: '┘à┘å╪╕┘ü╪º╪¬ ┘ê┘à╪╖┘ç╪▒ ╪ú╪▒╪╢┘è╪º╪¬ ╪╣╪º┘ä┘è ╪º┘ä╪¼┘ê╪»╪⌐', category: '┘à┘å╪╕┘ü╪º╪¬ ╪╡┘å╪º╪╣┘è╪⌐', faculty: '┘â┘ä┘è╪⌐ ╪º┘ä╪╣┘ä┘ê┘à', facultyId: 'science',
+            price: '45 ╪¼.┘à', image: 'https://images.unsplash.com/photo-1584820927498-cfe5211fd8bf?auto=format&fit=crop&q=80&w=500',
+            rating: '4.7 (2.1K)', tag: '╪º┘ä╪ú╪╣┘ä┘ë ┘à╪¿┘è╪╣╪º┘ï', tagColor: 'bg-emerald-600 text-white',
+            details: '┘à╪╖┘ç╪▒╪º╪¬ ┘ê┘à┘å╪╕┘ü╪º╪¬ ╪ó┘à┘å╪⌐ ╪╣╪º┘ä┘è╪⌐ ╪º┘ä╪¬╪▒┘â┘è╪▓ ┘ä┘ä╪Ñ┘å╪¬╪º╪¼ ╪º┘ä┘à┘å╪▓┘ä┘è ┘ê╪º┘ä╪¬╪¼╪º╪▒┘è╪î ┘à╪╡┘å╪╣╪⌐ ┘ê┘ü┘é ╪º┘ä┘à╪╣╪º┘è┘è╪▒ ╪º┘ä╪╖╪¿┘è╪⌐ ╪¿┘é╪│┘à ╪º┘ä┘â┘è┘à┘è╪º╪í.'
           },
           {
             id: 5,
-            name: 'ØµØ§Ø¨ÙˆÙ† Ø³Ø§Ø¦Ù„ Ù…Ø¹Ù‚Ù… Ù…ضاد Ù„Ù„Ø¨ÙƒØªÙŠØ±ÙŠا', category: 'Ù…Ù†ظفات ØµÙ†Ø§Ø¹ÙŠة', faculty: 'ÙƒÙ„ÙŠة Ø§Ù„Ø¹Ù„ÙˆÙ…', facultyId: 'science',
-            price: '60 ج.Ù…', image: 'https://images.unsplash.com/photo-1607006342411-101a4e101155?auto=format&fit=crop&q=80&w=500',
-            rating: '4.6 (950)', tag: 'Ù…Ø·Ù‡ر Ø¢Ù…Ù†', tagColor: 'bg-blue-700 text-white',
-            details: 'Ø¹Ø¨Ùˆة Ø¹Ø§Ø¦Ù„ÙŠة 3 Ù„تر Ù…Ù† Ø§Ù„ØµØ§Ø¨ÙˆÙ† Ø§Ù„Ø³Ø§Ø¦Ù„ Ø§Ù„Ù…عزز Ø¨Ù…رطبات Ø§Ù„Ø¬Ù„Ø³Ø±ÙŠÙ† Ù„Ø­Ù…Ø§ÙŠة Ø§Ù„Ø£ÙŠØ¯ÙŠ ÙˆØªØ±Ø·ÙŠØ¨Ù‡ا Ø¨ÙØ§Ø¹Ù„ÙŠة ØªØ§Ù…ة.'
+            name: '╪╡╪º╪¿┘ê┘å ╪│╪º╪ª┘ä ┘à╪╣┘é┘à ┘à╪╢╪º╪» ┘ä┘ä╪¿┘â╪¬┘è╪▒┘è╪º', category: '┘à┘å╪╕┘ü╪º╪¬ ╪╡┘å╪º╪╣┘è╪⌐', faculty: '┘â┘ä┘è╪⌐ ╪º┘ä╪╣┘ä┘ê┘à', facultyId: 'science',
+            price: '60 ╪¼.┘à', image: 'https://images.unsplash.com/photo-1607006342411-101a4e101155?auto=format&fit=crop&q=80&w=500',
+            rating: '4.6 (950)', tag: '┘à╪╖┘ç╪▒ ╪ó┘à┘å', tagColor: 'bg-emerald-700 text-white',
+            details: '╪╣╪¿┘ê╪⌐ ╪╣╪º╪ª┘ä┘è╪⌐ 3 ┘ä╪¬╪▒ ┘à┘å ╪º┘ä╪╡╪º╪¿┘ê┘å ╪º┘ä╪│╪º╪ª┘ä ╪º┘ä┘à╪╣╪▓╪▓ ╪¿┘à╪▒╪╖╪¿╪º╪¬ ╪º┘ä╪¼┘ä╪│╪▒┘è┘å ┘ä╪¡┘à╪º┘è╪⌐ ╪º┘ä╪ú┘è╪»┘è ┘ê╪¬╪▒╪╖┘è╪¿┘ç╪º ╪¿┘ü╪º╪╣┘ä┘è╪⌐ ╪¬╪º┘à╪⌐.'
           },
           {
             id: 6,
-            name: 'Ù…Ø¹Ù‚Ù… ÙƒØ­ÙˆÙ„ÙŠ Ø·Ø¨ÙŠ Ø¨ØªØ±ÙƒÙŠز 70%', category: 'Ù…Ù†ظفات ØµÙ†Ø§Ø¹ÙŠة', faculty: 'ÙƒÙ„ÙŠة Ø§Ù„Ø¹Ù„ÙˆÙ…', facultyId: 'science',
-            price: '50 ج.Ù…', image: 'https://images.unsplash.com/photo-1584622650111-993a426fbf0a?auto=format&fit=crop&q=80&w=500',
-            rating: '4.9 (1.4K)', tag: 'Ø·Ø¨ÙŠ Ù…Ø¹ØªÙ…د', tagColor: 'bg-cyan-600 text-white',
-            details: 'بخاخ ÙƒØ­ÙˆÙ„ Ø¥ÙŠØ«ÙŠÙ„ÙŠ Ù†Ù‚ÙŠ ØªØ±ÙƒÙŠز 70% Ù„Ù„ØªØ¹Ù‚ÙŠÙ… Ø§Ù„Ù…باشر ÙˆØ­Ù…Ø§ÙŠة Ø§Ù„أسطح ÙˆØ§Ù„Ø£ÙŠØ¯ÙŠ Ø¨ÙØ§Ø¹Ù„ÙŠة ØªØ§Ù…ة Ù…ØµÙ†ع Ø¨Ù…Ø¹Ø§Ù…Ù„ Ø§Ù„ÙƒÙ„ÙŠة.'
+            name: '┘à╪╣┘é┘à ┘â╪¡┘ê┘ä┘è ╪╖╪¿┘è ╪¿╪¬╪▒┘â┘è╪▓ 70%', category: '┘à┘å╪╕┘ü╪º╪¬ ╪╡┘å╪º╪╣┘è╪⌐', faculty: '┘â┘ä┘è╪⌐ ╪º┘ä╪╣┘ä┘ê┘à', facultyId: 'science',
+            price: '50 ╪¼.┘à', image: 'https://images.unsplash.com/photo-1584622650111-993a426fbf0a?auto=format&fit=crop&q=80&w=500',
+            rating: '4.9 (1.4K)', tag: '╪╖╪¿┘è ┘à╪╣╪¬┘à╪»', tagColor: 'bg-cyan-600 text-white',
+            details: '╪¿╪«╪º╪« ┘â╪¡┘ê┘ä ╪Ñ┘è╪½┘è┘ä┘è ┘å┘é┘è ╪¬╪▒┘â┘è╪▓ 70% ┘ä┘ä╪¬╪╣┘é┘è┘à ╪º┘ä┘à╪¿╪º╪┤╪▒ ┘ê╪¡┘à╪º┘è╪⌐ ╪º┘ä╪ú╪│╪╖╪¡ ┘ê╪º┘ä╪ú┘è╪»┘è ╪¿┘ü╪º╪╣┘ä┘è╪⌐ ╪¬╪º┘à╪⌐ ┘à╪╡┘å╪╣ ╪¿┘à╪╣╪º┘à┘ä ╪º┘ä┘â┘ä┘è╪⌐.'
           }
         ];
         localStorage.setItem('exhibition_products', JSON.stringify(defaultProducts));
@@ -1028,14 +951,14 @@ const AdminDashboard = () => {
         setSelectedItem(prev => ({ ...prev, status: newStatus }));
       }
     } catch (err) {
-      alert("حدث خطأ Ø£Ø«Ù†اء ØªØ­Ø¯ÙŠث Ø§Ù„Ø­Ø§Ù„ة: " + err.message);
+      alert("╪¡╪»╪½ ╪«╪╖╪ú ╪ú╪½┘å╪º╪í ╪¬╪¡╪»┘è╪½ ╪º┘ä╪¡╪º┘ä╪⌐: " + err.message);
     }
   };
 
   const handleDeleteItem = async (itemId, type) => {
     const isConfirm = window.confirm(
       isRtl 
-        ? "Ù‡Ù„ Ø£Ù†ت Ù…ØªØ£Ùƒد Ù…Ù† Ø±ØºØ¨ØªÙƒ ÙÙŠ حذف Ù‡ذا Ø§Ù„Ø³Ø¬Ù„ Ù†Ù‡Ø§Ø¦ÙŠØ§Ù‹ØŸ Ù„ا ÙŠÙ…ÙƒÙ† Ø§Ù„تراجع Ø¹Ù† Ù‡ذا Ø§Ù„إجراء." 
+        ? "┘ç┘ä ╪ú┘å╪¬ ┘à╪¬╪ú┘â╪» ┘à┘å ╪▒╪║╪¿╪¬┘â ┘ü┘è ╪¡╪░┘ü ┘ç╪░╪º ╪º┘ä╪│╪¼┘ä ┘å┘ç╪º╪ª┘è╪º┘ï╪ƒ ┘ä╪º ┘è┘à┘â┘å ╪º┘ä╪¬╪▒╪º╪¼╪╣ ╪╣┘å ┘ç╪░╪º ╪º┘ä╪Ñ╪¼╪▒╪º╪í." 
         : "Are you sure you want to delete this record permanently? This action cannot be undone."
     );
     if (!isConfirm) return;
@@ -1079,9 +1002,9 @@ const AdminDashboard = () => {
       if (selectedItem && selectedItem.id === itemId) {
         setSelectedItem(null);
       }
-      alert(isRtl ? "ØªÙ… حذف Ø§Ù„Ø³Ø¬Ù„ Ø¨Ù†جاح." : "Record deleted successfully.");
+      alert(isRtl ? "╪¬┘à ╪¡╪░┘ü ╪º┘ä╪│╪¼┘ä ╪¿┘å╪¼╪º╪¡." : "Record deleted successfully.");
     } catch (err) {
-      alert((isRtl ? "حدث خطأ Ø£Ø«Ù†اء Ø§Ù„حذف: " : "Error deleting record: ") + err.message);
+      alert((isRtl ? "╪¡╪»╪½ ╪«╪╖╪ú ╪ú╪½┘å╪º╪í ╪º┘ä╪¡╪░┘ü: " : "Error deleting record: ") + err.message);
     }
   };
 
@@ -1092,7 +1015,7 @@ const AdminDashboard = () => {
 
     if (activeTab === 'graduation') {
       const items = getFilteredGradProjects();
-      headers = ['ØªØ§Ø±ÙŠخ Ø§Ù„ØªÙ‚Ø¯ÙŠÙ…', 'Ø§Ø³Ù… Ø§Ù„Ù…Ø´Ø±Ùˆع Ø¨Ø§Ù„Ø¹Ø±Ø¨ÙŠة', 'Ø§Ø³Ù… Ø§Ù„Ù…Ø´Ø±Ùˆع Ø¨Ø§Ù„Ø¥Ù†Ø¬Ù„ÙŠØ²ÙŠة', 'Ø§Ù„ÙƒÙ„ÙŠة ÙˆØ§Ù„Ø¬Ø§Ù…عة', 'Ø§Ù„Ù†Ùˆع', 'Ø§Ù„Ø­Ø§Ù„ة', 'Ø§Ù„Ø¨Ø±ÙŠد Ø§Ù„Ø¥Ù„ÙƒØªØ±ÙˆÙ†ÙŠ Ù„Ù„رائد', 'Ø§Ù„Ù‡اتف', 'Ø§Ù„Ù…Ù„خص'];
+      headers = ['╪¬╪º╪▒┘è╪« ╪º┘ä╪¬┘é╪»┘è┘à', '╪º╪│┘à ╪º┘ä┘à╪┤╪▒┘ê╪╣ ╪¿╪º┘ä╪╣╪▒╪¿┘è╪⌐', '╪º╪│┘à ╪º┘ä┘à╪┤╪▒┘ê╪╣ ╪¿╪º┘ä╪Ñ┘å╪¼┘ä┘è╪▓┘è╪⌐', '╪º┘ä┘â┘ä┘è╪⌐ ┘ê╪º┘ä╪¼╪º┘à╪╣╪⌐', '╪º┘ä┘å┘ê╪╣', '╪º┘ä╪¡╪º┘ä╪⌐', '╪º┘ä╪¿╪▒┘è╪» ╪º┘ä╪Ñ┘ä┘â╪¬╪▒┘ê┘å┘è ┘ä┘ä╪▒╪º╪ª╪»', '╪º┘ä┘ç╪º╪¬┘ü', '╪º┘ä┘à┘ä╪«╪╡'];
       dataToExport = items.map(p => [
         new Date(p.created_at).toLocaleDateString('ar-EG'),
         p.project_name_ar,
@@ -1104,10 +1027,10 @@ const AdminDashboard = () => {
         p.leader_phone || '',
         p.abstract || ''
       ]);
-      filename = 'Ù…Ø´Ø±Ùˆعات_Ø§Ù„تخرج.csv';
+      filename = '┘à╪┤╪▒┘ê╪╣╪º╪¬_╪º┘ä╪¬╪«╪▒╪¼.csv';
     } else if (activeTab === 'research') {
       const items = getFilteredResearch();
-      headers = ['ØªØ§Ø±ÙŠخ Ø§Ù„ØªÙ‚Ø¯ÙŠÙ…', 'Ø§Ù„باحث Ø§Ù„Ø±Ø¦ÙŠØ³ÙŠ', 'Ø§Ù„درجة Ø§Ù„Ø¹Ù„Ù…ÙŠة', 'Ø§Ù„ÙƒÙ„ÙŠة ÙˆØ§Ù„Ø¬Ø§Ù…عة', 'Ø§Ù„Ø¨Ø±ÙŠد Ø§Ù„Ø¥Ù„ÙƒØªØ±ÙˆÙ†ÙŠ', 'Ø§Ù„Ù‡اتف', 'Ø§Ù„Ø­Ø§Ù„ة', 'Ø¹Ù†ÙˆØ§Ù† Ø§Ù„بحث', 'Ø§Ù„Ù…Ù„خص'];
+      headers = ['╪¬╪º╪▒┘è╪« ╪º┘ä╪¬┘é╪»┘è┘à', '╪º┘ä╪¿╪º╪¡╪½ ╪º┘ä╪▒╪ª┘è╪│┘è', '╪º┘ä╪»╪▒╪¼╪⌐ ╪º┘ä╪╣┘ä┘à┘è╪⌐', '╪º┘ä┘â┘ä┘è╪⌐ ┘ê╪º┘ä╪¼╪º┘à╪╣╪⌐', '╪º┘ä╪¿╪▒┘è╪» ╪º┘ä╪Ñ┘ä┘â╪¬╪▒┘ê┘å┘è', '╪º┘ä┘ç╪º╪¬┘ü', '╪º┘ä╪¡╪º┘ä╪⌐', '╪╣┘å┘ê╪º┘å ╪º┘ä╪¿╪¡╪½', '╪º┘ä┘à┘ä╪«╪╡'];
       dataToExport = items.map(r => [
         new Date(r.created_at).toLocaleDateString('ar-EG'),
         r.pi_name,
@@ -1119,11 +1042,11 @@ const AdminDashboard = () => {
         r.research_title || '',
         r.research_abstract || ''
       ]);
-      filename = 'Ø§Ù„Ø¨Ø­Ùˆث_Ø§Ù„ØªØ·Ø¨ÙŠÙ‚ÙŠة.csv';
+      filename = '╪º┘ä╪¿╪¡┘ê╪½_╪º┘ä╪¬╪╖╪¿┘è┘é┘è╪⌐.csv';
     } else if (['speakers', 'startups', 'investors', 'mentors', 'researchers', 'partners', 'volunteers'].includes(activeTab)) {
       const role = activeTab.slice(0, -1);
       const items = getFilteredRegistrants(role);
-      headers = ['Ø§Ù„ØªØ§Ø±ÙŠخ', 'Ø§Ù„Ø§Ø³Ù… Ø§Ù„ÙƒØ§Ù…Ù„', 'Ø§Ù„Ø¬Ù‡ة / Ø§Ù„Ù…ؤسسة', 'Ø§Ù„Ø¨Ø±ÙŠد Ø§Ù„Ø¥Ù„ÙƒØªØ±ÙˆÙ†ÙŠ', 'Ø±Ù‚Ù… Ø§Ù„Ù‡اتف', 'Ø§Ù„Ø±Ù‚Ù… Ø§Ù„Ù‚ÙˆÙ…ÙŠ', 'Ø§Ù„Ø­Ø§Ù„ة', 'رابط Ø§Ù„Ø³ÙŠرة Ø§Ù„Ø°Ø§ØªÙŠة'];
+      headers = ['╪º┘ä╪¬╪º╪▒┘è╪«', '╪º┘ä╪º╪│┘à ╪º┘ä┘â╪º┘à┘ä', '╪º┘ä╪¼┘ç╪⌐ / ╪º┘ä┘à╪ñ╪│╪│╪⌐', '╪º┘ä╪¿╪▒┘è╪» ╪º┘ä╪Ñ┘ä┘â╪¬╪▒┘ê┘å┘è', '╪▒┘é┘à ╪º┘ä┘ç╪º╪¬┘ü', '╪º┘ä╪▒┘é┘à ╪º┘ä┘é┘ê┘à┘è', '╪º┘ä╪¡╪º┘ä╪⌐', '╪▒╪º╪¿╪╖ ╪º┘ä╪│┘è╪▒╪⌐ ╪º┘ä╪░╪º╪¬┘è╪⌐'];
       dataToExport = items.map(r => [
         new Date(r.created_at).toLocaleDateString('ar-EG'),
         r.full_name,
@@ -1131,31 +1054,31 @@ const AdminDashboard = () => {
         r.email,
         r.phone,
         r.details?.nationalId || '',
-        r.status || 'تحت Ø§Ù„فحص Ø§Ù„Ø¥Ø¯Ø§Ø±ÙŠ',
+        r.status || '╪¬╪¡╪¬ ╪º┘ä┘ü╪¡╪╡ ╪º┘ä╪Ñ╪»╪º╪▒┘è',
         r.cv_url || ''
       ]);
       
       const roleNamesAr = {
-        speaker: 'Ø§Ù„Ù…ØªØ­Ø¯Ø«ÙˆÙ†',
-        startup: 'Ø§Ù„Ø´Ø±Ùƒات_Ø§Ù„Ù†اشئة',
-        investor: 'Ø§Ù„Ù…Ø³ØªØ«Ù…Ø±ÙˆÙ†',
-        mentor: 'Ø§Ù„Ù…ÙˆØ¬Ù‡ÙˆÙ†',
-        researcher: 'Ø§Ù„Ø¨Ø§Ø­Ø«ÙˆÙ†_ÙˆØ§Ù„Ù…Ø¨ØªÙƒØ±ÙˆÙ†',
-        partner: 'Ø§Ù„Ø´Ø±Ùƒاء_ÙˆØ§Ù„رعاة',
-        volunteer: 'Ø§Ù„Ù…ØªØ·ÙˆØ¹ÙˆÙ†'
+        speaker: '╪º┘ä┘à╪¬╪¡╪»╪½┘ê┘å',
+        startup: '╪º┘ä╪┤╪▒┘â╪º╪¬_╪º┘ä┘å╪º╪┤╪ª╪⌐',
+        investor: '╪º┘ä┘à╪│╪¬╪½┘à╪▒┘ê┘å',
+        mentor: '╪º┘ä┘à┘ê╪¼┘ç┘ê┘å',
+        researcher: '╪º┘ä╪¿╪º╪¡╪½┘ê┘å_┘ê╪º┘ä┘à╪¿╪¬┘â╪▒┘ê┘å',
+        partner: '╪º┘ä╪┤╪▒┘â╪º╪í_┘ê╪º┘ä╪▒╪╣╪º╪⌐',
+        volunteer: '╪º┘ä┘à╪¬╪╖┘ê╪╣┘ê┘å'
       };
-      filename = `${roleNamesAr[role] || 'Ø§Ù„Ù…Ø³Ø¬Ù„ÙˆÙ†'}.csv`;
+      filename = `${roleNamesAr[role] || '╪º┘ä┘à╪│╪¼┘ä┘ê┘å'}.csv`;
     } else if (activeTab === 'news') {
-      headers = ['Ø§Ù„ØªØ§Ø±ÙŠخ', 'Ø§Ù„Ø¹Ù†ÙˆØ§Ù†', 'Ø§Ù„Ùƒاتب / Ø§Ù„Ù†اشر', 'Ø§Ù„Ù…Ø­ØªÙˆÙ‰'];
+      headers = ['╪º┘ä╪¬╪º╪▒┘è╪«', '╪º┘ä╪╣┘å┘ê╪º┘å', '╪º┘ä┘â╪º╪¬╪¿ / ╪º┘ä┘å╪º╪┤╪▒', '╪º┘ä┘à╪¡╪¬┘ê┘ë'];
       dataToExport = newsList.map(n => [
         new Date(n.created_at).toLocaleDateString('ar-EG'),
         n.title,
         n.uploader_name,
         n.content
       ]);
-      filename = 'Ø§Ù„أخبار.csv';
+      filename = '╪º┘ä╪ú╪«╪¿╪º╪▒.csv';
     } else if (activeTab === 'jobs') {
-      headers = ['Ø§Ù„ØªØ§Ø±ÙŠخ', 'Ø§Ù„Ù…Ø³Ù…Ù‰ Ø§Ù„ÙˆØ¸ÙŠÙÙŠ', 'Ø§Ù„Ø´Ø±Ùƒة', 'Ø§Ù„Ù…ÙˆÙ‚ع', 'Ø§Ù„Ù†Ùˆع', 'Ø§Ù„خبرة', 'ØªÙØ§ØµÙŠÙ„ Ø§Ù„ÙˆØ¸ÙŠفة'];
+      headers = ['╪º┘ä╪¬╪º╪▒┘è╪«', '╪º┘ä┘à╪│┘à┘ë ╪º┘ä┘ê╪╕┘è┘ü┘è', '╪º┘ä╪┤╪▒┘â╪⌐', '╪º┘ä┘à┘ê┘é╪╣', '╪º┘ä┘å┘ê╪╣', '╪º┘ä╪«╪¿╪▒╪⌐', '╪¬┘ü╪º╪╡┘è┘ä ╪º┘ä┘ê╪╕┘è┘ü╪⌐'];
       dataToExport = jobs.map(j => [
         j.created_at ? new Date(j.created_at).toLocaleDateString('ar-EG') : '',
         j.title,
@@ -1165,7 +1088,7 @@ const AdminDashboard = () => {
         j.experience,
         j.details || ''
       ]);
-      filename = 'Ø´Ùˆاغر_Ø§Ù„Ùˆظائف.csv';
+      filename = '╪┤┘ê╪º╪║╪▒_╪º┘ä┘ê╪╕╪º╪ª┘ü.csv';
     } else {
       return;
     }
@@ -1202,7 +1125,7 @@ const AdminDashboard = () => {
       const matchesSearch = p.project_name_ar.toLowerCase().includes(searchQuery.toLowerCase()) || 
                             p.project_name_en.toLowerCase().includes(searchQuery.toLowerCase()) || 
                             p.college.toLowerCase().includes(searchQuery.toLowerCase());
-      const matchesStatus = statusFilter === 'Ø§Ù„ÙƒÙ„' || p.status === statusFilter;
+      const matchesStatus = statusFilter === '╪º┘ä┘â┘ä' || p.status === statusFilter;
       return matchesSearch && matchesStatus;
     });
   };
@@ -1212,7 +1135,7 @@ const AdminDashboard = () => {
       const matchesSearch = r.pi_name.toLowerCase().includes(searchQuery.toLowerCase()) || 
                             r.pi_faculty.toLowerCase().includes(searchQuery.toLowerCase()) || 
                             r.pi_email.toLowerCase().includes(searchQuery.toLowerCase());
-      const matchesStatus = statusFilter === 'Ø§Ù„ÙƒÙ„' || r.status === statusFilter;
+      const matchesStatus = statusFilter === '╪º┘ä┘â┘ä' || r.status === statusFilter;
       return matchesSearch && matchesStatus;
     });
   };
@@ -1257,53 +1180,36 @@ const AdminDashboard = () => {
 
   if (!isAuthenticated) {
     return (
-      <div className="min-h-screen pt-20 pb-20 flex items-center justify-center bg-gradient-to-br from-[#0F172A] via-[#1E3A8A]/80 to-[#0F172A] px-4 relative overflow-hidden" dir="rtl" style={{ fontFamily: "'Cairo', sans-serif" }}>
+      <div className="min-h-screen pt-32 pb-20 flex items-center justify-center bg-gradient-to-br from-slate-50 via-emerald-50/20 to-slate-100 px-4 relative overflow-hidden" dir="rtl" style={{ fontFamily: "'Cairo', sans-serif" }}>
         {/* Decorative background glows */}
-        <div className="absolute top-20 right-10 w-[400px] h-[400px] bg-blue-500/10 rounded-full blur-[120px] pointer-events-none" />
-        <div className="absolute bottom-10 left-10 w-[400px] h-[400px] bg-[#F4A217]/5 rounded-full blur-[120px] pointer-events-none" />
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-blue-700/5 rounded-full blur-[160px] pointer-events-none" />
+        <div className="absolute top-20 right-10 w-[300px] h-[300px] bg-emerald-200/10 rounded-full blur-[100px] pointer-events-none" />
+        <div className="absolute bottom-10 left-10 w-[300px] h-[300px] bg-[#F4A217]/5 rounded-full blur-[100px] pointer-events-none" />
         
-        <div className="max-w-md w-full bg-white/10 backdrop-blur-xl rounded-3xl shadow-2xl border border-white/15 p-8 md:p-10 relative z-10">
-          <div className="w-20 h-20 bg-[#F4A217]/20 rounded-3xl flex items-center justify-center mx-auto mb-6 relative group border border-[#F4A217]/20">
-            <div className="absolute inset-0 bg-[#F4A217]/10 rounded-3xl animate-pulse"></div>
-            <KeyRound className="w-10 h-10 text-[#F4A217] group-hover:scale-110 transition-transform duration-300" />
+        <div className="max-w-md w-full bg-white/90 backdrop-blur-md rounded-3xl shadow-2xl border border-slate-100/80 p-8 md:p-10 relative z-10 hover:shadow-emerald-900/5 transition-all duration-500">
+          <div className="w-20 h-20 bg-[#26462C]/10 rounded-3xl flex items-center justify-center mx-auto mb-6 relative group">
+            <div className="absolute inset-0 bg-[#26462C]/5 rounded-3xl animate-ping opacity-60"></div>
+            <KeyRound className="w-10 h-10 text-[#26462C] group-hover:scale-110 transition-transform duration-300" />
           </div>
-          <h2 className="text-2xl md:text-3xl font-black text-center text-white mb-1 tracking-tight">لوحة الإدارة - القمة 2026</h2>
-          <p className="text-xs font-bold text-blue-200/70 text-center mb-8">يرجى إدخال بيانات حسابك للوصول الآمن للوحة التحكم</p>
+          <h2 className="text-2xl md:text-3xl font-black text-center text-[#26462C] mb-2 tracking-tight">┘ä┘ê╪¡╪⌐ ╪º┘ä╪Ñ╪»╪º╪▒╪⌐ ╪º┘ä┘é┘à╪⌐ 2026</h2>
+          <p className="text-xs font-bold text-slate-400 text-center mb-8">┘è╪▒╪¼┘ë ╪Ñ╪»╪«╪º┘ä ╪▒┘à╪▓ ╪º┘ä╪¬╪¡┘é┘é ┘ä┘ä┘ê╪╡┘ê┘ä ╪º┘ä╪ó┘à┘å ┘ä┘ä┘ê╪¡╪⌐ ╪º┘ä╪¬╪¡┘â┘à</p>
           
-          <form onSubmit={handleLogin} className="space-y-5">
+          <form onSubmit={handleLogin} className="space-y-6">
             <div>
-              <label className="block text-xs font-black text-blue-100/80 mb-2">اسم المستخدم *</label>
-              <input 
-                type="text"
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
-                placeholder="admin أو academic"
-                className="w-full border border-white/20 bg-white/10 rounded-xl p-3.5 text-white placeholder-blue-300/50 focus:bg-white/15 focus:ring-2 focus:ring-[#F4A217] focus:border-[#F4A217]/50 outline-none transition-all duration-300 font-bold text-sm"
-                required
-              />
-            </div>
-            <div>
-              <label className="block text-xs font-black text-blue-100/80 mb-2">كلمة المرور *</label>
+              <label className="block text-xs font-black text-slate-600 mb-2.5">┘â┘ä┘à╪⌐ ┘à╪▒┘ê╪▒ ╪º┘ä┘à╪│╪ñ┘ê┘ä *</label>
               <input 
                 type="password" 
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                placeholder="••••••••"
-                className="w-full border border-white/20 bg-white/10 rounded-xl p-3.5 text-white placeholder-blue-300/50 focus:bg-white/15 focus:ring-2 focus:ring-[#F4A217] focus:border-[#F4A217]/50 font-mono text-center text-lg outline-none transition-all duration-300"
+                placeholder="ΓÇóΓÇóΓÇóΓÇóΓÇóΓÇóΓÇóΓÇó"
+                className="w-full border border-slate-200 bg-slate-50/50 rounded-xl p-3.5 focus:bg-white focus:ring-2 focus:ring-[#26462C] focus:border-[#26462C] font-mono text-center text-lg outline-none transition-all duration-300 shadow-inner"
                 required
               />
-              {loginError && <p className="text-red-300 text-xs font-bold mt-2.5 text-center bg-red-500/10 rounded-lg p-2">{loginError}</p>}
+              {loginError && <p className="text-red-500 text-xs font-bold mt-2.5 text-center">{loginError}</p>}
             </div>
             
-            <button type="submit" className="w-full bg-gradient-to-r from-[#F4A217] to-amber-500 hover:from-amber-500 hover:to-[#F4A217] text-[#0F172A] py-3.5 rounded-xl font-black text-base shadow-lg hover:shadow-amber-500/30 hover:-translate-y-0.5 transition-all duration-300 flex items-center justify-center gap-2 cursor-pointer mt-2">
-              <span>تسجيل الدخول الآمن</span>
+            <button type="submit" className="w-full bg-gradient-to-r from-emerald-800 to-[#26462C] hover:from-emerald-700 hover:to-[#1e3622] text-[#F4A217] py-3.5 rounded-xl font-black text-base shadow-md hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300 flex items-center justify-center gap-2 cursor-pointer">
+              <span>╪¬╪│╪¼┘è┘ä ╪º┘ä╪»╪«┘ê┘ä ╪º┘ä╪ó┘à┘å</span>
             </button>
-
-            <div className="pt-3 border-t border-white/10 text-center">
-              <p className="text-[11px] text-blue-200/50 font-bold">حسابات الدخول المتاحة:</p>
-              <p className="text-[11px] text-blue-200/40 mt-1">super admin: admin / admin123 &nbsp;|&nbsp; academic: academic / acad123</p>
-            </div>
           </form>
         </div>
       </div>
@@ -1314,74 +1220,52 @@ const AdminDashboard = () => {
     <div className="min-h-screen bg-slate-50 flex" dir="rtl" style={{ fontFamily: "'Cairo', sans-serif" }}>
       
       {/* 1. RIGHT SIDEBAR (Navigation) */}
-      <div className="w-72 bg-[#1E3A8A] text-white flex flex-col shrink-0 border-l border-slate-100/10 h-screen sticky top-0 overflow-y-auto z-30">
+      <div className="w-72 bg-[#26462C] text-white flex flex-col shrink-0 border-l border-slate-100/10 h-screen sticky top-0 overflow-y-auto z-30">
         {/* Logo and Summit Info */}
-        <div className="p-5 border-b border-white/10 flex items-center gap-3 bg-black/20">
+        <div className="p-6 border-b border-white/5 flex items-center gap-3">
           <div className="w-12 h-12 bg-white/10 rounded-2xl flex items-center justify-center shrink-0">
             <GraduationCap className="w-7 h-7 text-[#F4A217]" />
           </div>
           <div>
-            <h2 className="text-sm font-black text-white tracking-tight">قمة جامعة المنيا</h2>
-            <span className="text-[10px] text-blue-200/70 font-bold block mt-0.5">لوحة التحكم والمتابعة 2026</span>
+            <h2 className="text-base font-black text-white tracking-tight">┘é┘à╪⌐ ╪¼╪º┘à╪╣╪⌐ ╪º┘ä┘à┘å┘è╪º</h2>
+            <span className="text-[10px] text-slate-300 font-bold block mt-0.5">┘ä┘ê╪¡╪⌐ ╪º┘ä╪¬╪¡┘â┘à ┘ê╪º┘ä┘à╪¬╪º╪¿╪╣╪⌐ 2026</span>
           </div>
         </div>
-
-        {/* Admin Profile Card */}
-        <div className="p-4 border-b border-white/10 bg-white/5">
-          <div className="flex items-center gap-3">
-            <div className="w-12 h-12 rounded-2xl overflow-hidden bg-[#F4A217]/20 border-2 border-[#F4A217]/30 flex items-center justify-center shrink-0">
-              {adminProfile.avatar ? (
-                <img src={adminProfile.avatar} alt="avatar" className="w-full h-full object-cover" />
-              ) : (
-                <span className="text-[#F4A217] font-black text-lg">{(adminProfile.name || 'A').charAt(0).toUpperCase()}</span>
-              )}
-            </div>
-            <div className="min-w-0">
-              <p className="text-sm font-black text-white truncate">{adminProfile.name}</p>
-              <p className="text-[10px] text-blue-200/60 font-semibold truncate">{adminProfile.title}</p>
-              <span className={`text-[9px] font-black px-2 py-0.5 rounded-full mt-0.5 inline-block ${adminRole === 'superAdmin' ? 'bg-[#F4A217]/20 text-[#F4A217]' : 'bg-blue-400/20 text-blue-200'}`}>
-                {adminRole === 'superAdmin' ? 'مسؤول رئيسي' : 'أدمن أكاديمي'}
-              </span>
-            </div>
-          </div>
-        </div>
-
 
         {/* Sidebar Menu Items */}
-        <nav className="flex-1 p-4 space-y-1 overflow-y-auto">
+        <nav className="flex-1 p-4 space-y-1.5 overflow-y-auto">
           {[
-            { id: 'overview', label: 'نظرة عامة', count: null, icon: BarChart2, roles: ['superAdmin', 'academic'] },
-            { id: 'graduation', label: 'مشروعات التخرج', count: stats.totalGP, icon: GraduationCap, roles: ['superAdmin', 'academic'] },
-            { id: 'research', label: 'البحوث التطبيقية', count: stats.totalAR, icon: BookOpen, roles: ['superAdmin', 'academic'] },
-            { id: 'news', label: 'الأخبار الإعلانية', count: newsList.length, icon: Newspaper, roles: ['superAdmin'] },
-            { id: 'jobs', label: 'وظائف الملتقى', count: jobs.length, icon: Briefcase, roles: ['superAdmin'] },
-            { id: 'exhibition_innovations', label: 'معرض الابتكارات', count: innovations.length, icon: Sparkles, roles: ['superAdmin'] },
-            { id: 'exhibition_products', label: 'معرض الوحدات', count: products.length, icon: ShoppingBag, roles: ['superAdmin'] },
-            { id: 'speakers', label: 'المتحدثون والمدربون', count: stats.totalSpeakers, icon: Presentation, roles: ['superAdmin'] },
-            { id: 'startups', label: 'الشركات الناشئة', count: stats.totalStartups, icon: Briefcase, roles: ['superAdmin'] },
-            { id: 'investors', label: 'المستثمرون للتمويل', count: stats.totalInvestors, icon: Users, roles: ['superAdmin'] },
-            { id: 'mentors', label: 'الموجهون والإرشاد', count: stats.totalMentors, icon: Users, roles: ['superAdmin'] },
-            { id: 'researchers', label: 'الباحثون / المبتكرون', count: stats.totalResearchers, icon: BookOpen, roles: ['superAdmin'] },
-            { id: 'partners', label: 'الشركاء والجهات الراعية', count: stats.totalPartners, icon: Users, roles: ['superAdmin'] },
-            { id: 'volunteers', label: 'لجان التطوع والتنظيم', count: stats.totalVolunteers, icon: Users, roles: ['superAdmin'] },
-            { id: 'profile', label: 'الملف الشخصي', count: null, icon: Users, roles: ['superAdmin', 'academic'] },
-          ].filter(tab => tab.roles.includes(adminRole)).map(tab => (
+            { id: 'overview', label: '┘å╪╕╪▒╪⌐ ╪╣╪º┘à╪⌐', count: null, icon: BarChart2 },
+            { id: 'news', label: '╪º┘ä╪ú╪«╪¿╪º╪▒ ╪º┘ä╪Ñ╪╣┘ä╪º┘å┘è╪⌐', count: newsList.length, icon: Newspaper },
+            { id: 'jobs', label: '┘ê╪╕╪º╪ª┘ü ╪º┘ä┘à┘ä╪¬┘é┘ë', count: jobs.length, icon: Briefcase },
+            { id: 'exhibition_innovations', label: '┘à╪╣╪▒╪╢ ╪º┘ä╪º╪¿╪¬┘â╪º╪▒╪º╪¬', count: innovations.length, icon: Sparkles },
+            { id: 'exhibition_products', label: '┘à╪╣╪▒╪╢ ╪º┘ä┘ê╪¡╪»╪º╪¬', count: products.length, icon: ShoppingBag },
+            { id: 'graduation', label: '┘à╪┤╪▒┘ê╪╣╪º╪¬ ╪º┘ä╪¬╪«╪▒╪¼', count: stats.totalGP, icon: GraduationCap },
+            { id: 'research', label: '╪º┘ä╪¿╪¡┘ê╪½ ╪º┘ä╪¬╪╖╪¿┘è┘é┘è╪⌐', count: stats.totalAR, icon: BookOpen },
+            { id: 'speakers', label: '╪º┘ä┘à╪¬╪¡╪»╪½┘ê┘å ┘ê╪º┘ä┘à╪»╪▒╪¿┘ê┘å', count: stats.totalSpeakers, icon: Presentation },
+            { id: 'startups', label: '╪º┘ä╪┤╪▒┘â╪º╪¬ ╪º┘ä┘å╪º╪┤╪ª╪⌐', count: stats.totalStartups, icon: Briefcase },
+            { id: 'investors', label: '╪º┘ä┘à╪│╪¬╪½┘à╪▒┘ê┘å ┘ä┘ä╪¬┘à┘ê┘è┘ä', count: stats.totalInvestors, icon: Users },
+            { id: 'mentors', label: '╪º┘ä┘à┘ê╪¼┘ç┘ê┘å ┘ê╪º┘ä╪Ñ╪▒╪┤╪º╪»', count: stats.totalMentors, icon: Users },
+            { id: 'researchers', label: '╪º┘ä╪¿╪º╪¡╪½┘ê┘å / ╪º┘ä┘à╪¿╪¬┘â╪▒┘ê┘å', count: stats.totalResearchers, icon: BookOpen },
+            { id: 'partners', label: '╪º┘ä╪┤╪▒┘â╪º╪í ┘ê╪º┘ä╪¼┘ç╪º╪¬ ╪º┘ä╪▒╪º╪╣┘è╪⌐', count: stats.totalPartners, icon: Users },
+            { id: 'volunteers', label: '┘ä╪¼╪º┘å ╪º┘ä╪¬╪╖┘ê╪╣ ┘ê╪º┘ä╪¬┘å╪╕┘è┘à', count: stats.totalVolunteers, icon: Users }
+          ].map(tab => (
             <button
               key={tab.id}
               onClick={() => { setActiveTab(tab.id); setSelectedItem(null); }}
-              className={`w-full flex items-center justify-between px-4 py-2.5 rounded-xl font-bold text-xs sm:text-sm whitespace-nowrap transition-all duration-200 group cursor-pointer ${
+              className={`w-full flex items-center justify-between px-4 py-3 rounded-2xl font-bold text-xs sm:text-sm whitespace-nowrap transition-all duration-300 group cursor-pointer ${
                 activeTab === tab.id
-                  ? 'bg-gradient-to-r from-[#F4A217] to-amber-500 text-[#1E3A8A] shadow-lg shadow-amber-500/20'
-                  : 'text-blue-100/70 hover:bg-white/10 hover:text-white'
+                  ? 'bg-gradient-to-r from-[#F4A217] to-amber-500 text-[#26462C] shadow-lg shadow-amber-500/10'
+                  : 'text-slate-300 hover:bg-white/5 hover:text-white'
               }`}
             >
               <div className="flex items-center gap-2.5">
-                <tab.icon className={`w-4 h-4 shrink-0 transition-colors ${activeTab === tab.id ? 'text-[#1E3A8A]' : 'text-blue-300/60 group-hover:text-white'}`} />
+                <tab.icon className={`w-4 h-4 shrink-0 transition-colors ${activeTab === tab.id ? 'text-[#26462C]' : 'text-slate-400 group-hover:text-white'}`} />
                 <span>{tab.label}</span>
               </div>
               {tab.count !== null && (
                 <span className={`px-2 py-0.5 text-[10px] rounded-full font-black ${
-                  activeTab === tab.id ? 'bg-[#1E3A8A] text-white' : 'bg-white/10 text-slate-300'
+                  activeTab === tab.id ? 'bg-[#26462C] text-white' : 'bg-white/10 text-slate-300'
                 }`}>
                   {tab.count}
                 </span>
@@ -1390,20 +1274,14 @@ const AdminDashboard = () => {
           ))}
         </nav>
 
-        {/* Footer: logout */}
-        <div className="p-4 border-t border-white/10 bg-black/20 space-y-2">
-          <button 
-            onClick={handleLogout} 
-            className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-red-500/15 hover:bg-red-500/25 text-red-300 hover:text-red-200 rounded-xl font-bold text-xs transition-all cursor-pointer border border-red-500/20"
-          >
-            <span>تسجيل الخروج</span>
-          </button>
-          <div className="flex items-center gap-2 text-[10px] text-blue-300/40 font-bold px-1">
+        {/* Footer info */}
+        <div className="p-4 border-t border-white/5 bg-black/10">
+          <div className="flex items-center gap-2 text-[10px] text-slate-400 font-bold">
             <span className="relative flex h-1.5 w-1.5">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
-              <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-blue-400"></span>
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+              <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-emerald-500"></span>
             </span>
-            <span>رقم الإصدار: v1.1.0 - 2026</span>
+            <span>╪▒┘é┘à ╪º┘ä╪Ñ╪╡╪»╪º╪▒: v1.0.4 - 2026</span>
           </div>
         </div>
       </div>
@@ -1418,22 +1296,22 @@ const AdminDashboard = () => {
             <Search className="w-4 h-4 text-slate-400 absolute right-4.5 top-1/2 -translate-y-1/2" />
             <input
               type="text"
-              placeholder="Ø§Ù„بحث Ø§Ù„ÙÙˆØ±ÙŠ Ø¨Ø§Ù„Ø§Ø³Ù…ØŒ Ø§Ù„ÙƒÙ„ÙŠØ©ØŒ Ø§Ù„Ø¨Ø±ÙŠد Ø§Ù„Ø¥Ù„ÙƒØªØ±ÙˆÙ†ÙŠ..."
+              placeholder="╪º┘ä╪¿╪¡╪½ ╪º┘ä┘ü┘ê╪▒┘è ╪¿╪º┘ä╪º╪│┘à╪î ╪º┘ä┘â┘ä┘è╪⌐╪î ╪º┘ä╪¿╪▒┘è╪» ╪º┘ä╪Ñ┘ä┘â╪¬╪▒┘ê┘å┘è..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full bg-slate-50 border border-slate-200/80 rounded-2xl pr-11 pl-4 py-2.5 text-xs sm:text-sm focus:bg-white focus:ring-2 focus:ring-[#1E3A8A] focus:border-[#1E3A8A] outline-none shadow-inner transition-all duration-300"
+              className="w-full bg-slate-50 border border-slate-200/80 rounded-2xl pr-11 pl-4 py-2.5 text-xs sm:text-sm focus:bg-white focus:ring-2 focus:ring-[#26462C] focus:border-[#26462C] outline-none shadow-inner transition-all duration-300"
             />
           </div>
 
           {/* Left Header: Status Pulse and Logout */}
           <div className="flex items-center gap-4 self-end md:self-auto">
             {isSupabaseConfigured ? (
-              <div className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-emerald-50 border border-blue-200/60 text-blue-700 text-xs font-bold shadow-sm">
+              <div className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-emerald-50 border border-emerald-200/60 text-emerald-700 text-xs font-bold shadow-sm">
                 <span className="relative flex h-2 w-2">
                   <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
                   <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
                 </span>
-                <span>Ù‚اعدة Ø§Ù„Ø¨ÙŠØ§Ù†ات Ù†شطة</span>
+                <span>┘é╪º╪╣╪»╪⌐ ╪º┘ä╪¿┘è╪º┘å╪º╪¬ ┘å╪┤╪╖╪⌐</span>
               </div>
             ) : (
               <div className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-amber-50 border border-amber-200/60 text-amber-700 text-xs font-bold shadow-sm">
@@ -1441,16 +1319,16 @@ const AdminDashboard = () => {
                   <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75"></span>
                   <span className="relative inline-flex rounded-full h-2 w-2 bg-amber-500"></span>
                 </span>
-                <span>Ùˆضع Ø§Ù„Ù…Ø¹Ø§ÙŠÙ†ة Ø§Ù„Ù…Ø­Ù„ÙŠة</span>
+                <span>┘ê╪╢╪╣ ╪º┘ä┘à╪╣╪º┘è┘å╪⌐ ╪º┘ä┘à╪¡┘ä┘è╪⌐</span>
               </div>
             )}
 
-            <button onClick={fetchData} className="p-2.5 bg-slate-100 text-slate-500 hover:bg-slate-200 hover:text-slate-800 rounded-xl transition-all cursor-pointer shadow-sm active:scale-95" title="ØªØ­Ø¯ÙŠث Ø§Ù„Ø¨ÙŠØ§Ù†ات">
+            <button onClick={fetchData} className="p-2.5 bg-slate-100 text-slate-500 hover:bg-slate-200 hover:text-slate-800 rounded-xl transition-all cursor-pointer shadow-sm active:scale-95" title="╪¬╪¡╪»┘è╪½ ╪º┘ä╪¿┘è╪º┘å╪º╪¬">
               <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
             </button>
 
             <button onClick={handleLogout} className="px-4 py-2 bg-red-50 hover:bg-red-100 text-red-600 rounded-xl font-bold text-xs sm:text-sm transition-all cursor-pointer shadow-sm active:scale-95 border border-red-100">
-              Ø®Ø±Ùˆج
+              ╪«╪▒┘ê╪¼
             </button>
           </div>
         </header>
@@ -1460,8 +1338,8 @@ const AdminDashboard = () => {
           
           {loading ? (
             <div className="py-20 text-center text-slate-500 font-bold flex flex-col items-center gap-3">
-              <RefreshCw className="w-8 h-8 animate-spin text-[#1E3A8A]" />
-              <span>Ø¬Ø§Ø±ÙŠ ØªØ­Ù…ÙŠÙ„ Ø§Ù„Ø¨ÙŠØ§Ù†ات...</span>
+              <RefreshCw className="w-8 h-8 animate-spin text-[#26462C]" />
+              <span>╪¼╪º╪▒┘è ╪¬╪¡┘à┘è┘ä ╪º┘ä╪¿┘è╪º┘å╪º╪¬...</span>
             </div>
           ) : (
             <>
@@ -1473,17 +1351,17 @@ const AdminDashboard = () => {
                   <div className="xl:col-span-9 space-y-8">
                     
                     {/* 1. Hero Banner */}
-                    <div className="bg-gradient-to-r from-blue-900 to-[#1E3A8A] text-white p-8 md:p-10 rounded-[2.5rem] relative overflow-hidden shadow-lg flex flex-col md:flex-row justify-between items-center gap-6">
+                    <div className="bg-gradient-to-r from-emerald-800 to-[#26462C] text-white p-8 md:p-10 rounded-[2.5rem] relative overflow-hidden shadow-lg flex flex-col md:flex-row justify-between items-center gap-6">
                       {/* Floating decorative elements */}
                       <div className="absolute top-0 right-0 w-[400px] h-[400px] bg-white/5 rounded-full blur-[100px] pointer-events-none" />
                       <div className="absolute -bottom-20 -left-20 w-96 h-96 bg-[#F4A217]/10 rounded-full blur-[80px] pointer-events-none" />
                       
                       <div className="space-y-4 relative z-10 text-center md:text-right">
                         <span className="inline-block bg-[#F4A217]/25 text-[#F4A217] border border-[#F4A217]/20 px-4 py-1.5 rounded-full text-xs font-black">
-                          Ù‚Ù…ة Ø¬Ø§Ù…عة Ø§Ù„Ù…Ù†ÙŠا Ù„Ù„Ø§Ø¨ØªÙƒار ÙˆØ±ÙŠادة Ø§Ù„Ø£Ø¹Ù…Ø§Ù„ 2026
+                          ┘é┘à╪⌐ ╪¼╪º┘à╪╣╪⌐ ╪º┘ä┘à┘å┘è╪º ┘ä┘ä╪º╪¿╪¬┘â╪º╪▒ ┘ê╪▒┘è╪º╪»╪⌐ ╪º┘ä╪ú╪╣┘à╪º┘ä 2026
                         </span>
-                        <h2 className="text-3xl md:text-4xl font-black tracking-tight leading-tight">ÙŠÙˆÙ…Ùƒ Ø³Ø¹ÙŠØ¯ØŒ ÙŠا Ù…Ø³Ø¤ÙˆÙ„ Ø§Ù„Ù‚Ù…ة!</h2>
-                        <p className="text-slate-200 text-sm max-w-lg leading-relaxed font-semibold">Ù…تابعة Ùƒافة Ø·Ù„بات Ø§Ù„Ù…Ø¨ØªÙƒØ±ÙŠÙ† ÙˆØ§Ù„Ø¨Ø§Ø­Ø«ÙŠÙ†ØŒ Ùˆإدارة Ù…عارض Ø§Ù„Ø§Ø¨ØªÙƒار ÙˆØ¬Ø¯ÙˆÙ„ Ø§Ù„ÙØ¹Ø§Ù„ÙŠات Ø¨Ù†جاح.</p>
+                        <h2 className="text-3xl md:text-4xl font-black tracking-tight leading-tight">┘è┘ê┘à┘â ╪│╪╣┘è╪»╪î ┘è╪º ┘à╪│╪ñ┘ê┘ä ╪º┘ä┘é┘à╪⌐!</h2>
+                        <p className="text-slate-200 text-sm max-w-lg leading-relaxed font-semibold">┘à╪¬╪º╪¿╪╣╪⌐ ┘â╪º┘ü╪⌐ ╪╖┘ä╪¿╪º╪¬ ╪º┘ä┘à╪¿╪¬┘â╪▒┘è┘å ┘ê╪º┘ä╪¿╪º╪¡╪½┘è┘å╪î ┘ê╪Ñ╪»╪º╪▒╪⌐ ┘à╪╣╪º╪▒╪╢ ╪º┘ä╪º╪¿╪¬┘â╪º╪▒ ┘ê╪¼╪»┘ê┘ä ╪º┘ä┘ü╪╣╪º┘ä┘è╪º╪¬ ╪¿┘å╪¼╪º╪¡.</p>
                       </div>
                       
                       {/* Illustration/Icon Container */}
@@ -1496,76 +1374,31 @@ const AdminDashboard = () => {
                     {/* 2. Sparkline Stats Cards */}
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
                       {[
-                        { title: 'Ù…Ø´Ø±Ùˆعات Ø§Ù„تخرج', value: stats.totalGP, label: 'Ù…Ø´Ø±Ùˆع Ù…ضاف', color: 'text-blue-700', bg: 'bg-emerald-50', svgColor: 'text-emerald-600', percent: '+14%' },
-                        { title: 'Ø§Ù„Ø¨Ø­Ùˆث Ø§Ù„ØªØ·Ø¨ÙŠÙ‚ÙŠة', value: stats.totalAR, label: 'بحث ØªØ·Ø¨ÙŠÙ‚ÙŠ', color: 'text-[#1E3A8A]', bg: 'bg-[#1E3A8A]/10', svgColor: 'text-[#1E3A8A]', percent: '+8%' },
-                        { title: 'Ø§Ø¨ØªÙƒارات Ø§Ù„Ù…عرض', value: innovations.length, label: 'Ø§Ø¨ØªÙƒار ØªÙ‚Ù†ÙŠ', color: 'text-[#F4A217]', bg: 'bg-[#F4A217]/10', svgColor: 'text-[#F4A217]', percent: '+22%' },
-                        { title: 'Ùˆظائف ÙˆØ´Ùˆاغر', value: jobs.length, label: 'ÙˆØ¸ÙŠفة شاغرة', color: 'text-amber-600', bg: 'bg-amber-50', svgColor: 'text-amber-500', percent: '+18%' }
-                      ].map((card, idx) => {
-                        const cardVal = card.value || 0;
-                        const p1 = Math.round(cardVal * 0.2);
-                        const p2 = Math.round(cardVal * 0.5);
-                        const p3 = Math.round(cardVal * 0.85);
-                        const p4 = cardVal;
-                        const points = [p1, p2, p3, p4];
-                        const maxVal = Math.max(...points, 1);
-                        const x_coords = [10, 36, 62, 88];
-                        const pts = points.map((v, pIdx) => ({
-                          x: x_coords[pIdx],
-                          y: 30 - 5 - (v / maxVal) * 20,
-                          val: v
-                        }));
-
-                        return (
-                          <div key={idx} className="bg-white p-6 rounded-[2rem] border border-slate-100 shadow-soft hover:shadow-lg hover:-translate-y-1 transition-all duration-300 flex flex-col justify-between group">
-                            <div className="flex justify-between items-start mb-4">
-                              <div>
-                                <span className="text-xs font-bold text-slate-400 block mb-1">{card.title}</span>
-                                <span className="text-2xl md:text-3xl font-black text-slate-800 tracking-tight">{card.value}</span>
-                              </div>
-                              <span className={`px-2 py-0.5 rounded-lg text-[10px] font-black ${card.bg} ${card.color}`}>
-                                {card.percent}
-                              </span>
+                        { title: '┘à╪┤╪▒┘ê╪╣╪º╪¬ ╪º┘ä╪¬╪«╪▒╪¼', value: stats.totalGP, label: '┘à╪┤╪▒┘ê╪╣ ┘à╪╢╪º┘ü', color: 'text-emerald-700', bg: 'bg-emerald-50', svgColor: 'text-emerald-600', path: 'M 0,20 Q 25,5 50,25 T 100,10', percent: '+14%' },
+                        { title: '╪º┘ä╪¿╪¡┘ê╪½ ╪º┘ä╪¬╪╖╪¿┘è┘é┘è╪⌐', value: stats.totalAR, label: '╪¿╪¡╪½ ╪¬╪╖╪¿┘è┘é┘è', color: 'text-[#26462C]', bg: 'bg-[#26462C]/10', svgColor: 'text-[#26462C]', path: 'M 0,10 Q 25,25 50,5 T 100,20', percent: '+8%' },
+                        { title: '╪º╪¿╪¬┘â╪º╪▒╪º╪¬ ╪º┘ä┘à╪╣╪▒╪╢', value: innovations.length, label: '╪º╪¿╪¬┘â╪º╪▒ ╪¬┘é┘å┘è', color: 'text-[#F4A217]', bg: 'bg-[#F4A217]/10', svgColor: 'text-[#F4A217]', path: 'M 0,25 Q 30,10 60,30 T 100,5', percent: '+22%' },
+                        { title: '┘ê╪╕╪º╪ª┘ü ┘ê╪┤┘ê╪º╪║╪▒', value: jobs.length, label: '┘ê╪╕┘è┘ü╪⌐ ╪┤╪º╪║╪▒╪⌐', color: 'text-amber-600', bg: 'bg-amber-50', svgColor: 'text-amber-500', path: 'M 0,15 Q 25,5 50,20 T 100,8', percent: '+18%' }
+                      ].map((card, idx) => (
+                        <div key={idx} className="bg-white p-6 rounded-[2rem] border border-slate-100 shadow-soft hover:shadow-lg hover:-translate-y-1 transition-all duration-300 flex flex-col justify-between group">
+                          <div className="flex justify-between items-start mb-4">
+                            <div>
+                              <span className="text-xs font-bold text-slate-400 block mb-1">{card.title}</span>
+                              <span className="text-2xl md:text-3xl font-black text-slate-800 tracking-tight">{card.value}</span>
                             </div>
-                            <div className="flex items-end justify-between mt-2">
-                              <span className="text-[10px] font-bold text-slate-400">
-                                {hoveredDot && hoveredDot.startsWith(`${idx}-`) ? (
-                                  <span className="text-slate-600 font-bold transition-all">
-                                    {hoveredDot.split('-')[1] === '0' ? 'Ø§Ù„Ø£Ø³Ø¨Ùˆع 1: ' :
-                                     hoveredDot.split('-')[1] === '1' ? 'Ø§Ù„Ø£Ø³Ø¨Ùˆع 2: ' :
-                                     hoveredDot.split('-')[1] === '2' ? 'Ø§Ù„Ø£Ø³Ø¨Ùˆع 3: ' : 'Ø§Ù„Ø­Ø§Ù„ÙŠ: '}
-                                    <strong className="text-[#1E3A8A] font-black">{pts[parseInt(hoveredDot.split('-')[1])].val}</strong>
-                                  </span>
-                                ) : (
-                                  card.label
-                                )}
-                              </span>
-                              <div className="w-20 h-8 relative">
-                                <svg className={`w-full h-full ${card.svgColor} overflow-visible`} viewBox="0 0 100 30">
-                                  <path 
-                                    d={`M ${pts[0].x},${pts[0].y} C ${(pts[0].x+pts[1].x)/2},${pts[0].y} ${(pts[0].x+pts[1].x)/2},${pts[1].y} ${pts[1].x},${pts[1].y} C ${(pts[1].x+pts[2].x)/2},${pts[1].y} ${(pts[1].x+pts[2].x)/2},${pts[2].y} ${pts[2].x},${pts[2].y} C ${(pts[2].x+pts[3].x)/2},${pts[2].y} ${(pts[2].x+pts[3].x)/2},${pts[3].y} ${pts[3].x},${pts[3].y}`} 
-                                    fill="none" 
-                                    stroke="currentColor" 
-                                    strokeWidth="2.5" 
-                                    strokeLinecap="round" 
-                                  />
-                                  {pts.map((pt, pIdx) => (
-                                    <circle
-                                      key={pIdx}
-                                      cx={pt.x}
-                                      cy={pt.y}
-                                      r={hoveredDot === `${idx}-${pIdx}` ? "4.5" : "2"}
-                                      className="fill-white stroke-2 cursor-pointer transition-all duration-200"
-                                      stroke="currentColor"
-                                      onMouseEnter={() => setHoveredDot(`${idx}-${pIdx}`)}
-                                      onMouseLeave={() => setHoveredDot(null)}
-                                    />
-                                  ))}
-                                </svg>
-                              </div>
+                            <span className={`px-2 py-0.5 rounded-lg text-[10px] font-black ${card.bg} ${card.color}`}>
+                              {card.percent}
+                            </span>
+                          </div>
+                          <div className="flex items-end justify-between mt-2">
+                            <span className="text-[10px] font-bold text-slate-400">{card.label}</span>
+                            <div className="w-16 h-8">
+                              <svg className={`w-full h-full ${card.svgColor} overflow-visible`} viewBox="0 0 100 30">
+                                <path d={card.path} fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" />
+                              </svg>
                             </div>
                           </div>
-                        );
-                      })}
+                        </div>
+                      ))}
                     </div>
 
                     {/* 3. Double Charts: Circular Progress + Plans Done Progress Bars */}
@@ -1574,8 +1407,8 @@ const AdminDashboard = () => {
                       {/* Chart Left: Circular progress check */}
                       <div className="bg-white p-8 rounded-[2.5rem] border border-slate-100 shadow-soft flex flex-col justify-between h-[300px]">
                         <div className="flex justify-between items-center mb-6">
-                          <h4 className="font-black text-slate-800 text-lg">فحص ÙˆÙ…راجعة Ø§Ù„Ø·Ù„بات</h4>
-                          <span className="text-xs font-bold text-[#1E3A8A] bg-[#1E3A8A]/10 px-3 py-1 rounded-full">ØªØ­Ø¯ÙŠث ÙÙˆØ±ÙŠ</span>
+                          <h4 className="font-black text-slate-800 text-lg">┘ü╪¡╪╡ ┘ê┘à╪▒╪º╪¼╪╣╪⌐ ╪º┘ä╪╖┘ä╪¿╪º╪¬</h4>
+                          <span className="text-xs font-bold text-[#26462C] bg-[#26462C]/10 px-3 py-1 rounded-full">╪¬╪¡╪»┘è╪½ ┘ü┘ê╪▒┘è</span>
                         </div>
                         <div className="flex items-center justify-around gap-6">
                           <div className="relative w-36 h-36 flex items-center justify-center">
@@ -1585,60 +1418,24 @@ const AdminDashboard = () => {
                                 cx="72"
                                 cy="72"
                                 r="56"
-                                className={`${
-                                  hoveredLegendIdx === 0 ? 'text-amber-500' :
-                                  hoveredLegendIdx === 1 ? 'text-yellow-500' : 'text-[#1E3A8A]'
-                                } transition-all duration-500 ease-out`}
+                                className="text-[#26462C] transition-all duration-1000 ease-out"
                                 strokeWidth="12"
                                 strokeDasharray={2 * Math.PI * 56}
-                                strokeDashoffset={2 * Math.PI * 56 * (1 - (
-                                  hoveredLegendIdx === 0 ? 0.75 :
-                                  hoveredLegendIdx === 1 ? 0.88 :
-                                  hoveredLegendIdx === 2 ? 0.60 : 0.92
-                                ))}
+                                strokeDashoffset={2 * Math.PI * 56 * (1 - 0.92)}
                                 strokeLinecap="round"
                                 stroke="currentColor"
                                 fill="transparent"
                               />
                             </svg>
                             <div className="absolute flex flex-col items-center">
-                              <span className="text-3xl font-black text-slate-800 transition-all duration-300">
-                                {hoveredLegendIdx === 0 ? '75%' :
-                                 hoveredLegendIdx === 1 ? '88%' :
-                                 hoveredLegendIdx === 2 ? '60%' : '92%'}
-                              </span>
-                              <span className="text-[10px] font-bold text-slate-400 transition-all duration-300">
-                                {hoveredLegendIdx === 0 ? 'Ù…تحدث Ù…Ù‚Ø¨ÙˆÙ„' :
-                                 hoveredLegendIdx === 1 ? 'Ø´Ø±Ùƒة Ù…Ù‚Ø¨ÙˆÙ„ة' :
-                                 hoveredLegendIdx === 2 ? 'Ù…Ø³ØªØ«Ù…ر Ù…Ù‚Ø¨ÙˆÙ„' : 'تحت Ø§Ù„فحص'}
-                              </span>
+                              <span className="text-3xl font-black text-slate-800">92%</span>
+                              <span className="text-[10px] font-bold text-slate-400">╪¬╪¡╪¬ ╪º┘ä┘ü╪¡╪╡</span>
                             </div>
                           </div>
                           <div className="space-y-3 font-semibold text-sm text-slate-600">
-                            <div 
-                              className="flex items-center gap-2 cursor-pointer hover:text-slate-900 transition-colors group"
-                              onMouseEnter={() => setHoveredLegendIdx(0)}
-                              onMouseLeave={() => setHoveredLegendIdx(null)}
-                            >
-                              <span className="w-2.5 h-2.5 rounded-full bg-amber-500 group-hover:scale-125 transition-transform"></span> 
-                              <span>Ø§Ù„Ù…ØªØ­Ø¯Ø«ÙˆÙ†: {stats.totalSpeakers}</span>
-                            </div>
-                            <div 
-                              className="flex items-center gap-2 cursor-pointer hover:text-slate-900 transition-colors group"
-                              onMouseEnter={() => setHoveredLegendIdx(1)}
-                              onMouseLeave={() => setHoveredLegendIdx(null)}
-                            >
-                              <span className="w-2.5 h-2.5 rounded-full bg-yellow-500 group-hover:scale-125 transition-transform"></span> 
-                              <span>Ø§Ù„Ø´Ø±Ùƒات Ø§Ù„Ù†اشئة: {stats.totalStartups}</span>
-                            </div>
-                            <div 
-                              className="flex items-center gap-2 cursor-pointer hover:text-slate-900 transition-colors group"
-                              onMouseEnter={() => setHoveredLegendIdx(2)}
-                              onMouseLeave={() => setHoveredLegendIdx(null)}
-                            >
-                              <span className="w-2.5 h-2.5 rounded-full bg-[#1E3A8A] group-hover:scale-125 transition-transform"></span> 
-                              <span>Ø§Ù„Ù…Ø³ØªØ«Ù…Ø±ÙˆÙ†: {stats.totalInvestors}</span>
-                            </div>
+                            <div className="flex items-center gap-2"><span className="w-2.5 h-2.5 rounded-full bg-amber-500"></span> <span>╪º┘ä┘à╪¬╪¡╪»╪½┘ê┘å: {stats.totalSpeakers}</span></div>
+                            <div className="flex items-center gap-2"><span className="w-2.5 h-2.5 rounded-full bg-yellow-500"></span> <span>╪º┘ä╪┤╪▒┘â╪º╪¬ ╪º┘ä┘å╪º╪┤╪ª╪⌐: {stats.totalStartups}</span></div>
+                            <div className="flex items-center gap-2"><span className="w-2.5 h-2.5 rounded-full bg-[#26462C]"></span> <span>╪º┘ä┘à╪│╪¬╪½┘à╪▒┘ê┘å: {stats.totalInvestors}</span></div>
                           </div>
                         </div>
                       </div>
@@ -1646,14 +1443,14 @@ const AdminDashboard = () => {
                       {/* Chart Right: Plans progress bars */}
                       <div className="bg-white p-8 rounded-[2.5rem] border border-slate-100 shadow-soft flex flex-col justify-between h-[300px]">
                         <div className="flex justify-between items-center mb-4">
-                          <h4 className="font-black text-slate-800 text-lg">Ù†سب Ø§ÙƒØªÙ…Ø§Ù„ Ù„Ø¬Ø§Ù† Ø§Ù„ØªÙ†Ø¸ÙŠÙ…</h4>
-                          <span className="text-xs font-bold text-emerald-600 bg-emerald-50 px-3 py-1 rounded-full">Ø£Ø¹Ù…Ø§Ù„ Ø§Ù„Ù„Ø¬Ø§Ù†</span>
+                          <h4 className="font-black text-slate-800 text-lg">┘å╪│╪¿ ╪º┘â╪¬┘à╪º┘ä ┘ä╪¼╪º┘å ╪º┘ä╪¬┘å╪╕┘è┘à</h4>
+                          <span className="text-xs font-bold text-emerald-600 bg-emerald-50 px-3 py-1 rounded-full">╪ú╪╣┘à╪º┘ä ╪º┘ä┘ä╪¼╪º┘å</span>
                         </div>
                         <div className="space-y-4 flex-1 flex flex-col justify-center">
                           {[
-                            { name: 'Ù„Ø¬Ù†ة Ø§Ù„Ø§Ø³ØªÙ‚Ø¨Ø§Ù„ ÙˆØ§Ù„ØªØ³Ø¬ÙŠÙ„', percent: 84, color: 'bg-[#1E3A8A]' },
-                            { name: 'Ù„Ø¬Ù†ة Ø§Ù„ØªÙ‚ÙŠÙŠÙ… Ø§Ù„Ø¹Ù„Ù…ÙŠ ÙˆØ§Ù„ÙÙ†ÙŠ', percent: 70, color: 'bg-amber-500' },
-                            { name: 'Ø§Ù„ØªÙˆØ§ØµÙ„ Ù…ع Ø§Ù„Ø´Ø±Ùƒات ÙˆØ§Ù„Ù…Ø³ØªØ«Ù…Ø±ÙŠÙ†', percent: 55, color: 'bg-[#F4A217]' }
+                            { name: '┘ä╪¼┘å╪⌐ ╪º┘ä╪º╪│╪¬┘é╪¿╪º┘ä ┘ê╪º┘ä╪¬╪│╪¼┘è┘ä', percent: 84, color: 'bg-[#26462C]' },
+                            { name: '┘ä╪¼┘å╪⌐ ╪º┘ä╪¬┘é┘è┘è┘à ╪º┘ä╪╣┘ä┘à┘è ┘ê╪º┘ä┘ü┘å┘è', percent: 70, color: 'bg-amber-500' },
+                            { name: '╪º┘ä╪¬┘ê╪º╪╡┘ä ┘à╪╣ ╪º┘ä╪┤╪▒┘â╪º╪¬ ┘ê╪º┘ä┘à╪│╪¬╪½┘à╪▒┘è┘å', percent: 55, color: 'bg-[#F4A217]' }
                           ].map((item, idx) => (
                             <div key={idx} className="space-y-1.5">
                               <div className="flex justify-between text-xs font-bold text-slate-600">
@@ -1679,25 +1476,25 @@ const AdminDashboard = () => {
                     <div className="bg-white p-6 rounded-[2.5rem] border border-slate-100 shadow-soft flex flex-col items-center text-center relative overflow-hidden">
                       <div className="absolute top-0 right-0 w-20 h-20 bg-emerald-50 rounded-full -mr-6 -mt-6"></div>
                       
-                      <div className="w-20 h-20 bg-gradient-to-tr from-blue-900 to-[#1E3A8A] rounded-[1.75rem] flex items-center justify-center shadow-lg relative z-10 mb-4 text-[#F4A217] font-black text-3xl">
+                      <div className="w-20 h-20 bg-gradient-to-tr from-emerald-800 to-[#26462C] rounded-[1.75rem] flex items-center justify-center shadow-lg relative z-10 mb-4 text-[#F4A217] font-black text-3xl">
                         AD
                       </div>
 
-                      <h3 className="font-black text-slate-800 text-lg">Ø£Ø¯Ù…Ù† Ø§Ù„Ù‚Ù…ة Ø§Ù„Ø±Ø¦ÙŠØ³ÙŠ</h3>
-                      <span className="text-xs text-slate-400 font-bold mb-6">Ø±Ø¦ÙŠس Ù„Ø¬Ù†ة Ø§Ù„إشراف Ø§Ù„Ø¹Ø§Ù…</span>
+                      <h3 className="font-black text-slate-800 text-lg">╪ú╪»┘à┘å ╪º┘ä┘é┘à╪⌐ ╪º┘ä╪▒╪ª┘è╪│┘è</h3>
+                      <span className="text-xs text-slate-400 font-bold mb-6">╪▒╪ª┘è╪│ ┘ä╪¼┘å╪⌐ ╪º┘ä╪Ñ╪┤╪▒╪º┘ü ╪º┘ä╪╣╪º┘à</span>
                       
                       <div className="w-full border-t border-slate-100 pt-6 space-y-4 text-right">
                         <div className="flex justify-between text-xs font-bold">
-                          <span className="text-slate-400">Ø­Ø§Ù„ة Ø§Ù„Ø®Ø§Ø¯Ù…:</span>
-                          <span className="text-emerald-600">Ù†شط ÙˆØµØ­ÙŠ</span>
+                          <span className="text-slate-400">╪¡╪º┘ä╪⌐ ╪º┘ä╪«╪º╪»┘à:</span>
+                          <span className="text-emerald-600">┘å╪┤╪╖ ┘ê╪╡╪¡┘è</span>
                         </div>
                         <div className="flex justify-between text-xs font-bold">
-                          <span className="text-slate-400">Ù†Ùˆع Ø§Ù„Ø§ØªØµØ§Ù„:</span>
+                          <span className="text-slate-400">┘å┘ê╪╣ ╪º┘ä╪º╪¬╪╡╪º┘ä:</span>
                           <span className="text-slate-700">{isSupabaseConfigured ? 'Supabase SDK' : 'LocalStorage fallback'}</span>
                         </div>
                         <div className="flex justify-between text-xs font-bold">
-                          <span className="text-slate-400">ØªØ§Ø±ÙŠخ ØªØ³Ø¬ÙŠÙ„ Ø§Ù„Ø¯Ø®ÙˆÙ„:</span>
-                          <span className="text-slate-700">Ø§Ù„ÙŠÙˆÙ… 11:00 ص</span>
+                          <span className="text-slate-400">╪¬╪º╪▒┘è╪« ╪¬╪│╪¼┘è┘ä ╪º┘ä╪»╪«┘ê┘ä:</span>
+                          <span className="text-slate-700">╪º┘ä┘è┘ê┘à 11:00 ╪╡</span>
                         </div>
                       </div>
                     </div>
@@ -1705,19 +1502,19 @@ const AdminDashboard = () => {
                     {/* Summit Milestones Calendar */}
                     <div className="bg-white p-6 rounded-[2.5rem] border border-slate-100 shadow-soft space-y-6">
                       <div>
-                        <h4 className="font-black text-slate-800 text-base mb-1">Ø¬Ø¯ÙˆÙ„ ÙØ¹Ø§Ù„ÙŠات Ø§Ù„Ù‚Ù…ة</h4>
-                        <p className="text-[10px] text-slate-400 font-semibold">Ù…تابعة Ø§Ù„فترات Ø§Ù„Ø²Ù…Ù†ÙŠة Ù„Ù„ÙØ¹Ø§Ù„ÙŠات</p>
+                        <h4 className="font-black text-slate-800 text-base mb-1">╪¼╪»┘ê┘ä ┘ü╪╣╪º┘ä┘è╪º╪¬ ╪º┘ä┘é┘à╪⌐</h4>
+                        <p className="text-[10px] text-slate-400 font-semibold">┘à╪¬╪º╪¿╪╣╪⌐ ╪º┘ä┘ü╪¬╪▒╪º╪¬ ╪º┘ä╪▓┘à┘å┘è╪⌐ ┘ä┘ä┘ü╪╣╪º┘ä┘è╪º╪¬</p>
                       </div>
                       
                       <div className="grid grid-cols-3 gap-2 bg-slate-50 p-1.5 rounded-xl border border-slate-200/50">
                         {[
-                          { day: 'Ø§Ù„ÙŠÙˆÙ… Ø§Ù„Ø£ÙˆÙ„', label: 'افتتاح ÙˆÙ‚Ø¨ÙˆÙ„', active: true },
-                          { day: 'Ø§Ù„ÙŠÙˆÙ… Ø§Ù„Ø«Ø§Ù†ÙŠ', label: 'Ùˆرش ÙˆØªÙ‚ÙŠÙŠÙ…', active: false },
-                          { day: 'Ø§Ù„ÙŠÙˆÙ… Ø§Ù„Ø«Ø§Ù„ث', label: 'Ø­ÙÙ„ Ø§Ù„Ø®ØªØ§Ù…', active: false }
+                          { day: '╪º┘ä┘è┘ê┘à ╪º┘ä╪ú┘ê┘ä', label: '╪º┘ü╪¬╪¬╪º╪¡ ┘ê┘é╪¿┘ê┘ä', active: true },
+                          { day: '╪º┘ä┘è┘ê┘à ╪º┘ä╪½╪º┘å┘è', label: '┘ê╪▒╪┤ ┘ê╪¬┘é┘è┘è┘à', active: false },
+                          { day: '╪º┘ä┘è┘ê┘à ╪º┘ä╪½╪º┘ä╪½', label: '╪¡┘ü┘ä ╪º┘ä╪«╪¬╪º┘à', active: false }
                         ].map((item, idx) => (
                           <div key={idx} className={`p-2 rounded-lg text-center cursor-pointer transition-all ${
                             item.active 
-                              ? 'bg-[#1E3A8A] text-white shadow-md' 
+                              ? 'bg-[#26462C] text-white shadow-md' 
                               : 'bg-white text-slate-600 hover:bg-slate-100 border border-slate-200'
                           }`}>
                             <span className="text-[10px] font-black block">{item.day}</span>
@@ -1729,10 +1526,10 @@ const AdminDashboard = () => {
                       {/* Activity List */}
                       <div className="space-y-4 pt-2">
                         {[
-                          { time: '02:00 Ù…', task: 'Ø§Ø³ØªÙ‚Ø¨Ø§Ù„ Ùˆفحص Ø·Ù„بات Ù…Ø´Ø±Ùˆعات Ø§Ù„حاسبات', type: 'Ø±Ø¦ÙŠØ³ÙŠ' },
-                          { time: '02:30 Ù…', task: 'ØªÙ‚ÙŠÙŠÙ… Ø§Ù„Ø¨Ø­Ùˆث Ø§Ù„ØªØ·Ø¨ÙŠÙ‚ÙŠة Ù„Ù‚Ø³Ù… Ø§Ù„Ù‡Ù†دسة', type: 'ÙØ±Ø¹ÙŠ' },
-                          { time: '03:00 Ù…', task: 'ØªØ³Ø¬ÙŠÙ„ Ø§Ù„Ù…ØªØ­Ø¯Ø«ÙŠÙ† ÙˆØ§Ù„Ù…Ø¯Ø±Ø¨ÙŠÙ† Ø§Ù„Ø£Ø¬Ø§Ù†ب', type: 'Ø±Ø¦ÙŠØ³ÙŠ' },
-                          { time: '03:50 Ù…', task: 'حصر أعداد Ø§Ù„Ù…Ø³Ø¬Ù„ÙŠÙ† Ø¨Ù…Ù„ØªÙ‚Ù‰ Ø§Ù„ØªÙˆØ¸ÙŠف', type: 'رصد' }
+                          { time: '02:00 ┘à', task: '╪º╪│╪¬┘é╪¿╪º┘ä ┘ê┘ü╪¡╪╡ ╪╖┘ä╪¿╪º╪¬ ┘à╪┤╪▒┘ê╪╣╪º╪¬ ╪º┘ä╪¡╪º╪│╪¿╪º╪¬', type: '╪▒╪ª┘è╪│┘è' },
+                          { time: '02:30 ┘à', task: '╪¬┘é┘è┘è┘à ╪º┘ä╪¿╪¡┘ê╪½ ╪º┘ä╪¬╪╖╪¿┘è┘é┘è╪⌐ ┘ä┘é╪│┘à ╪º┘ä┘ç┘å╪»╪│╪⌐', type: '┘ü╪▒╪╣┘è' },
+                          { time: '03:00 ┘à', task: '╪¬╪│╪¼┘è┘ä ╪º┘ä┘à╪¬╪¡╪»╪½┘è┘å ┘ê╪º┘ä┘à╪»╪▒╪¿┘è┘å ╪º┘ä╪ú╪¼╪º┘å╪¿', type: '╪▒╪ª┘è╪│┘è' },
+                          { time: '03:50 ┘à', task: '╪¡╪╡╪▒ ╪ú╪╣╪»╪º╪» ╪º┘ä┘à╪│╪¼┘ä┘è┘å ╪¿┘à┘ä╪¬┘é┘ë ╪º┘ä╪¬┘ê╪╕┘è┘ü', type: '╪▒╪╡╪»' }
                         ].map((item, idx) => (
                           <div key={idx} className="flex gap-3 text-right">
                             <span className="text-[10px] font-black text-indigo-600 bg-indigo-50 px-2 py-1 rounded-lg shrink-0 self-start">{item.time}</span>
@@ -1757,33 +1554,33 @@ const AdminDashboard = () => {
                       <Search className="w-5 h-5 text-slate-400 absolute right-4 top-1/2 -translate-y-1/2" />
                       <input
                         type="text"
-                        placeholder="ابحث Ø¨Ø§Ù„Ø§Ø³Ù…ØŒ Ø§Ù„ÙƒÙ„ÙŠØ©ØŒ Ø§Ù„Ø¨Ø±ÙŠد..."
+                        placeholder="╪º╪¿╪¡╪½ ╪¿╪º┘ä╪º╪│┘à╪î ╪º┘ä┘â┘ä┘è╪⌐╪î ╪º┘ä╪¿╪▒┘è╪»..."
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
-                        className="w-full bg-white border border-slate-200/85 rounded-2xl pr-12 pl-4 py-3 text-xs sm:text-sm focus:ring-2 focus:ring-[#1E3A8A] focus:border-[#1E3A8A] outline-none shadow-sm transition-all duration-300"
+                        className="w-full bg-white border border-slate-200/85 rounded-2xl pr-12 pl-4 py-3 text-xs sm:text-sm focus:ring-2 focus:ring-[#26462C] focus:border-[#26462C] outline-none shadow-sm transition-all duration-300"
                       />
                     </div>
                     {(activeTab === 'graduation' || activeTab === 'research') && (
                       <select
                         value={statusFilter}
                         onChange={(e) => setStatusFilter(e.target.value)}
-                        className="bg-white border border-slate-200/85 rounded-2xl px-4 py-3 text-xs sm:text-sm focus:ring-2 focus:ring-[#1E3A8A] focus:border-[#1E3A8A] font-bold text-slate-700 outline-none shadow-sm transition-all duration-300 cursor-pointer"
+                        className="bg-white border border-slate-200/85 rounded-2xl px-4 py-3 text-xs sm:text-sm focus:ring-2 focus:ring-[#26462C] focus:border-[#26462C] font-bold text-slate-700 outline-none shadow-sm transition-all duration-300 cursor-pointer"
                       >
-                        <option value="Ø§Ù„ÙƒÙ„">ÙƒÙ„ Ø§Ù„Ø­Ø§Ù„ات</option>
-                        <option value="ØªÙ… Ø§Ø³ØªÙ„Ø§Ù… Ø§Ù„Ø·Ù„ب">ØªÙ… Ø§Ø³ØªÙ„Ø§Ù… Ø§Ù„Ø·Ù„ب</option>
-                        <option value="تحت Ø§Ù„فحص Ø§Ù„Ø¥Ø¯Ø§Ø±ÙŠ">تحت Ø§Ù„فحص Ø§Ù„Ø¥Ø¯Ø§Ø±ÙŠ</option>
-                        <option value="تحت Ø§Ù„ØªÙ‚ÙŠÙŠÙ… Ø§Ù„ÙÙ†ÙŠ">تحت Ø§Ù„ØªÙ‚ÙŠÙŠÙ… Ø§Ù„ÙÙ†ÙŠ</option>
-                        <option value="تحت Ù…راجعة Ø§Ù„Ù…Ù„ÙƒÙŠة Ø§Ù„ÙÙƒØ±ÙŠة">تحت Ù…راجعة Ø§Ù„Ù…Ù„ÙƒÙŠة Ø§Ù„ÙÙƒØ±ÙŠة</option>
-                        <option value="Ù…Ù‚Ø¨ÙˆÙ„ Ù„Ù„عرض ÙÙŠ Ø§Ù„Ù‚Ù…ة">Ù…Ù‚Ø¨ÙˆÙ„ Ù„Ù„عرض ÙÙŠ Ø§Ù„Ù‚Ù…ة</option>
+                        <option value="╪º┘ä┘â┘ä">┘â┘ä ╪º┘ä╪¡╪º┘ä╪º╪¬</option>
+                        <option value="╪¬┘à ╪º╪│╪¬┘ä╪º┘à ╪º┘ä╪╖┘ä╪¿">╪¬┘à ╪º╪│╪¬┘ä╪º┘à ╪º┘ä╪╖┘ä╪¿</option>
+                        <option value="╪¬╪¡╪¬ ╪º┘ä┘ü╪¡╪╡ ╪º┘ä╪Ñ╪»╪º╪▒┘è">╪¬╪¡╪¬ ╪º┘ä┘ü╪¡╪╡ ╪º┘ä╪Ñ╪»╪º╪▒┘è</option>
+                        <option value="╪¬╪¡╪¬ ╪º┘ä╪¬┘é┘è┘è┘à ╪º┘ä┘ü┘å┘è">╪¬╪¡╪¬ ╪º┘ä╪¬┘é┘è┘è┘à ╪º┘ä┘ü┘å┘è</option>
+                        <option value="╪¬╪¡╪¬ ┘à╪▒╪º╪¼╪╣╪⌐ ╪º┘ä┘à┘ä┘â┘è╪⌐ ╪º┘ä┘ü┘â╪▒┘è╪⌐">╪¬╪¡╪¬ ┘à╪▒╪º╪¼╪╣╪⌐ ╪º┘ä┘à┘ä┘â┘è╪⌐ ╪º┘ä┘ü┘â╪▒┘è╪⌐</option>
+                        <option value="┘à┘é╪¿┘ê┘ä ┘ä┘ä╪╣╪▒╪╢ ┘ü┘è ╪º┘ä┘é┘à╪⌐">┘à┘é╪¿┘ê┘ä ┘ä┘ä╪╣╪▒╪╢ ┘ü┘è ╪º┘ä┘é┘à╪⌐</option>
                       </select>
                     )}
                     <button
                       onClick={handleExportToExcel}
-                      className="bg-emerald-600 hover:bg-blue-700 text-white px-5 py-3 rounded-2xl font-bold text-xs sm:text-sm flex items-center justify-center gap-2 transition-all duration-300 shadow-md hover:shadow-lg active:scale-95 shrink-0 cursor-pointer hover:-translate-y-0.5 border border-blue-500"
-                      title="ØªØµØ¯ÙŠر Ù‡Ø°Ù‡ Ø§Ù„Ù‚Ø§Ø¦Ù…ة Ø¥Ù„Ù‰ Ù…Ù„ف Ø¥ÙƒØ³ÙŠÙ„ CSV"
+                      className="bg-emerald-600 hover:bg-emerald-700 text-white px-5 py-3 rounded-2xl font-bold text-xs sm:text-sm flex items-center justify-center gap-2 transition-all duration-300 shadow-md hover:shadow-lg active:scale-95 shrink-0 cursor-pointer hover:-translate-y-0.5 border border-emerald-500"
+                      title="╪¬╪╡╪»┘è╪▒ ┘ç╪░┘ç ╪º┘ä┘é╪º╪ª┘à╪⌐ ╪Ñ┘ä┘ë ┘à┘ä┘ü ╪Ñ┘â╪│┘è┘ä CSV"
                     >
                       <FileSpreadsheet className="w-4 h-4" />
-                      <span>ØªØµØ¯ÙŠر Ø¥Ù„Ù‰ Ø¥ÙƒØ³ÙŠÙ„</span>
+                      <span>╪¬╪╡╪»┘è╪▒ ╪Ñ┘ä┘ë ╪Ñ┘â╪│┘è┘ä</span>
                     </button>
                   </div>
 
@@ -1795,20 +1592,20 @@ const AdminDashboard = () => {
                 <div className="space-y-6 animate-fade-in">
                   <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-slate-50 p-6 rounded-2xl border border-slate-200">
                     <div>
-                      <h3 className="text-xl font-black text-[#1E3A8A] mb-1">إدارة Ø§Ù„أخبار</h3>
-                      <p className="text-sm text-slate-500 font-bold">إضافة ÙˆØªØ¹Ø¯ÙŠÙ„ Ùˆحذف Ø§Ù„أخبار Ø§Ù„Ù…Ø¹Ø±Ùˆضة ÙÙŠ Ø§Ù„صفحة Ø§Ù„Ø±Ø¦ÙŠØ³ÙŠة.</p>
+                      <h3 className="text-xl font-black text-[#26462C] mb-1">╪Ñ╪»╪º╪▒╪⌐ ╪º┘ä╪ú╪«╪¿╪º╪▒</h3>
+                      <p className="text-sm text-slate-500 font-bold">╪Ñ╪╢╪º┘ü╪⌐ ┘ê╪¬╪╣╪»┘è┘ä ┘ê╪¡╪░┘ü ╪º┘ä╪ú╪«╪¿╪º╪▒ ╪º┘ä┘à╪╣╪▒┘ê╪╢╪⌐ ┘ü┘è ╪º┘ä╪╡┘ü╪¡╪⌐ ╪º┘ä╪▒╪ª┘è╪│┘è╪⌐.</p>
                     </div>
                     <button 
                       onClick={() => setIsNewsModalOpen(true)}
-                      className="bg-[#1E3A8A] hover:bg-[#1e3a8a] text-[#F4A217] px-6 py-3 rounded-xl font-bold flex items-center gap-2 transition-colors shadow-sm shrink-0"
+                      className="bg-[#26462C] hover:bg-[#1a301e] text-[#F4A217] px-6 py-3 rounded-xl font-bold flex items-center gap-2 transition-colors shadow-sm shrink-0"
                     >
-                      + إضافة خبر Ø¬Ø¯ÙŠد
+                      + ╪Ñ╪╢╪º┘ü╪⌐ ╪«╪¿╪▒ ╪¼╪»┘è╪»
                     </button>
                   </div>
 
                   {newsList.length === 0 ? (
                     <div className="py-20 text-center text-slate-500 font-bold bg-slate-50 rounded-3xl border border-slate-200 border-dashed">
-                      Ù„ا ØªÙˆجد أخبار Ù…ضافة Ø­ØªÙ‰ Ø§Ù„Ø¢Ù†.
+                      ┘ä╪º ╪¬┘ê╪¼╪» ╪ú╪«╪¿╪º╪▒ ┘à╪╢╪º┘ü╪⌐ ╪¡╪¬┘ë ╪º┘ä╪ó┘å.
                     </div>
                   ) : (
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -1820,7 +1617,7 @@ const AdminDashboard = () => {
                             ) : (
                               <div className="flex flex-col items-center justify-center w-full h-full text-slate-400 bg-slate-100">
                                 <Newspaper className="w-10 h-10 mb-2 opacity-50" />
-                                <span className="text-xs font-bold">Ù„ا ØªÙˆجد ØµÙˆرة</span>
+                                <span className="text-xs font-bold">┘ä╪º ╪¬┘ê╪¼╪» ╪╡┘ê╪▒╪⌐</span>
                               </div>
                             )}
                           </div>
@@ -1832,8 +1629,8 @@ const AdminDashboard = () => {
                               <div className="flex items-center gap-1"><Users className="w-3.5 h-3.5"/> {newsItem.uploader_name}</div>
                             </div>
                             <div className="flex gap-2 mt-4 pt-4 border-t border-slate-100">
-                               <button onClick={() => openEditNewsModal(newsItem)} className="flex-1 py-2 bg-blue-50 text-blue-600 rounded-lg font-bold text-xs hover:bg-blue-100 transition-colors">ØªØ¹Ø¯ÙŠÙ„</button>
-                               <button onClick={() => handleDeleteNews(newsItem.id)} className="flex-1 py-2 bg-red-50 text-red-600 rounded-lg font-bold text-xs hover:bg-red-100 transition-colors">حذف</button>
+                               <button onClick={() => openEditNewsModal(newsItem)} className="flex-1 py-2 bg-blue-50 text-blue-600 rounded-lg font-bold text-xs hover:bg-blue-100 transition-colors">╪¬╪╣╪»┘è┘ä</button>
+                               <button onClick={() => handleDeleteNews(newsItem.id)} className="flex-1 py-2 bg-red-50 text-red-600 rounded-lg font-bold text-xs hover:bg-red-100 transition-colors">╪¡╪░┘ü</button>
                             </div>
                           </div>
                         </div>
@@ -1848,34 +1645,34 @@ const AdminDashboard = () => {
                 <div className="space-y-6 animate-fade-in">
                   <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-slate-50 p-6 rounded-2xl border border-slate-200">
                     <div>
-                      <h3 className="text-xl font-black text-[#1E3A8A] mb-1">إدارة Ùˆظائف Ø§Ù„Ù…Ù„ØªÙ‚Ù‰</h3>
-                      <p className="text-sm text-slate-500 font-bold">إضافة ÙˆØªØ¹Ø¯ÙŠÙ„ Ùˆحذف Ø§Ù„Ùˆظائف Ø§Ù„شاغرة Ø§Ù„Ù…Ø¹Ø±Ùˆضة Ù„Ù„Ø·Ù„اب ÙˆØ§Ù„Ø®Ø±ÙŠØ¬ÙŠÙ† Ø¨Ø§Ù„Ù…Ù„ØªÙ‚Ù‰.</p>
+                      <h3 className="text-xl font-black text-[#26462C] mb-1">╪Ñ╪»╪º╪▒╪⌐ ┘ê╪╕╪º╪ª┘ü ╪º┘ä┘à┘ä╪¬┘é┘ë</h3>
+                      <p className="text-sm text-slate-500 font-bold">╪Ñ╪╢╪º┘ü╪⌐ ┘ê╪¬╪╣╪»┘è┘ä ┘ê╪¡╪░┘ü ╪º┘ä┘ê╪╕╪º╪ª┘ü ╪º┘ä╪┤╪º╪║╪▒╪⌐ ╪º┘ä┘à╪╣╪▒┘ê╪╢╪⌐ ┘ä┘ä╪╖┘ä╪º╪¿ ┘ê╪º┘ä╪«╪▒┘è╪¼┘è┘å ╪¿╪º┘ä┘à┘ä╪¬┘é┘ë.</p>
                     </div>
                     <button 
                       onClick={openAddJobModal}
-                      className="bg-[#1E3A8A] hover:bg-[#1e3a8a] text-[#F4A217] px-6 py-3 rounded-xl font-bold flex items-center gap-2 transition-colors shadow-sm shrink-0 cursor-pointer"
+                      className="bg-[#26462C] hover:bg-[#1a301e] text-[#F4A217] px-6 py-3 rounded-xl font-bold flex items-center gap-2 transition-colors shadow-sm shrink-0 cursor-pointer"
                     >
                       <Briefcase className="w-4 h-4" />
-                      <span>+ إضافة ÙˆØ¸ÙŠفة Ø¬Ø¯ÙŠدة</span>
+                      <span>+ ╪Ñ╪╢╪º┘ü╪⌐ ┘ê╪╕┘è┘ü╪⌐ ╪¼╪»┘è╪»╪⌐</span>
                     </button>
                   </div>
 
                   {jobs.length === 0 ? (
                     <div className="py-20 text-center text-slate-500 font-bold bg-slate-50 rounded-3xl border border-slate-200 border-dashed">
-                      Ù„ا ØªÙˆجد Ùˆظائف Ù…ضافة Ø­ØªÙ‰ Ø§Ù„Ø¢Ù†.
+                      ┘ä╪º ╪¬┘ê╪¼╪» ┘ê╪╕╪º╪ª┘ü ┘à╪╢╪º┘ü╪⌐ ╪¡╪¬┘ë ╪º┘ä╪ó┘å.
                     </div>
                   ) : (
                     <div className="overflow-x-auto">
                       <table className="w-full text-right border-collapse text-sm">
                         <thead>
                           <tr className="bg-slate-50 border-b border-slate-200 text-slate-700 font-black">
-                            <th className="p-4">شعار Ø§Ù„Ø´Ø±Ùƒة</th>
-                            <th className="p-4">Ø§Ù„Ù…Ø³Ù…Ù‰ Ø§Ù„ÙˆØ¸ÙŠÙÙŠ</th>
-                            <th className="p-4">Ø§Ù„Ø´Ø±Ùƒة</th>
-                            <th className="p-4">Ø§Ù„Ù…ÙˆÙ‚ع</th>
-                            <th className="p-4">Ø§Ù„Ù†Ùˆع</th>
-                            <th className="p-4">Ø§Ù„خبرة</th>
-                            <th className="p-4 text-center">Ø§Ù„إجراءات</th>
+                            <th className="p-4">╪┤╪╣╪º╪▒ ╪º┘ä╪┤╪▒┘â╪⌐</th>
+                            <th className="p-4">╪º┘ä┘à╪│┘à┘ë ╪º┘ä┘ê╪╕┘è┘ü┘è</th>
+                            <th className="p-4">╪º┘ä╪┤╪▒┘â╪⌐</th>
+                            <th className="p-4">╪º┘ä┘à┘ê┘é╪╣</th>
+                            <th className="p-4">╪º┘ä┘å┘ê╪╣</th>
+                            <th className="p-4">╪º┘ä╪«╪¿╪▒╪⌐</th>
+                            <th className="p-4 text-center">╪º┘ä╪Ñ╪¼╪▒╪º╪í╪º╪¬</th>
                           </tr>
                         </thead>
                         <tbody className="divide-y divide-slate-100">
@@ -1909,13 +1706,13 @@ const AdminDashboard = () => {
                                     onClick={() => openEditJobModal(j)} 
                                     className="p-2 text-blue-600 bg-blue-50 hover:bg-blue-100 rounded-lg inline-flex items-center gap-1.5 font-bold text-xs cursor-pointer"
                                   >
-                                    ØªØ¹Ø¯ÙŠÙ„
+                                    ╪¬╪╣╪»┘è┘ä
                                   </button>
                                   <button 
                                     onClick={() => handleDeleteJob(j.id)} 
                                     className="p-2 text-red-600 bg-red-50 hover:bg-red-100 rounded-lg inline-flex items-center gap-1.5 font-bold text-xs cursor-pointer"
                                   >
-                                    حذف
+                                    ╪¡╪░┘ü
                                   </button>
                                 </div>
                               </td>
@@ -1934,17 +1731,17 @@ const AdminDashboard = () => {
                   <table className="w-full text-right border-collapse text-sm">
                     <thead>
                       <tr className="bg-slate-50 border-b border-slate-200 text-slate-700 font-black">
-                        <th className="p-4">ØªØ§Ø±ÙŠخ Ø§Ù„ØªÙ‚Ø¯ÙŠÙ…</th>
-                        <th className="p-4">Ø§Ø³Ù… Ø§Ù„Ù…Ø´Ø±Ùˆع</th>
-                        <th className="p-4">Ø§Ù„ÙƒÙ„ÙŠة ÙˆØ§Ù„Ø¬Ø§Ù…عة</th>
-                        <th className="p-4">Ø§Ù„Ù†Ùˆع</th>
-                        <th className="p-4">Ø§Ù„Ø­Ø§Ù„ة</th>
-                        <th className="p-4 text-center">Ø§Ù„إجراءات</th>
+                        <th className="p-4">╪¬╪º╪▒┘è╪« ╪º┘ä╪¬┘é╪»┘è┘à</th>
+                        <th className="p-4">╪º╪│┘à ╪º┘ä┘à╪┤╪▒┘ê╪╣</th>
+                        <th className="p-4">╪º┘ä┘â┘ä┘è╪⌐ ┘ê╪º┘ä╪¼╪º┘à╪╣╪⌐</th>
+                        <th className="p-4">╪º┘ä┘å┘ê╪╣</th>
+                        <th className="p-4">╪º┘ä╪¡╪º┘ä╪⌐</th>
+                        <th className="p-4 text-center">╪º┘ä╪Ñ╪¼╪▒╪º╪í╪º╪¬</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-slate-100">
                       {getFilteredGradProjects().length === 0 ? (
-                        <tr><td colSpan="6" className="p-8 text-center text-slate-400 font-bold">Ù„ا ØªÙˆجد Ù…Ø´Ø±Ùˆعات تخرج Ù…Ø·Ø§Ø¨Ù‚ة Ù„Ù„بحث</td></tr>
+                        <tr><td colSpan="6" className="p-8 text-center text-slate-400 font-bold">┘ä╪º ╪¬┘ê╪¼╪» ┘à╪┤╪▒┘ê╪╣╪º╪¬ ╪¬╪«╪▒╪¼ ┘à╪╖╪º╪¿┘é╪⌐ ┘ä┘ä╪¿╪¡╪½</td></tr>
                       ) : (
                         getFilteredGradProjects().map(p => (
                           <tr key={p.id} className="hover:bg-slate-50 transition-colors">
@@ -1957,17 +1754,17 @@ const AdminDashboard = () => {
                             <td className="p-4 font-bold text-slate-500">{p.project_type}</td>
                             <td className="p-4">
                               <span className={`px-3 py-1 rounded-full text-xs font-black ${
-                                p.status === 'Ù…Ù‚Ø¨ÙˆÙ„ Ù„Ù„عرض ÙÙŠ Ø§Ù„Ù‚Ù…ة' ? 'bg-green-100 text-green-700' :
-                                p.status.includes('تحت') ? 'bg-amber-100 text-amber-700' : 'bg-slate-100 text-slate-700'
+                                p.status === '┘à┘é╪¿┘ê┘ä ┘ä┘ä╪╣╪▒╪╢ ┘ü┘è ╪º┘ä┘é┘à╪⌐' ? 'bg-green-100 text-green-700' :
+                                p.status.includes('╪¬╪¡╪¬') ? 'bg-amber-100 text-amber-700' : 'bg-slate-100 text-slate-700'
                               }`}>{p.status}</span>
                             </td>
                             <td className="p-4 text-center">
                               <div className="flex items-center justify-center gap-2">
                                 <button onClick={() => { setSelectedItem(p); setSelectedType('graduation'); }} className="p-2 text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-lg inline-flex items-center gap-1.5 font-bold text-xs">
-                                  <Eye className="w-4 h-4" /> فحص Ø§Ù„ØªÙØ§ØµÙŠÙ„
+                                  <Eye className="w-4 h-4" /> ┘ü╪¡╪╡ ╪º┘ä╪¬┘ü╪º╪╡┘è┘ä
                                 </button>
-                                <button onClick={() => handleDeleteItem(p.id, 'graduation')} className="p-2 text-red-600 bg-red-50 hover:bg-red-100 rounded-lg inline-flex items-center gap-1.5 font-bold text-xs" title="حذف">
-                                  <Trash className="w-3.5 h-3.5" /> حذف
+                                <button onClick={() => handleDeleteItem(p.id, 'graduation')} className="p-2 text-red-600 bg-red-50 hover:bg-red-100 rounded-lg inline-flex items-center gap-1.5 font-bold text-xs" title="╪¡╪░┘ü">
+                                  <Trash className="w-3.5 h-3.5" /> ╪¡╪░┘ü
                                 </button>
                               </div>
                             </td>
@@ -1985,17 +1782,17 @@ const AdminDashboard = () => {
                   <table className="w-full text-right border-collapse text-sm">
                     <thead>
                       <tr className="bg-slate-50 border-b border-slate-200 text-slate-700 font-black">
-                        <th className="p-4">ØªØ§Ø±ÙŠخ Ø§Ù„ØªÙ‚Ø¯ÙŠÙ…</th>
-                        <th className="p-4">Ø§Ù„باحث Ø§Ù„Ø±Ø¦ÙŠØ³ÙŠ</th>
-                        <th className="p-4">Ø§Ù„ÙƒÙ„ÙŠة ÙˆØ§Ù„Ø¬Ø§Ù…عة</th>
-                        <th className="p-4">Ø§Ù„Ø¨Ø±ÙŠد Ø§Ù„Ø¥Ù„ÙƒØªØ±ÙˆÙ†ÙŠ</th>
-                        <th className="p-4">Ø§Ù„Ø­Ø§Ù„ة</th>
-                        <th className="p-4 text-center">Ø§Ù„إجراءات</th>
+                        <th className="p-4">╪¬╪º╪▒┘è╪« ╪º┘ä╪¬┘é╪»┘è┘à</th>
+                        <th className="p-4">╪º┘ä╪¿╪º╪¡╪½ ╪º┘ä╪▒╪ª┘è╪│┘è</th>
+                        <th className="p-4">╪º┘ä┘â┘ä┘è╪⌐ ┘ê╪º┘ä╪¼╪º┘à╪╣╪⌐</th>
+                        <th className="p-4">╪º┘ä╪¿╪▒┘è╪» ╪º┘ä╪Ñ┘ä┘â╪¬╪▒┘ê┘å┘è</th>
+                        <th className="p-4">╪º┘ä╪¡╪º┘ä╪⌐</th>
+                        <th className="p-4 text-center">╪º┘ä╪Ñ╪¼╪▒╪º╪í╪º╪¬</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-slate-100">
                       {getFilteredResearch().length === 0 ? (
-                        <tr><td colSpan="6" className="p-8 text-center text-slate-400 font-bold">Ù„ا ØªÙˆجد Ø¨Ø­Ùˆث ØªØ·Ø¨ÙŠÙ‚ÙŠة Ù…Ø·Ø§Ø¨Ù‚ة Ù„Ù„بحث</td></tr>
+                        <tr><td colSpan="6" className="p-8 text-center text-slate-400 font-bold">┘ä╪º ╪¬┘ê╪¼╪» ╪¿╪¡┘ê╪½ ╪¬╪╖╪¿┘è┘é┘è╪⌐ ┘à╪╖╪º╪¿┘é╪⌐ ┘ä┘ä╪¿╪¡╪½</td></tr>
                       ) : (
                         getFilteredResearch().map(r => (
                           <tr key={r.id} className="hover:bg-slate-50 transition-colors">
@@ -2008,17 +1805,17 @@ const AdminDashboard = () => {
                             <td className="p-4 font-bold text-slate-500">{r.pi_email}</td>
                             <td className="p-4">
                               <span className={`px-3 py-1 rounded-full text-xs font-black ${
-                                r.status === 'Ù…Ù‚Ø¨ÙˆÙ„ Ù„Ù„عرض ÙÙŠ Ø§Ù„Ù‚Ù…ة' ? 'bg-green-100 text-green-700' :
-                                r.status.includes('تحت') ? 'bg-amber-100 text-amber-700' : 'bg-slate-100 text-slate-700'
+                                r.status === '┘à┘é╪¿┘ê┘ä ┘ä┘ä╪╣╪▒╪╢ ┘ü┘è ╪º┘ä┘é┘à╪⌐' ? 'bg-green-100 text-green-700' :
+                                r.status.includes('╪¬╪¡╪¬') ? 'bg-amber-100 text-amber-700' : 'bg-slate-100 text-slate-700'
                               }`}>{r.status}</span>
                             </td>
                             <td className="p-4 text-center">
                               <div className="flex items-center justify-center gap-2">
                                 <button onClick={() => { setSelectedItem(r); setSelectedType('research'); }} className="p-2 text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-lg inline-flex items-center gap-1.5 font-bold text-xs">
-                                  <Eye className="w-4 h-4" /> فحص Ø§Ù„ØªÙØ§ØµÙŠÙ„
+                                  <Eye className="w-4 h-4" /> ┘ü╪¡╪╡ ╪º┘ä╪¬┘ü╪º╪╡┘è┘ä
                                 </button>
-                                <button onClick={() => handleDeleteItem(r.id, 'research')} className="p-2 text-red-600 bg-red-50 hover:bg-red-100 rounded-lg inline-flex items-center gap-1.5 font-bold text-xs" title="حذف">
-                                  <Trash className="w-3.5 h-3.5" /> حذف
+                                <button onClick={() => handleDeleteItem(r.id, 'research')} className="p-2 text-red-600 bg-red-50 hover:bg-red-100 rounded-lg inline-flex items-center gap-1.5 font-bold text-xs" title="╪¡╪░┘ü">
+                                  <Trash className="w-3.5 h-3.5" /> ╪¡╪░┘ü
                                 </button>
                               </div>
                             </td>
@@ -2036,31 +1833,31 @@ const AdminDashboard = () => {
                   <table className="w-full text-right border-collapse text-sm">
                     <thead>
                       <tr className="bg-slate-50 border-b border-slate-200 text-slate-700 font-black">
-                        <th className="p-4">Ø§Ù„ØªØ§Ø±ÙŠخ</th>
-                        <th className="p-4">Ø§Ù„Ø§Ø³Ù… Ø§Ù„ÙƒØ§Ù…Ù„</th>
-                        <th className="p-4">Ø§Ù„Ø¬Ù‡ة / Ø§Ù„Ù…ؤسسة</th>
-                        <th className="p-4">Ø§Ù„Ø¨Ø±ÙŠد Ø§Ù„Ø¥Ù„ÙƒØªØ±ÙˆÙ†ÙŠ</th>
-                        <th className="p-4">Ø±Ù‚Ù… Ø§Ù„Ù‡اتف</th>
-                        <th className="p-4 text-center">Ø§Ù„Ù…Ù„ف / Ø§Ù„Ø³ÙŠرة Ø§Ù„Ø°Ø§ØªÙŠة</th>
-                        <th className="p-4">Ø§Ù„Ø­Ø§Ù„ة</th>
-                        <th className="p-4 text-center">Ø§Ù„إجراءات</th>
+                        <th className="p-4">╪º┘ä╪¬╪º╪▒┘è╪«</th>
+                        <th className="p-4">╪º┘ä╪º╪│┘à ╪º┘ä┘â╪º┘à┘ä</th>
+                        <th className="p-4">╪º┘ä╪¼┘ç╪⌐ / ╪º┘ä┘à╪ñ╪│╪│╪⌐</th>
+                        <th className="p-4">╪º┘ä╪¿╪▒┘è╪» ╪º┘ä╪Ñ┘ä┘â╪¬╪▒┘ê┘å┘è</th>
+                        <th className="p-4">╪▒┘é┘à ╪º┘ä┘ç╪º╪¬┘ü</th>
+                        <th className="p-4 text-center">╪º┘ä┘à┘ä┘ü / ╪º┘ä╪│┘è╪▒╪⌐ ╪º┘ä╪░╪º╪¬┘è╪⌐</th>
+                        <th className="p-4">╪º┘ä╪¡╪º┘ä╪⌐</th>
+                        <th className="p-4 text-center">╪º┘ä╪Ñ╪¼╪▒╪º╪í╪º╪¬</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-slate-100">
                       {getFilteredRegistrants(activeTab.slice(0, -1)).length === 0 ? (
-                        <tr><td colSpan="8" className="p-8 text-center text-slate-400 font-bold">Ù„ا ÙŠÙˆجد Ù…Ø³Ø¬Ù„ÙˆÙ† ÙÙŠ Ù‡ذا Ø§Ù„Ù‚Ø³Ù…</td></tr>
+                        <tr><td colSpan="8" className="p-8 text-center text-slate-400 font-bold">┘ä╪º ┘è┘ê╪¼╪» ┘à╪│╪¼┘ä┘ê┘å ┘ü┘è ┘ç╪░╪º ╪º┘ä┘é╪│┘à</td></tr>
                       ) : (
                         getFilteredRegistrants(activeTab.slice(0, -1)).map(r => (
                           <tr key={r.id} className="hover:bg-slate-50 transition-colors">
                             <td className="p-4 font-semibold text-slate-500">{new Date(r.created_at).toLocaleDateString('ar-EG')}</td>
                             <td className="p-4 font-black text-slate-800">
                               <div>{r.full_name}</div>
-                              {r.details.nationalId && <div className="text-xs text-purple-700 font-bold mt-1">Ø§Ù„Ø±Ù‚Ù… Ø§Ù„Ù‚ÙˆÙ…ÙŠ: {r.details.nationalId}</div>}
-                              {r.details.speechTopic && <div className="text-xs text-[#1E3A8A] font-bold mt-1">Ø§Ù„Ù…ÙˆØ¶Ùˆع: {r.details.speechTopic}</div>}
-                              {r.details.startupName && <div className="text-xs text-[#F4A217] font-bold mt-1">Ø§Ù„Ø´Ø±Ùƒة Ø§Ù„Ù†اشئة: {r.details.startupName}</div>}
-                              {r.details.researchTitle && <div className="text-xs text-blue-600 font-bold mt-1">Ø¹Ù†ÙˆØ§Ù† Ø§Ù„بحث: {r.details.researchTitle}</div>}
-                              {r.details.companyName && <div className="text-xs text-indigo-600 font-bold mt-1">Ø§Ù„Ù…ؤسسة: {r.details.companyName} ({r.details.partnerType})</div>}
-                              {r.details.volunteerCommittee && <div className="text-xs text-emerald-600 font-bold mt-1">Ù„Ø¬Ù†ة Ø§Ù„ØªØ·Ùˆع: {r.details.volunteerCommittee}</div>}
+                              {r.details.nationalId && <div className="text-xs text-purple-700 font-bold mt-1">╪º┘ä╪▒┘é┘à ╪º┘ä┘é┘ê┘à┘è: {r.details.nationalId}</div>}
+                              {r.details.speechTopic && <div className="text-xs text-[#26462C] font-bold mt-1">╪º┘ä┘à┘ê╪╢┘ê╪╣: {r.details.speechTopic}</div>}
+                              {r.details.startupName && <div className="text-xs text-[#F4A217] font-bold mt-1">╪º┘ä╪┤╪▒┘â╪⌐ ╪º┘ä┘å╪º╪┤╪ª╪⌐: {r.details.startupName}</div>}
+                              {r.details.researchTitle && <div className="text-xs text-blue-600 font-bold mt-1">╪╣┘å┘ê╪º┘å ╪º┘ä╪¿╪¡╪½: {r.details.researchTitle}</div>}
+                              {r.details.companyName && <div className="text-xs text-indigo-600 font-bold mt-1">╪º┘ä┘à╪ñ╪│╪│╪⌐: {r.details.companyName} ({r.details.partnerType})</div>}
+                              {r.details.volunteerCommittee && <div className="text-xs text-emerald-600 font-bold mt-1">┘ä╪¼┘å╪⌐ ╪º┘ä╪¬╪╖┘ê╪╣: {r.details.volunteerCommittee}</div>}
                             </td>
                             <td className="p-4 font-bold text-slate-600">{r.organization}</td>
                             <td className="p-4 font-semibold text-slate-500">{r.email}</td>
@@ -2068,50 +1865,50 @@ const AdminDashboard = () => {
                             <td className="p-4 text-center">
                               {r.cv_url && r.cv_url !== '#' ? (
                                 <a href={r.cv_url} target="_blank" className="p-2 text-blue-600 bg-blue-50 hover:bg-blue-100 rounded-lg inline-flex items-center gap-1 font-bold text-xs">
-                                  <Download className="w-3.5 h-3.5" /> ØªØ­Ù…ÙŠÙ„ Ø§Ù„Ù…Ù„ف
+                                  <Download className="w-3.5 h-3.5" /> ╪¬╪¡┘à┘è┘ä ╪º┘ä┘à┘ä┘ü
                                 </a>
                               ) : (
-                                <span className="text-slate-400 font-bold text-xs">Ù„ا ÙŠÙˆجد Ù…Ø±ÙÙ‚</span>
+                                <span className="text-slate-400 font-bold text-xs">┘ä╪º ┘è┘ê╪¼╪» ┘à╪▒┘ü┘é</span>
                               )}
                             </td>
                             <td className="p-4">
                               <span className={`px-3 py-1 rounded-full text-xs font-black ${
-                                r.status === 'Ù…Ù‚Ø¨ÙˆÙ„ Ù„Ù„عرض ÙÙŠ Ø§Ù„Ù‚Ù…ة' ? 'bg-green-100 text-green-700' :
-                                (r.status || '').includes('تحت') ? 'bg-amber-100 text-amber-700' : 'bg-slate-100 text-slate-700'
-                              }`}>{r.status || 'تحت Ø§Ù„فحص Ø§Ù„Ø¥Ø¯Ø§Ø±ÙŠ'}</span>
+                                r.status === '┘à┘é╪¿┘ê┘ä ┘ä┘ä╪╣╪▒╪╢ ┘ü┘è ╪º┘ä┘é┘à╪⌐' ? 'bg-green-100 text-green-700' :
+                                (r.status || '').includes('╪¬╪¡╪¬') ? 'bg-amber-100 text-amber-700' : 'bg-slate-100 text-slate-700'
+                              }`}>{r.status || '╪¬╪¡╪¬ ╪º┘ä┘ü╪¡╪╡ ╪º┘ä╪Ñ╪»╪º╪▒┘è'}</span>
                             </td>
                             <td className="p-4 text-center">
                               <div className="flex flex-col sm:flex-row items-center justify-center gap-2">
-                                {r.status === 'Ù…Ù‚Ø¨ÙˆÙ„ Ù„Ù„عرض ÙÙŠ Ø§Ù„Ù‚Ù…ة' ? (
+                                {r.status === '┘à┘é╪¿┘ê┘ä ┘ä┘ä╪╣╪▒╪╢ ┘ü┘è ╪º┘ä┘é┘à╪⌐' ? (
                                   <button 
-                                    onClick={() => handleStatusChange(r.id, 'registration', 'تحت Ø§Ù„فحص Ø§Ù„Ø¥Ø¯Ø§Ø±ÙŠ')}
+                                    onClick={() => handleStatusChange(r.id, 'registration', '╪¬╪¡╪¬ ╪º┘ä┘ü╪¡╪╡ ╪º┘ä╪Ñ╪»╪º╪▒┘è')}
                                     className="px-3 py-1.5 bg-amber-50 hover:bg-amber-100 text-amber-700 rounded-lg font-bold text-xs transition-colors whitespace-nowrap"
                                   >
-                                    Ø¥Ù„غاء Ø§Ù„Ù‚Ø¨ÙˆÙ„
+                                    ╪Ñ┘ä╪║╪º╪í ╪º┘ä┘é╪¿┘ê┘ä
                                   </button>
                                 ) : (
                                   <div className="flex flex-col items-center gap-1">
                                     <button 
-                                      onClick={() => handleStatusChange(r.id, 'registration', 'Ù…Ù‚Ø¨ÙˆÙ„ Ù„Ù„عرض ÙÙŠ Ø§Ù„Ù‚Ù…ة')}
+                                      onClick={() => handleStatusChange(r.id, 'registration', '┘à┘é╪¿┘ê┘ä ┘ä┘ä╪╣╪▒╪╢ ┘ü┘è ╪º┘ä┘é┘à╪⌐')}
                                       disabled={!r.cv_url || r.cv_url === '#'}
                                       className={`px-3 py-1.5 rounded-lg font-bold text-xs transition-all shadow-sm whitespace-nowrap ${
                                         (!r.cv_url || r.cv_url === '#') 
                                           ? 'bg-slate-100 text-slate-400 cursor-not-allowed border border-slate-200' 
                                           : 'bg-green-600 hover:bg-green-700 text-white'
                                       }`}
-                                      title={(!r.cv_url || r.cv_url === '#') ? 'ÙŠØ±Ø¬Ù‰ رفع Ø§Ù„Ø³ÙŠرة Ø§Ù„Ø°Ø§ØªÙŠة Ø£ÙˆÙ„Ø§Ù‹ Ù„ØªØªÙ…ÙƒÙ† Ù…Ù† Ø§Ù„Ù‚Ø¨ÙˆÙ„' : ''}
+                                      title={(!r.cv_url || r.cv_url === '#') ? '┘è╪▒╪¼┘ë ╪▒┘ü╪╣ ╪º┘ä╪│┘è╪▒╪⌐ ╪º┘ä╪░╪º╪¬┘è╪⌐ ╪ú┘ê┘ä╪º┘ï ┘ä╪¬╪¬┘à┘â┘å ┘à┘å ╪º┘ä┘é╪¿┘ê┘ä' : ''}
                                     >
-                                      Ù…ÙˆØ§ÙÙ‚ة ÙˆÙ‚Ø¨ÙˆÙ„
+                                      ┘à┘ê╪º┘ü┘é╪⌐ ┘ê┘é╪¿┘ê┘ä
                                     </button>
                                     {(!r.cv_url || r.cv_url === '#') && (
-                                      <span className="text-[9px] text-red-500 font-bold whitespace-nowrap">ÙŠجب رفع Ø§Ù„Ù€ CV Ø£ÙˆÙ„Ø§Ù‹</span>
+                                      <span className="text-[9px] text-red-500 font-bold whitespace-nowrap">┘è╪¼╪¿ ╪▒┘ü╪╣ ╪º┘ä┘Ç CV ╪ú┘ê┘ä╪º┘ï</span>
                                     )}
                                   </div>
                                 )}
                                 <button 
                                   onClick={() => handleDeleteItem(r.id, 'registration')} 
                                   className="p-1.5 text-red-600 bg-red-50 hover:bg-red-100 rounded-lg inline-flex items-center gap-1 font-bold text-xs" 
-                                  title="حذف Ø§Ù„حساب"
+                                  title="╪¡╪░┘ü ╪º┘ä╪¡╪│╪º╪¿"
                                 >
                                   <Trash className="w-3.5 h-3.5" />
                                 </button>
@@ -2129,19 +1926,19 @@ const AdminDashboard = () => {
               {activeTab === 'exhibition_innovations' && (
                 <div className="space-y-6">
                   <div className="flex justify-between items-center bg-white p-4 rounded-2xl border border-slate-200 shadow-sm">
-                    <h3 className="text-lg font-black text-slate-800">إدارة Ù…Ø¹Ø±Ùˆضات Ù…عرض Ø§Ù„Ø§Ø¨ØªÙƒارات Ø§Ù„Ø±Ù‚Ù…ÙŠة ÙˆØ§Ù„Ø°Ùƒاء Ø§Ù„Ø§ØµØ·Ù†Ø§Ø¹ÙŠ</h3>
+                    <h3 className="text-lg font-black text-slate-800">╪Ñ╪»╪º╪▒╪⌐ ┘à╪╣╪▒┘ê╪╢╪º╪¬ ┘à╪╣╪▒╪╢ ╪º┘ä╪º╪¿╪¬┘â╪º╪▒╪º╪¬ ╪º┘ä╪▒┘é┘à┘è╪⌐ ┘ê╪º┘ä╪░┘â╪º╪í ╪º┘ä╪º╪╡╪╖┘å╪º╪╣┘è</h3>
                     <button 
                       onClick={openAddInnovationModal}
-                      className="px-5 py-2.5 bg-[#1E3A8A] hover:bg-[#1e3a8a] text-[#F4A217] rounded-xl font-bold text-sm inline-flex items-center gap-2 transition-all shadow-md shadow-green-900/10"
+                      className="px-5 py-2.5 bg-[#26462C] hover:bg-[#1a301e] text-[#F4A217] rounded-xl font-bold text-sm inline-flex items-center gap-2 transition-all shadow-md shadow-green-900/10"
                     >
-                      <Plus className="w-4 h-4" /> إضافة Ø§Ø¨ØªÙƒار Ø¬Ø¯ÙŠد
+                      <Plus className="w-4 h-4" /> ╪Ñ╪╢╪º┘ü╪⌐ ╪º╪¿╪¬┘â╪º╪▒ ╪¼╪»┘è╪»
                     </button>
                   </div>
 
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     {innovations.length === 0 ? (
                       <div className="col-span-full py-16 text-center text-slate-400 font-bold bg-white rounded-3xl border border-slate-200">
-                        Ù„ا ØªÙˆجد Ø§Ø¨ØªÙƒارات Ù…ضافة Ø­Ø§Ù„ÙŠØ§Ù‹. اضغط Ø¹Ù„Ù‰ Ø§Ù„زر Ø¨Ø§Ù„Ø£Ø¹Ù„Ù‰ Ù„إضافة Ø£ÙˆÙ„ Ø§Ø¨ØªÙƒار.
+                        ┘ä╪º ╪¬┘ê╪¼╪» ╪º╪¿╪¬┘â╪º╪▒╪º╪¬ ┘à╪╢╪º┘ü╪⌐ ╪¡╪º┘ä┘è╪º┘ï. ╪º╪╢╪║╪╖ ╪╣┘ä┘ë ╪º┘ä╪▓╪▒ ╪¿╪º┘ä╪ú╪╣┘ä┘ë ┘ä╪Ñ╪╢╪º┘ü╪⌐ ╪ú┘ê┘ä ╪º╪¿╪¬┘â╪º╪▒.
                       </div>
                     ) : (
                       innovations.filter(item => 
@@ -2158,9 +1955,9 @@ const AdminDashboard = () => {
                                 className="w-full h-full object-cover" 
                               />
                               <span className="absolute top-4 right-4 bg-teal-600 text-white text-[10px] font-black px-3 py-1 rounded-full uppercase">
-                                {item.category === 'ai' ? 'Ø°Ùƒاء Ø§ØµØ·Ù†Ø§Ø¹ÙŠ' : 
-                                 item.category === 'cyber' ? 'Ø£Ù…Ù† Ø³ÙŠØ¨Ø±Ø§Ù†ÙŠ' :
-                                 item.category === 'iot' ? 'Ø¥Ù†ØªØ±Ù†ت Ø£Ø´ÙŠاء' : 'ØªØ·Ø¨ÙŠÙ‚ات ÙˆÙŠب/Ø¬ÙˆØ§Ù„'}
+                                {item.category === 'ai' ? '╪░┘â╪º╪í ╪º╪╡╪╖┘å╪º╪╣┘è' : 
+                                 item.category === 'cyber' ? '╪ú┘à┘å ╪│┘è╪¿╪▒╪º┘å┘è' :
+                                 item.category === 'iot' ? '╪Ñ┘å╪¬╪▒┘å╪¬ ╪ú╪┤┘è╪º╪í' : '╪¬╪╖╪¿┘è┘é╪º╪¬ ┘ê┘è╪¿/╪¼┘ê╪º┘ä'}
                               </span>
                             </div>
                             <div className="p-6 space-y-3">
@@ -2169,8 +1966,8 @@ const AdminDashboard = () => {
                               <p className="text-xs font-bold text-slate-400 leading-relaxed line-clamp-2">{item.desc}</p>
                               
                               <div className="pt-3 border-t border-slate-100 flex items-center justify-between text-[11px] font-bold text-slate-500">
-                                <span>Ø§Ù„Ù…Ø³ØªÙˆÙ‰: <strong className="text-blue-600">{item.levelName || item.level}</strong></span>
-                                <span>Ø§Ù„ØªÙ‚Ù†ÙŠة: <strong>{item.stats?.tech || item.tech || 'Python'}</strong></span>
+                                <span>╪º┘ä┘à╪│╪¬┘ê┘ë: <strong className="text-blue-600">{item.levelName || item.level}</strong></span>
+                                <span>╪º┘ä╪¬┘é┘å┘è╪⌐: <strong>{item.stats?.tech || item.tech || 'Python'}</strong></span>
                               </div>
                             </div>
                           </div>
@@ -2180,13 +1977,13 @@ const AdminDashboard = () => {
                               onClick={() => openEditInnovationModal(item)}
                               className="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl font-bold text-xs inline-flex items-center gap-1 transition-colors"
                             >
-                              <Edit className="w-3.5 h-3.5" /> ØªØ¹Ø¯ÙŠÙ„
+                              <Edit className="w-3.5 h-3.5" /> ╪¬╪╣╪»┘è┘ä
                             </button>
                             <button 
                               onClick={() => handleDeleteInnovation(item.id)}
                               className="px-4 py-2 bg-red-50 hover:bg-red-100 text-red-600 rounded-xl font-bold text-xs inline-flex items-center gap-1 transition-colors"
                             >
-                              <Trash className="w-3.5 h-3.5" /> حذف
+                              <Trash className="w-3.5 h-3.5" /> ╪¡╪░┘ü
                             </button>
                           </div>
                         </div>
@@ -2200,19 +1997,19 @@ const AdminDashboard = () => {
               {activeTab === 'exhibition_products' && (
                 <div className="space-y-6">
                   <div className="flex justify-between items-center bg-white p-4 rounded-2xl border border-slate-200 shadow-sm">
-                    <h3 className="text-lg font-black text-slate-800">إدارة Ù…Ø¹Ø±Ùˆضات ÙˆÙ…Ù†تجات Ø§Ù„Ùˆحدات Ø§Ù„Ø¥Ù†ØªØ§Ø¬ÙŠة Ø¨Ø§Ù„ÙƒÙ„ÙŠات</h3>
+                    <h3 className="text-lg font-black text-slate-800">╪Ñ╪»╪º╪▒╪⌐ ┘à╪╣╪▒┘ê╪╢╪º╪¬ ┘ê┘à┘å╪¬╪¼╪º╪¬ ╪º┘ä┘ê╪¡╪»╪º╪¬ ╪º┘ä╪Ñ┘å╪¬╪º╪¼┘è╪⌐ ╪¿╪º┘ä┘â┘ä┘è╪º╪¬</h3>
                     <button 
                       onClick={openAddProductModal}
-                      className="px-5 py-2.5 bg-[#1E3A8A] hover:bg-[#1e3a8a] text-[#F4A217] rounded-xl font-bold text-sm inline-flex items-center gap-2 transition-all shadow-md shadow-green-900/10"
+                      className="px-5 py-2.5 bg-[#26462C] hover:bg-[#1a301e] text-[#F4A217] rounded-xl font-bold text-sm inline-flex items-center gap-2 transition-all shadow-md shadow-green-900/10"
                     >
-                      <Plus className="w-4 h-4" /> إضافة Ù…Ù†تج Ø¬Ø¯ÙŠد
+                      <Plus className="w-4 h-4" /> ╪Ñ╪╢╪º┘ü╪⌐ ┘à┘å╪¬╪¼ ╪¼╪»┘è╪»
                     </button>
                   </div>
 
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     {products.length === 0 ? (
                       <div className="col-span-full py-16 text-center text-slate-400 font-bold bg-white rounded-3xl border border-slate-200">
-                        Ù„ا ØªÙˆجد Ù…Ù†تجات Ù…ضافة Ø­Ø§Ù„ÙŠØ§Ù‹. اضغط Ø¹Ù„Ù‰ Ø§Ù„زر Ø¨Ø§Ù„Ø£Ø¹Ù„Ù‰ Ù„إضافة Ø£ÙˆÙ„ Ù…Ù†تج.
+                        ┘ä╪º ╪¬┘ê╪¼╪» ┘à┘å╪¬╪¼╪º╪¬ ┘à╪╢╪º┘ü╪⌐ ╪¡╪º┘ä┘è╪º┘ï. ╪º╪╢╪║╪╖ ╪╣┘ä┘ë ╪º┘ä╪▓╪▒ ╪¿╪º┘ä╪ú╪╣┘ä┘ë ┘ä╪Ñ╪╢╪º┘ü╪⌐ ╪ú┘ê┘ä ┘à┘å╪¬╪¼.
                       </div>
                     ) : (
                       products.filter(item => 
@@ -2243,8 +2040,8 @@ const AdminDashboard = () => {
                               <p className="text-xs font-bold text-slate-400 leading-relaxed line-clamp-2">{item.details}</p>
                               
                               <div className="pt-3 border-t border-slate-100 flex items-center justify-between text-[11px] font-bold text-slate-500">
-                                <span>Ø§Ù„Ù‚Ø³Ù…: <strong className="text-indigo-600">{item.category}</strong></span>
-                                <span>Ø§Ù„ØªÙ‚ÙŠÙŠÙ…: <strong>{item.rating || '4.8 (120)'}</strong></span>
+                                <span>╪º┘ä┘é╪│┘à: <strong className="text-indigo-600">{item.category}</strong></span>
+                                <span>╪º┘ä╪¬┘é┘è┘è┘à: <strong>{item.rating || '4.8 (120)'}</strong></span>
                               </div>
                             </div>
                           </div>
@@ -2254,13 +2051,13 @@ const AdminDashboard = () => {
                               onClick={() => openEditProductModal(item)}
                               className="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl font-bold text-xs inline-flex items-center gap-1 transition-colors"
                             >
-                              <Edit className="w-3.5 h-3.5" /> ØªØ¹Ø¯ÙŠÙ„
+                              <Edit className="w-3.5 h-3.5" /> ╪¬╪╣╪»┘è┘ä
                             </button>
                             <button 
                               onClick={() => handleDeleteProduct(item.id)}
                               className="px-4 py-2 bg-red-50 hover:bg-red-100 text-red-600 rounded-xl font-bold text-xs inline-flex items-center gap-1 transition-colors"
                             >
-                              <Trash className="w-3.5 h-3.5" /> حذف
+                              <Trash className="w-3.5 h-3.5" /> ╪¡╪░┘ü
                             </button>
                           </div>
                         </div>
@@ -2275,20 +2072,20 @@ const AdminDashboard = () => {
                 <div className="space-y-8 animate-fade-in">
                   <div className="flex justify-between items-center pb-4 border-b border-slate-200">
                     <button onClick={() => setSelectedItem(null)} className="flex items-center gap-1 text-slate-600 hover:text-slate-900 font-bold text-sm bg-slate-100 px-4 py-2 rounded-xl">
-                      <ArrowLeft className="w-4 h-4" /> Ø§Ù„Ø¹Ùˆدة Ù„Ù„Ø¬Ø¯ÙˆÙ„
+                      <ArrowLeft className="w-4 h-4" /> ╪º┘ä╪╣┘ê╪»╪⌐ ┘ä┘ä╪¼╪»┘ê┘ä
                     </button>
                     <div className="flex items-center gap-3">
-                      <span className="text-sm font-bold text-slate-400">ØªØ­Ø¯ÙŠث Ø­Ø§Ù„ة Ø§Ù„Ø·Ù„ب:</span>
+                      <span className="text-sm font-bold text-slate-400">╪¬╪¡╪»┘è╪½ ╪¡╪º┘ä╪⌐ ╪º┘ä╪╖┘ä╪¿:</span>
                       <select
                         value={selectedItem.status}
                         onChange={(e) => handleStatusChange(selectedItem.id, selectedType, e.target.value)}
-                        className="bg-slate-50 border border-slate-300 rounded-xl px-4 py-2 font-black text-sm text-[#1E3A8A] focus:ring-2 focus:ring-[#1E3A8A]"
+                        className="bg-slate-50 border border-slate-300 rounded-xl px-4 py-2 font-black text-sm text-[#26462C] focus:ring-2 focus:ring-[#26462C]"
                       >
-                        <option value="ØªÙ… Ø§Ø³ØªÙ„Ø§Ù… Ø§Ù„Ø·Ù„ب">ØªÙ… Ø§Ø³ØªÙ„Ø§Ù… Ø§Ù„Ø·Ù„ب</option>
-                        <option value="تحت Ø§Ù„فحص Ø§Ù„Ø¥Ø¯Ø§Ø±ÙŠ">تحت Ø§Ù„فحص Ø§Ù„Ø¥Ø¯Ø§Ø±ÙŠ</option>
-                        <option value="تحت Ø§Ù„ØªÙ‚ÙŠÙŠÙ… Ø§Ù„ÙÙ†ÙŠ">تحت Ø§Ù„ØªÙ‚ÙŠÙŠÙ… Ø§Ù„ÙÙ†ÙŠ</option>
-                        <option value="تحت Ù…راجعة Ø§Ù„Ù…Ù„ÙƒÙŠة Ø§Ù„ÙÙƒØ±ÙŠة">تحت Ù…راجعة Ø§Ù„Ù…Ù„ÙƒÙŠة Ø§Ù„ÙÙƒØ±ÙŠة</option>
-                        <option value="Ù…Ù‚Ø¨ÙˆÙ„ Ù„Ù„عرض ÙÙŠ Ø§Ù„Ù‚Ù…ة">Ù…Ù‚Ø¨ÙˆÙ„ Ù„Ù„عرض ÙÙŠ Ø§Ù„Ù‚Ù…ة</option>
+                        <option value="╪¬┘à ╪º╪│╪¬┘ä╪º┘à ╪º┘ä╪╖┘ä╪¿">╪¬┘à ╪º╪│╪¬┘ä╪º┘à ╪º┘ä╪╖┘ä╪¿</option>
+                        <option value="╪¬╪¡╪¬ ╪º┘ä┘ü╪¡╪╡ ╪º┘ä╪Ñ╪»╪º╪▒┘è">╪¬╪¡╪¬ ╪º┘ä┘ü╪¡╪╡ ╪º┘ä╪Ñ╪»╪º╪▒┘è</option>
+                        <option value="╪¬╪¡╪¬ ╪º┘ä╪¬┘é┘è┘è┘à ╪º┘ä┘ü┘å┘è">╪¬╪¡╪¬ ╪º┘ä╪¬┘é┘è┘è┘à ╪º┘ä┘ü┘å┘è</option>
+                        <option value="╪¬╪¡╪¬ ┘à╪▒╪º╪¼╪╣╪⌐ ╪º┘ä┘à┘ä┘â┘è╪⌐ ╪º┘ä┘ü┘â╪▒┘è╪⌐">╪¬╪¡╪¬ ┘à╪▒╪º╪¼╪╣╪⌐ ╪º┘ä┘à┘ä┘â┘è╪⌐ ╪º┘ä┘ü┘â╪▒┘è╪⌐</option>
+                        <option value="┘à┘é╪¿┘ê┘ä ┘ä┘ä╪╣╪▒╪╢ ┘ü┘è ╪º┘ä┘é┘à╪⌐">┘à┘é╪¿┘ê┘ä ┘ä┘ä╪╣╪▒╪╢ ┘ü┘è ╪º┘ä┘é┘à╪⌐</option>
                       </select>
                     </div>
                   </div>
@@ -2298,41 +2095,41 @@ const AdminDashboard = () => {
                     <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 text-right">
                       <div className="lg:col-span-2 space-y-6">
                         <div>
-                          <span className="text-xs font-bold text-slate-400 block mb-1">Ø§Ø³Ù… Ø§Ù„Ù…Ø´Ø±Ùˆع (Ø¹Ø±Ø¨ÙŠ / Ø¥Ù†Ø¬Ù„ÙŠØ²ÙŠ)</span>
-                          <h2 className="text-2xl font-black text-[#1E3A8A]">{selectedItem.project_name_ar}</h2>
+                          <span className="text-xs font-bold text-slate-400 block mb-1">╪º╪│┘à ╪º┘ä┘à╪┤╪▒┘ê╪╣ (╪╣╪▒╪¿┘è / ╪Ñ┘å╪¼┘ä┘è╪▓┘è)</span>
+                          <h2 className="text-2xl font-black text-[#26462C]">{selectedItem.project_name_ar}</h2>
                           <p className="text-md text-slate-500 font-bold" dir="ltr">{selectedItem.project_name_en}</p>
                         </div>
 
                         <div className="bg-slate-50 p-6 rounded-2xl border border-slate-200">
-                          <h4 className="font-black text-[#1E3A8A] mb-3">Ù…Ù„خص Ø§Ù„Ù…Ø´Ø±Ùˆع</h4>
+                          <h4 className="font-black text-[#26462C] mb-3">┘à┘ä╪«╪╡ ╪º┘ä┘à╪┤╪▒┘ê╪╣</h4>
                           <p className="text-slate-700 leading-relaxed font-semibold">{selectedItem.details?.projectSummary}</p>
                         </div>
 
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                           <div className="bg-slate-50 p-6 rounded-2xl border border-slate-200">
-                            <h4 className="font-black text-[#1E3A8A] mb-2">Ø§Ù„Ù…Ø´ÙƒÙ„ة</h4>
+                            <h4 className="font-black text-[#26462C] mb-2">╪º┘ä┘à╪┤┘â┘ä╪⌐</h4>
                             <p className="text-slate-600 text-sm font-semibold">{selectedItem.details?.problemAddressed}</p>
                           </div>
                           <div className="bg-slate-50 p-6 rounded-2xl border border-slate-200">
-                            <h4 className="font-black text-[#1E3A8A] mb-2">Ø§Ù„Ø­Ù„</h4>
+                            <h4 className="font-black text-[#26462C] mb-2">╪º┘ä╪¡┘ä</h4>
                             <p className="text-slate-600 text-sm font-semibold">{selectedItem.details?.solutionProvided}</p>
                           </div>
                         </div>
 
                         {/* Team members list */}
                         <div className="bg-slate-50 p-6 rounded-2xl border border-slate-200">
-                          <h4 className="font-black text-[#1E3A8A] mb-4">أعضاء Ø§Ù„ÙØ±ÙŠÙ‚ ({selectedItem.team_members?.length} Ø·Ù„اب)</h4>
+                          <h4 className="font-black text-[#26462C] mb-4">╪ú╪╣╪╢╪º╪í ╪º┘ä┘ü╪▒┘è┘é ({selectedItem.team_members?.length} ╪╖┘ä╪º╪¿)</h4>
                           <div className="space-y-4">
                             {selectedItem.team_members?.map((m, idx) => (
                               <div key={idx} className="bg-white p-4 rounded-xl border border-slate-100 flex flex-col md:flex-row justify-between gap-2">
                                 <div>
                                   <span className="font-black text-slate-800">{m.name}</span>
-                                  <span className="text-xs bg-[#F4A217]/10 text-[#1E3A8A] px-2 py-0.5 rounded mr-2 font-bold">{m.role || 'Ø¹Ø¶Ùˆ'}</span>
+                                  <span className="text-xs bg-[#F4A217]/10 text-[#26462C] px-2 py-0.5 rounded mr-2 font-bold">{m.role || '╪╣╪╢┘ê'}</span>
                                 </div>
                                 <div className="text-xs font-semibold text-slate-500 flex flex-wrap gap-4">
-                                  <span>Ø§Ù„ÙƒÙ„ÙŠة: {m.college}</span>
-                                  <span>Ø§Ù„Ù‡اتف: {m.phone}</span>
-                                  <span>Ø§Ù„Ø¨Ø±ÙŠد: {m.email}</span>
+                                  <span>╪º┘ä┘â┘ä┘è╪⌐: {m.college}</span>
+                                  <span>╪º┘ä┘ç╪º╪¬┘ü: {m.phone}</span>
+                                  <span>╪º┘ä╪¿╪▒┘è╪»: {m.email}</span>
                                 </div>
                               </div>
                             ))}
@@ -2343,25 +2140,25 @@ const AdminDashboard = () => {
                       {/* Side project info & attachments */}
                       <div className="space-y-6">
                         <div className="bg-slate-50 p-6 rounded-2xl border border-slate-200 space-y-4">
-                          <h4 className="font-black text-[#1E3A8A] border-b pb-2">Ø¨ÙŠØ§Ù†ات Ø§Ù„Ù…Ù‚رر ÙˆØ§Ù„Ø¬Ø§Ù…عة</h4>
+                          <h4 className="font-black text-[#26462C] border-b pb-2">╪¿┘è╪º┘å╪º╪¬ ╪º┘ä┘à┘é╪▒╪▒ ┘ê╪º┘ä╪¼╪º┘à╪╣╪⌐</h4>
                           <div>
-                            <span className="text-xs text-slate-400 block">Ø§Ù„ÙƒÙ„ÙŠة</span>
+                            <span className="text-xs text-slate-400 block">╪º┘ä┘â┘ä┘è╪⌐</span>
                             <span className="font-bold text-slate-700">{selectedItem.college}</span>
                           </div>
                           <div>
-                            <span className="text-xs text-slate-400 block">Ø§Ù„Ù‚Ø³Ù…</span>
+                            <span className="text-xs text-slate-400 block">╪º┘ä┘é╪│┘à</span>
                             <span className="font-bold text-slate-700">{selectedItem.department}</span>
                           </div>
                           <div>
-                            <span className="text-xs text-slate-400 block">Ø³Ù†ة Ø§Ù„تخرج</span>
+                            <span className="text-xs text-slate-400 block">╪│┘å╪⌐ ╪º┘ä╪¬╪«╪▒╪¼</span>
                             <span className="font-bold text-slate-700">{selectedItem.year}</span>
                           </div>
                         </div>
 
                         <div className="bg-slate-50 p-6 rounded-2xl border border-slate-200 space-y-4">
-                          <h4 className="font-black text-[#1E3A8A] border-b pb-2">Ø§Ù„Ù…Ù„فات ÙˆØ§Ù„Ù…Ø±ÙÙ‚ات</h4>
+                          <h4 className="font-black text-[#26462C] border-b pb-2">╪º┘ä┘à┘ä┘ü╪º╪¬ ┘ê╪º┘ä┘à╪▒┘ü┘é╪º╪¬</h4>
                           {Object.keys(selectedItem.files || {}).length === 0 ? (
-                            <span className="text-xs text-slate-400 font-bold">Ù„ا ØªÙˆجد Ù…Ù„فات Ù…Ø±ÙÙˆعة</span>
+                            <span className="text-xs text-slate-400 font-bold">┘ä╪º ╪¬┘ê╪¼╪» ┘à┘ä┘ü╪º╪¬ ┘à╪▒┘ü┘ê╪╣╪⌐</span>
                           ) : (
                             Object.entries(selectedItem.files).map(([key, url]) => (
                               <a 
@@ -2369,7 +2166,7 @@ const AdminDashboard = () => {
                                 onClick={(e) => {
                                   if (url === '#') {
                                     e.preventDefault();
-                                    alert('Ø¹Ø°Ø±Ø§Ù‹ØŒ Ù‡ذا Ø§Ù„Ù…Ù„ف ØºÙŠر Ù…ØªÙˆفر Ø­Ø§Ù„ÙŠØ§Ù‹.');
+                                    alert('╪╣╪░╪▒╪º┘ï╪î ┘ç╪░╪º ╪º┘ä┘à┘ä┘ü ╪║┘è╪▒ ┘à╪¬┘ê┘ü╪▒ ╪¡╪º┘ä┘è╪º┘ï.');
                                   }
                                 }}
                                 target="_blank" 
@@ -2379,9 +2176,9 @@ const AdminDashboard = () => {
                               >
                                 <span className="flex items-center gap-2">
                                   <FileText className="w-4 h-4 text-red-500" />
-                                  {key === 'summaryPdf' ? 'Ù…Ù„خص Ø§Ù„Ù…Ø´Ø±Ùˆع PDF' :
-                                   key === 'pitchDeck' ? 'Ø§Ù„عرض Ø§Ù„ØªÙ‚Ø¯ÙŠÙ…ÙŠ' :
-                                   key === 'screenshot' ? 'ØµÙˆرة Ù„Ù‚طة Ø§Ù„شاشة' : key}
+                                  {key === 'summaryPdf' ? '┘à┘ä╪«╪╡ ╪º┘ä┘à╪┤╪▒┘ê╪╣ PDF' :
+                                   key === 'pitchDeck' ? '╪º┘ä╪╣╪▒╪╢ ╪º┘ä╪¬┘é╪»┘è┘à┘è' :
+                                   key === 'screenshot' ? '╪╡┘ê╪▒╪⌐ ┘ä┘é╪╖╪⌐ ╪º┘ä╪┤╪º╪┤╪⌐' : key}
                                 </span>
                                 <Download className="w-4 h-4 text-slate-400" />
                               </a>
@@ -2397,18 +2194,18 @@ const AdminDashboard = () => {
                     <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 text-right">
                       <div className="lg:col-span-2 space-y-6">
                         <div>
-                          <span className="text-xs font-bold text-slate-400 block mb-1">Ø§Ø³Ù… Ø§Ù„باحث Ø§Ù„Ø±Ø¦ÙŠØ³ÙŠ</span>
+                          <span className="text-xs font-bold text-slate-400 block mb-1">╪º╪│┘à ╪º┘ä╪¿╪º╪¡╪½ ╪º┘ä╪▒╪ª┘è╪│┘è</span>
                           <h2 className="text-2xl font-black text-[#183059]">{selectedItem.pi_name}</h2>
                           <p className="text-md text-slate-500 font-bold">{selectedItem.pi_rank} - {selectedItem.pi_faculty}</p>
                         </div>
 
                         <div className="bg-slate-50 p-6 rounded-2xl border border-slate-200">
-                          <h4 className="font-black text-slate-800 mb-2">Ø§Ù„Ù…Ø´ÙƒÙ„ة Ø§Ù„Ù…Ø³ØªÙ‡دفة Ø¨Ø§Ù„بحث</h4>
+                          <h4 className="font-black text-slate-800 mb-2">╪º┘ä┘à╪┤┘â┘ä╪⌐ ╪º┘ä┘à╪│╪¬┘ç╪»┘ü╪⌐ ╪¿╪º┘ä╪¿╪¡╪½</h4>
                           <p className="text-slate-700 leading-relaxed font-semibold">{selectedItem.details?.problem}</p>
                         </div>
 
                         <div className="bg-slate-50 p-6 rounded-2xl border border-slate-200">
-                          <h4 className="font-black text-slate-800 mb-2">Ø§Ù„Ø­Ù„ ÙˆØ§Ù„ØªØ·Ø¨ÙŠÙ‚ Ø§Ù„Ù…Ù‚ترح</h4>
+                          <h4 className="font-black text-slate-800 mb-2">╪º┘ä╪¡┘ä ┘ê╪º┘ä╪¬╪╖╪¿┘è┘é ╪º┘ä┘à┘é╪¬╪▒╪¡</h4>
                           <p className="text-slate-700 leading-relaxed font-semibold">{selectedItem.details?.solution}</p>
                         </div>
                       </div>
@@ -2416,25 +2213,25 @@ const AdminDashboard = () => {
                       {/* Research Side Panel */}
                       <div className="space-y-6">
                         <div className="bg-slate-50 p-6 rounded-2xl border border-slate-200 space-y-4">
-                          <h4 className="font-black text-slate-800 border-b pb-2">Ø¨ÙŠØ§Ù†ات Ø§Ù„Ø§ØªØµØ§Ù„ Ù„Ù„باحث</h4>
+                          <h4 className="font-black text-slate-800 border-b pb-2">╪¿┘è╪º┘å╪º╪¬ ╪º┘ä╪º╪¬╪╡╪º┘ä ┘ä┘ä╪¿╪º╪¡╪½</h4>
                           <div>
-                            <span className="text-xs text-slate-400 block">Ø§Ù„Ø¨Ø±ÙŠد Ø§Ù„Ø¥Ù„ÙƒØªØ±ÙˆÙ†ÙŠ</span>
+                            <span className="text-xs text-slate-400 block">╪º┘ä╪¿╪▒┘è╪» ╪º┘ä╪Ñ┘ä┘â╪¬╪▒┘ê┘å┘è</span>
                             <span className="font-bold text-slate-700">{selectedItem.pi_email}</span>
                           </div>
                           <div>
-                            <span className="text-xs text-slate-400 block">Ø±Ù‚Ù… Ø§Ù„Ù‡اتف</span>
+                            <span className="text-xs text-slate-400 block">╪▒┘é┘à ╪º┘ä┘ç╪º╪¬┘ü</span>
                             <span className="font-bold text-slate-700">{selectedItem.pi_phone}</span>
                           </div>
                           <div>
-                            <span className="text-xs text-slate-400 block">Ø§Ù„Ù‚Ø³Ù… Ø§Ù„Ø¹Ù„Ù…ÙŠ</span>
+                            <span className="text-xs text-slate-400 block">╪º┘ä┘é╪│┘à ╪º┘ä╪╣┘ä┘à┘è</span>
                             <span className="font-bold text-slate-700">{selectedItem.pi_dept}</span>
                           </div>
                         </div>
 
                         <div className="bg-slate-50 p-6 rounded-2xl border border-slate-200 space-y-4">
-                          <h4 className="font-black text-slate-800 border-b pb-2">Ø§Ù„Ù…Ù„فات Ø§Ù„Ø¨Ø­Ø«ÙŠة</h4>
+                          <h4 className="font-black text-slate-800 border-b pb-2">╪º┘ä┘à┘ä┘ü╪º╪¬ ╪º┘ä╪¿╪¡╪½┘è╪⌐</h4>
                           {Object.keys(selectedItem.files || {}).length === 0 ? (
-                            <span className="text-xs text-slate-400 font-bold">Ù„ا ØªÙˆجد Ù…Ù„فات Ù…Ø±ÙÙˆعة</span>
+                            <span className="text-xs text-slate-400 font-bold">┘ä╪º ╪¬┘ê╪¼╪» ┘à┘ä┘ü╪º╪¬ ┘à╪▒┘ü┘ê╪╣╪⌐</span>
                           ) : (
                             Object.entries(selectedItem.files).map(([key, url]) => (
                               <a 
@@ -2442,7 +2239,7 @@ const AdminDashboard = () => {
                                 onClick={(e) => {
                                   if (url === '#') {
                                     e.preventDefault();
-                                    alert('Ø¹Ø°Ø±Ø§Ù‹ØŒ Ù‡ذا Ø§Ù„Ù…Ù„ف ØºÙŠر Ù…ØªÙˆفر Ø­Ø§Ù„ÙŠØ§Ù‹.');
+                                    alert('╪╣╪░╪▒╪º┘ï╪î ┘ç╪░╪º ╪º┘ä┘à┘ä┘ü ╪║┘è╪▒ ┘à╪¬┘ê┘ü╪▒ ╪¡╪º┘ä┘è╪º┘ï.');
                                   }
                                 }}
                                 target="_blank" 
@@ -2452,8 +2249,8 @@ const AdminDashboard = () => {
                               >
                                 <span className="flex items-center gap-2">
                                   <FileText className="w-4 h-4 text-red-500" />
-                                  {key === 'researchPdf' ? 'Ù…Ù„ف Ø§Ù„بحث Ø§Ù„Ø±Ø¦ÙŠØ³ÙŠ' :
-                                   key === 'marketSummaryPdf' ? 'Ø§Ù„Ù…Ù„خص Ø§Ù„ØªØ³ÙˆÙŠÙ‚ÙŠ' : key}
+                                  {key === 'researchPdf' ? '┘à┘ä┘ü ╪º┘ä╪¿╪¡╪½ ╪º┘ä╪▒╪ª┘è╪│┘è' :
+                                   key === 'marketSummaryPdf' ? '╪º┘ä┘à┘ä╪«╪╡ ╪º┘ä╪¬╪│┘ê┘è┘é┘è' : key}
                                 </span>
                                 <Download className="w-4 h-4 text-slate-400" />
                               </a>
@@ -2480,18 +2277,18 @@ const AdminDashboard = () => {
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
           <div className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" onClick={() => setIsExhibitionModalOpen(false)}></div>
           <div className="bg-white rounded-3xl w-full max-w-2xl overflow-hidden relative z-10 shadow-2xl animate-scale-up flex flex-col max-h-[90vh]">
-            <div className="bg-[#1E3A8A] text-white p-6 flex justify-between items-center shrink-0">
+            <div className="bg-[#26462C] text-white p-6 flex justify-between items-center shrink-0">
               <h2 className="text-2xl font-black text-[#F4A217]">
                 {exhibitionModalType === 'innovation'
-                  ? (exhibitionEditItem ? 'ØªØ¹Ø¯ÙŠÙ„ Ø¨ÙŠØ§Ù†ات Ø§Ù„Ø§Ø¨ØªÙƒار' : 'إضافة Ø§Ø¨ØªÙƒار Ø¬Ø¯ÙŠد Ù„Ù…عرض Ø§Ù„Ø§Ø¨ØªÙƒارات')
-                  : (exhibitionEditItem ? 'ØªØ¹Ø¯ÙŠÙ„ Ø¨ÙŠØ§Ù†ات Ø§Ù„Ù…Ù†تج' : 'إضافة Ù…Ù†تج Ø¬Ø¯ÙŠد Ù„Ù„Ùˆحدات Ø§Ù„Ø¥Ù†ØªØ§Ø¬ÙŠة')
+                  ? (exhibitionEditItem ? '╪¬╪╣╪»┘è┘ä ╪¿┘è╪º┘å╪º╪¬ ╪º┘ä╪º╪¿╪¬┘â╪º╪▒' : '╪Ñ╪╢╪º┘ü╪⌐ ╪º╪¿╪¬┘â╪º╪▒ ╪¼╪»┘è╪» ┘ä┘à╪╣╪▒╪╢ ╪º┘ä╪º╪¿╪¬┘â╪º╪▒╪º╪¬')
+                  : (exhibitionEditItem ? '╪¬╪╣╪»┘è┘ä ╪¿┘è╪º┘å╪º╪¬ ╪º┘ä┘à┘å╪¬╪¼' : '╪Ñ╪╢╪º┘ü╪⌐ ┘à┘å╪¬╪¼ ╪¼╪»┘è╪» ┘ä┘ä┘ê╪¡╪»╪º╪¬ ╪º┘ä╪Ñ┘å╪¬╪º╪¼┘è╪⌐')
                 }
               </h2>
               <button 
                 onClick={() => setIsExhibitionModalOpen(false)}
                 className="w-8 h-8 flex items-center justify-center bg-white/10 hover:bg-white/20 rounded-full transition-colors font-bold"
               >
-                âœ•
+                Γ£ò
               </button>
             </div>
             
@@ -2500,109 +2297,109 @@ const AdminDashboard = () => {
                 <form onSubmit={handleSaveInnovation} className="space-y-4">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-xs font-bold text-slate-700 mb-2">Ø¹Ù†ÙˆØ§Ù† Ø§Ù„Ø§Ø¨ØªÙƒار *</label>
+                      <label className="block text-xs font-bold text-slate-700 mb-2">╪╣┘å┘ê╪º┘å ╪º┘ä╪º╪¿╪¬┘â╪º╪▒ *</label>
                       <input 
                         type="text" 
                         required
                         value={innovationFormData.name}
                         onChange={(e) => setInnovationFormData({...innovationFormData, name: e.target.value})}
-                        className="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:border-[#1E3A8A] outline-none font-bold text-xs"
+                        className="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:border-[#26462C] outline-none font-bold text-xs"
                       />
                     </div>
                     <div>
-                      <label className="block text-xs font-bold text-slate-700 mb-2">Ø§Ø³Ù… Ø§Ù„ÙØ±ÙŠÙ‚ / Ø§Ù„Ù…Ø¨ØªÙƒر *</label>
+                      <label className="block text-xs font-bold text-slate-700 mb-2">╪º╪│┘à ╪º┘ä┘ü╪▒┘è┘é / ╪º┘ä┘à╪¿╪¬┘â╪▒ *</label>
                       <input 
                         type="text" 
                         required
                         value={innovationFormData.team}
                         onChange={(e) => setInnovationFormData({...innovationFormData, team: e.target.value})}
-                        className="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:border-[#1E3A8A] outline-none font-bold text-xs"
+                        className="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:border-[#26462C] outline-none font-bold text-xs"
                       />
                     </div>
                     <div>
-                      <label className="block text-xs font-bold text-slate-700 mb-2">Ø§Ù„ØªØµÙ†ÙŠف *</label>
+                      <label className="block text-xs font-bold text-slate-700 mb-2">╪º┘ä╪¬╪╡┘å┘è┘ü *</label>
                       <select 
                         value={innovationFormData.category}
                         onChange={(e) => setInnovationFormData({...innovationFormData, category: e.target.value})}
-                        className="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:border-[#1E3A8A] outline-none font-bold text-xs"
+                        className="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:border-[#26462C] outline-none font-bold text-xs"
                       >
-                        <option value="ai">Ø§Ù„Ø°Ùƒاء Ø§Ù„Ø§ØµØ·Ù†Ø§Ø¹ÙŠ</option>
-                        <option value="cyber">Ø§Ù„Ø£Ù…Ù† Ø§Ù„Ø³ÙŠØ¨Ø±Ø§Ù†ÙŠ</option>
-                        <option value="iot">Ø¥Ù†ØªØ±Ù†ت Ø§Ù„Ø£Ø´ÙŠاء</option>
-                        <option value="apps">ØªØ·Ø¨ÙŠÙ‚ات Ø§Ù„ÙˆÙŠب ÙˆØ§Ù„Ø¬ÙˆØ§Ù„</option>
+                        <option value="ai">╪º┘ä╪░┘â╪º╪í ╪º┘ä╪º╪╡╪╖┘å╪º╪╣┘è</option>
+                        <option value="cyber">╪º┘ä╪ú┘à┘å ╪º┘ä╪│┘è╪¿╪▒╪º┘å┘è</option>
+                        <option value="iot">╪Ñ┘å╪¬╪▒┘å╪¬ ╪º┘ä╪ú╪┤┘è╪º╪í</option>
+                        <option value="apps">╪¬╪╖╪¿┘è┘é╪º╪¬ ╪º┘ä┘ê┘è╪¿ ┘ê╪º┘ä╪¼┘ê╪º┘ä</option>
                       </select>
                     </div>
                     <div>
-                      <label className="block text-xs font-bold text-slate-700 mb-2">Ù…Ø³ØªÙˆÙ‰ Ø§Ù„Ø¬Ø§Ù‡Ø²ÙŠة *</label>
+                      <label className="block text-xs font-bold text-slate-700 mb-2">┘à╪│╪¬┘ê┘ë ╪º┘ä╪¼╪º┘ç╪▓┘è╪⌐ *</label>
                       <select 
                         value={innovationFormData.level}
                         onChange={(e) => {
                           const val = e.target.value;
-                          let name = 'Ù†Ù…Ùˆذج Ø£ÙˆÙ„ÙŠ';
-                          if (val === 'advanced') name = 'Ù…Ø³ØªÙˆÙ‰ Ù…ØªÙ‚Ø¯Ù…';
-                          if (val === 'ready') name = 'Ø¬Ø§Ù‡ز Ù„Ù„ØªØ¨Ù†ÙŠ Ø§Ù„ØªØ¬Ø§Ø±ÙŠ';
+                          let name = '┘å┘à┘ê╪░╪¼ ╪ú┘ê┘ä┘è';
+                          if (val === 'advanced') name = '┘à╪│╪¬┘ê┘ë ┘à╪¬┘é╪»┘à';
+                          if (val === 'ready') name = '╪¼╪º┘ç╪▓ ┘ä┘ä╪¬╪¿┘å┘è ╪º┘ä╪¬╪¼╪º╪▒┘è';
                           setInnovationFormData({...innovationFormData, level: val, levelName: name});
                         }}
-                        className="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:border-[#1E3A8A] outline-none font-bold text-xs"
+                        className="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:border-[#26462C] outline-none font-bold text-xs"
                       >
-                        <option value="prototype">Ù†Ù…Ùˆذج Ø£ÙˆÙ„ÙŠ</option>
-                        <option value="advanced">Ù…Ø³ØªÙˆÙ‰ Ù…ØªÙ‚Ø¯Ù…</option>
-                        <option value="ready">Ø¬Ø§Ù‡ز Ù„Ù„ØªØ¨Ù†ÙŠ Ø§Ù„ØªØ¬Ø§Ø±ÙŠ</option>
+                        <option value="prototype">┘å┘à┘ê╪░╪¼ ╪ú┘ê┘ä┘è</option>
+                        <option value="advanced">┘à╪│╪¬┘ê┘ë ┘à╪¬┘é╪»┘à</option>
+                        <option value="ready">╪¼╪º┘ç╪▓ ┘ä┘ä╪¬╪¿┘å┘è ╪º┘ä╪¬╪¼╪º╪▒┘è</option>
                       </select>
                     </div>
                     <div>
-                      <label className="block text-xs font-bold text-slate-700 mb-2">Ø§Ù„ØªÙ‚Ù†ÙŠة Ø§Ù„Ù…Ø³ØªØ®Ø¯Ù…ة</label>
+                      <label className="block text-xs font-bold text-slate-700 mb-2">╪º┘ä╪¬┘é┘å┘è╪⌐ ╪º┘ä┘à╪│╪¬╪«╪»┘à╪⌐</label>
                       <input 
                         type="text" 
                         value={innovationFormData.tech}
                         onChange={(e) => setInnovationFormData({...innovationFormData, tech: e.target.value})}
-                        className="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:border-[#1E3A8A] outline-none font-bold text-xs"
-                        placeholder="Ù…Ø«Ø§Ù„: React / Node.js"
+                        className="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:border-[#26462C] outline-none font-bold text-xs"
+                        placeholder="┘à╪½╪º┘ä: React / Node.js"
                       />
                     </div>
                     <div>
-                      <label className="block text-xs font-bold text-slate-700 mb-2">Ø£ÙŠÙ‚ÙˆÙ†ة Ø§Ù„عرض (Ø§Ø³Ù… Ø§Ù„Ø£ÙŠÙ‚ÙˆÙ†ة)</label>
+                      <label className="block text-xs font-bold text-slate-700 mb-2">╪ú┘è┘é┘ê┘å╪⌐ ╪º┘ä╪╣╪▒╪╢ (╪º╪│┘à ╪º┘ä╪ú┘è┘é┘ê┘å╪⌐)</label>
                       <select 
                         value={innovationFormData.icon}
                         onChange={(e) => setInnovationFormData({...innovationFormData, icon: e.target.value})}
-                        className="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:border-[#1E3A8A] outline-none font-bold text-xs"
+                        className="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:border-[#26462C] outline-none font-bold text-xs"
                       >
-                        <option value="Cpu">Cpu (Ù…Ø¹Ø§Ù„ج)</option>
-                        <option value="Lock">Lock (Ù‚ÙÙ„ Ø­Ù…Ø§ÙŠة)</option>
-                        <option value="Sprout">Sprout (Ø¨ÙŠØ¦ÙŠ / Ù†بات)</option>
-                        <option value="Globe">Globe (Ø¥Ù†ØªØ±Ù†ت / Ø´Ø¨Ùƒة)</option>
-                        <option value="Database">Database (Ù‚Ùˆاعد Ø¨ÙŠØ§Ù†ات)</option>
+                        <option value="Cpu">Cpu (┘à╪╣╪º┘ä╪¼)</option>
+                        <option value="Lock">Lock (┘é┘ü┘ä ╪¡┘à╪º┘è╪⌐)</option>
+                        <option value="Sprout">Sprout (╪¿┘è╪ª┘è / ┘å╪¿╪º╪¬)</option>
+                        <option value="Globe">Globe (╪Ñ┘å╪¬╪▒┘å╪¬ / ╪┤╪¿┘â╪⌐)</option>
+                        <option value="Database">Database (┘é┘ê╪º╪╣╪» ╪¿┘è╪º┘å╪º╪¬)</option>
                       </select>
                     </div>
                     <div className="md:col-span-2">
-                      <label className="block text-xs font-bold text-slate-700 mb-2">رابط ØµÙˆرة Ø§Ù„Ø§Ø¨ØªÙƒار</label>
+                      <label className="block text-xs font-bold text-slate-700 mb-2">╪▒╪º╪¿╪╖ ╪╡┘ê╪▒╪⌐ ╪º┘ä╪º╪¿╪¬┘â╪º╪▒</label>
                       <input 
                         type="url" 
                         value={innovationFormData.image}
                         onChange={(e) => setInnovationFormData({...innovationFormData, image: e.target.value})}
-                        className="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:border-[#1E3A8A] outline-none font-bold text-xs text-left"
+                        className="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:border-[#26462C] outline-none font-bold text-xs text-left"
                         dir="ltr"
                         placeholder="https://images.unsplash.com/..."
                       />
                     </div>
                     <div className="md:col-span-2">
-                      <label className="block text-xs font-bold text-slate-700 mb-2">Ø§Ù„Ùˆصف ÙˆØ§Ù„شرح *</label>
+                      <label className="block text-xs font-bold text-slate-700 mb-2">╪º┘ä┘ê╪╡┘ü ┘ê╪º┘ä╪┤╪▒╪¡ *</label>
                       <textarea 
                         required
                         rows={3}
                         value={innovationFormData.desc}
                         onChange={(e) => setInnovationFormData({...innovationFormData, desc: e.target.value})}
-                        className="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:border-[#1E3A8A] outline-none font-bold text-xs resize-none"
+                        className="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:border-[#26462C] outline-none font-bold text-xs resize-none"
                       />
                     </div>
                   </div>
                   
                   <div className="pt-4 border-t border-slate-100 flex gap-3">
-                    <button type="submit" className="flex-1 bg-[#1E3A8A] hover:bg-[#1e3a8a] text-white px-6 py-3 rounded-xl font-bold transition-colors text-sm">
-                      {exhibitionEditItem ? 'حفظ Ø§Ù„ØªØ¹Ø¯ÙŠÙ„ات' : 'إضافة Ù„Ù„Ø§Ø¨ØªÙƒارات'}
+                    <button type="submit" className="flex-1 bg-[#26462C] hover:bg-[#1a301e] text-white px-6 py-3 rounded-xl font-bold transition-colors text-sm">
+                      {exhibitionEditItem ? '╪¡┘ü╪╕ ╪º┘ä╪¬╪╣╪»┘è┘ä╪º╪¬' : '╪Ñ╪╢╪º┘ü╪⌐ ┘ä┘ä╪º╪¿╪¬┘â╪º╪▒╪º╪¬'}
                     </button>
                     <button type="button" onClick={() => setIsExhibitionModalOpen(false)} className="px-6 py-3 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl font-bold transition-colors text-sm">
-                      Ø¥Ù„غاء
+                      ╪Ñ┘ä╪║╪º╪í
                     </button>
                   </div>
                 </form>
@@ -2610,17 +2407,17 @@ const AdminDashboard = () => {
                 <form onSubmit={handleSaveProduct} className="space-y-4">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-xs font-bold text-slate-700 mb-2">Ø§Ø³Ù… Ø§Ù„Ù…Ù†تج / Ø§Ù„Ø®Ø¯Ù…ة *</label>
+                      <label className="block text-xs font-bold text-slate-700 mb-2">╪º╪│┘à ╪º┘ä┘à┘å╪¬╪¼ / ╪º┘ä╪«╪»┘à╪⌐ *</label>
                       <input 
                         type="text" 
                         required
                         value={productFormData.name}
                         onChange={(e) => setProductFormData({...productFormData, name: e.target.value})}
-                        className="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:border-[#1E3A8A] outline-none font-bold text-xs"
+                        className="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:border-[#26462C] outline-none font-bold text-xs"
                       />
                     </div>
                     <div>
-                      <label className="block text-xs font-bold text-slate-700 mb-2">Ø§Ù„ÙƒÙ„ÙŠة Ø§Ù„Ù…Ù†تجة *</label>
+                      <label className="block text-xs font-bold text-slate-700 mb-2">╪º┘ä┘â┘ä┘è╪⌐ ╪º┘ä┘à┘å╪¬╪¼╪⌐ *</label>
                       <select 
                         value={productFormData.facultyId}
                         onChange={(e) => {
@@ -2629,93 +2426,93 @@ const AdminDashboard = () => {
                           const name = selectEl.options[selectEl.selectedIndex].text;
                           setProductFormData({...productFormData, facultyId: val, faculty: name});
                         }}
-                        className="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:border-[#1E3A8A] outline-none font-bold text-xs"
+                        className="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:border-[#26462C] outline-none font-bold text-xs"
                       >
-                        <option value="agriculture">ÙƒÙ„ÙŠة Ø§Ù„زراعة</option>
-                        <option value="science">ÙƒÙ„ÙŠة Ø§Ù„Ø¹Ù„ÙˆÙ…</option>
-                        <option value="artedu">ÙƒÙ„ÙŠة Ø§Ù„ØªØ±Ø¨ÙŠة Ø§Ù„ÙÙ†ÙŠة</option>
-                        <option value="specific">ÙƒÙ„ÙŠة Ø§Ù„ØªØ±Ø¨ÙŠة Ø§Ù„Ù†ÙˆØ¹ÙŠة</option>
-                        <option value="engineering">ÙƒÙ„ÙŠة Ø§Ù„Ù‡Ù†دسة</option>
-                        <option value="computers">ÙƒÙ„ÙŠة Ø§Ù„حاسبات ÙˆØ§Ù„Ù…Ø¹Ù„ÙˆÙ…ات</option>
-                        <option value="pharmacy">ÙƒÙ„ÙŠة Ø§Ù„ØµÙŠØ¯Ù„ة</option>
-                        <option value="finearts">ÙƒÙ„ÙŠة Ø§Ù„ÙÙ†ÙˆÙ† Ø§Ù„Ø¬Ù…ÙŠÙ„ة</option>
-                        <option value="tourism">ÙƒÙ„ÙŠة Ø§Ù„Ø³ÙŠاحة ÙˆØ§Ù„ÙÙ†Ø§Ø¯Ù‚</option>
+                        <option value="agriculture">┘â┘ä┘è╪⌐ ╪º┘ä╪▓╪▒╪º╪╣╪⌐</option>
+                        <option value="science">┘â┘ä┘è╪⌐ ╪º┘ä╪╣┘ä┘ê┘à</option>
+                        <option value="artedu">┘â┘ä┘è╪⌐ ╪º┘ä╪¬╪▒╪¿┘è╪⌐ ╪º┘ä┘ü┘å┘è╪⌐</option>
+                        <option value="specific">┘â┘ä┘è╪⌐ ╪º┘ä╪¬╪▒╪¿┘è╪⌐ ╪º┘ä┘å┘ê╪╣┘è╪⌐</option>
+                        <option value="engineering">┘â┘ä┘è╪⌐ ╪º┘ä┘ç┘å╪»╪│╪⌐</option>
+                        <option value="computers">┘â┘ä┘è╪⌐ ╪º┘ä╪¡╪º╪│╪¿╪º╪¬ ┘ê╪º┘ä┘à╪╣┘ä┘ê┘à╪º╪¬</option>
+                        <option value="pharmacy">┘â┘ä┘è╪⌐ ╪º┘ä╪╡┘è╪»┘ä╪⌐</option>
+                        <option value="finearts">┘â┘ä┘è╪⌐ ╪º┘ä┘ü┘å┘ê┘å ╪º┘ä╪¼┘à┘è┘ä╪⌐</option>
+                        <option value="tourism">┘â┘ä┘è╪⌐ ╪º┘ä╪│┘è╪º╪¡╪⌐ ┘ê╪º┘ä┘ü┘å╪º╪»┘é</option>
                       </select>
                     </div>
                     <div>
-                      <label className="block text-xs font-bold text-slate-700 mb-2">Ø§Ù„ØªØµÙ†ÙŠف ÙˆØ§Ù„Ù‚طاع *</label>
+                      <label className="block text-xs font-bold text-slate-700 mb-2">╪º┘ä╪¬╪╡┘å┘è┘ü ┘ê╪º┘ä┘é╪╖╪º╪╣ *</label>
                       <input 
                         type="text" 
                         required
                         value={productFormData.category}
                         onChange={(e) => setProductFormData({...productFormData, category: e.target.value})}
-                        className="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:border-[#1E3A8A] outline-none font-bold text-xs"
-                        placeholder="Ù…Ø«Ø§Ù„: Ù…Ù†تجات Ø²Ø±Ø§Ø¹ÙŠة Ø£Ùˆ Ù…Ù†ظفات"
+                        className="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:border-[#26462C] outline-none font-bold text-xs"
+                        placeholder="┘à╪½╪º┘ä: ┘à┘å╪¬╪¼╪º╪¬ ╪▓╪▒╪º╪╣┘è╪⌐ ╪ú┘ê ┘à┘å╪╕┘ü╪º╪¬"
                       />
                     </div>
                     <div>
-                      <label className="block text-xs font-bold text-slate-700 mb-2">Ø§Ù„سعر Ø§Ù„ØªØ¬Ø§Ø±ÙŠ *</label>
+                      <label className="block text-xs font-bold text-slate-700 mb-2">╪º┘ä╪│╪╣╪▒ ╪º┘ä╪¬╪¼╪º╪▒┘è *</label>
                       <input 
                         type="text" 
                         required
                         value={productFormData.price}
                         onChange={(e) => setProductFormData({...productFormData, price: e.target.value})}
-                        className="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:border-[#1E3A8A] outline-none font-bold text-xs"
-                        placeholder="Ù…Ø«Ø§Ù„: 150 ج.Ù…"
+                        className="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:border-[#26462C] outline-none font-bold text-xs"
+                        placeholder="┘à╪½╪º┘ä: 150 ╪¼.┘à"
                       />
                     </div>
                     <div>
-                      <label className="block text-xs font-bold text-slate-700 mb-2">شعار Ø§Ù„ØªØ³ÙˆÙŠÙ‚ (Tag) (Ø§Ø®ØªÙŠØ§Ø±ÙŠ)</label>
+                      <label className="block text-xs font-bold text-slate-700 mb-2">╪┤╪╣╪º╪▒ ╪º┘ä╪¬╪│┘ê┘è┘é (Tag) (╪º╪«╪¬┘è╪º╪▒┘è)</label>
                       <input 
                         type="text" 
                         value={productFormData.tag}
                         onChange={(e) => setProductFormData({...productFormData, tag: e.target.value})}
-                        className="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:border-[#1E3A8A] outline-none font-bold text-xs"
-                        placeholder="Ù…Ø«Ø§Ù„: Ø§Ù„Ø£Ùƒثر Ù…Ø¨ÙŠØ¹Ø§Ù‹ Ø£Ùˆ عصر بارد"
+                        className="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:border-[#26462C] outline-none font-bold text-xs"
+                        placeholder="┘à╪½╪º┘ä: ╪º┘ä╪ú┘â╪½╪▒ ┘à╪¿┘è╪╣╪º┘ï ╪ú┘ê ╪╣╪╡╪▒ ╪¿╪º╪▒╪»"
                       />
                     </div>
                     <div>
-                      <label className="block text-xs font-bold text-slate-700 mb-2">Ù„ÙˆÙ† Ø§Ù„شعار</label>
+                      <label className="block text-xs font-bold text-slate-700 mb-2">┘ä┘ê┘å ╪º┘ä╪┤╪╣╪º╪▒</label>
                       <select 
                         value={productFormData.tagColor}
                         onChange={(e) => setProductFormData({...productFormData, tagColor: e.target.value})}
-                        className="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:border-[#1E3A8A] outline-none font-bold text-xs"
+                        className="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:border-[#26462C] outline-none font-bold text-xs"
                       >
-                        <option value="bg-emerald-600 text-white">أخضر Ø²Ù…Ø±Ø¯ÙŠ</option>
-                        <option value="bg-amber-500 text-white">Ø°Ù‡Ø¨ÙŠ / Ø¨Ø±ØªÙ‚Ø§Ù„ÙŠ</option>
-                        <option value="bg-blue-600 text-white">Ø£Ø²Ø±Ù‚ Ø¯Ø§ÙƒÙ†</option>
-                        <option value="bg-purple-600 text-white">Ø¨Ù†ÙØ³Ø¬ÙŠ ÙÙ†ÙŠ</option>
+                        <option value="bg-emerald-600 text-white">╪ú╪«╪╢╪▒ ╪▓┘à╪▒╪»┘è</option>
+                        <option value="bg-amber-500 text-white">╪░┘ç╪¿┘è / ╪¿╪▒╪¬┘é╪º┘ä┘è</option>
+                        <option value="bg-blue-600 text-white">╪ú╪▓╪▒┘é ╪»╪º┘â┘å</option>
+                        <option value="bg-purple-600 text-white">╪¿┘å┘ü╪│╪¼┘è ┘ü┘å┘è</option>
                       </select>
                     </div>
                     <div className="md:col-span-2">
-                      <label className="block text-xs font-bold text-slate-700 mb-2">رابط ØµÙˆرة Ø§Ù„Ù…Ù†تج</label>
+                      <label className="block text-xs font-bold text-slate-700 mb-2">╪▒╪º╪¿╪╖ ╪╡┘ê╪▒╪⌐ ╪º┘ä┘à┘å╪¬╪¼</label>
                       <input 
                         type="url" 
                         value={productFormData.image}
                         onChange={(e) => setProductFormData({...productFormData, image: e.target.value})}
-                        className="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:border-[#1E3A8A] outline-none font-bold text-xs text-left"
+                        className="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:border-[#26462C] outline-none font-bold text-xs text-left"
                         dir="ltr"
                         placeholder="https://images.unsplash.com/..."
                       />
                     </div>
                     <div className="md:col-span-2">
-                      <label className="block text-xs font-bold text-slate-700 mb-2">ØªÙØ§ØµÙŠÙ„ ÙˆÙ…Ùˆاصفات Ø§Ù„Ù…Ù†تج *</label>
+                      <label className="block text-xs font-bold text-slate-700 mb-2">╪¬┘ü╪º╪╡┘è┘ä ┘ê┘à┘ê╪º╪╡┘ü╪º╪¬ ╪º┘ä┘à┘å╪¬╪¼ *</label>
                       <textarea 
                         required
                         rows={3}
                         value={productFormData.details}
                         onChange={(e) => setProductFormData({...productFormData, details: e.target.value})}
-                        className="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:border-[#1E3A8A] outline-none font-bold text-xs resize-none"
+                        className="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:border-[#26462C] outline-none font-bold text-xs resize-none"
                       />
                     </div>
                   </div>
                   
                   <div className="pt-4 border-t border-slate-100 flex gap-3">
-                    <button type="submit" className="flex-1 bg-[#1E3A8A] hover:bg-[#1e3a8a] text-white px-6 py-3 rounded-xl font-bold transition-colors text-sm">
-                      {exhibitionEditItem ? 'حفظ Ø§Ù„ØªØ¹Ø¯ÙŠÙ„ات' : 'إضافة Ù„Ù„Ù…Ù†تجات'}
+                    <button type="submit" className="flex-1 bg-[#26462C] hover:bg-[#1a301e] text-white px-6 py-3 rounded-xl font-bold transition-colors text-sm">
+                      {exhibitionEditItem ? '╪¡┘ü╪╕ ╪º┘ä╪¬╪╣╪»┘è┘ä╪º╪¬' : '╪Ñ╪╢╪º┘ü╪⌐ ┘ä┘ä┘à┘å╪¬╪¼╪º╪¬'}
                     </button>
                     <button type="button" onClick={() => setIsExhibitionModalOpen(false)} className="px-6 py-3 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl font-bold transition-colors text-sm">
-                      Ø¥Ù„غاء
+                      ╪Ñ┘ä╪║╪º╪í
                     </button>
                   </div>
                 </form>
@@ -2730,67 +2527,67 @@ const AdminDashboard = () => {
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
           <div className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" onClick={() => setIsNewsModalOpen(false)}></div>
           <div className="bg-white rounded-3xl w-full max-w-2xl overflow-hidden relative z-10 shadow-2xl animate-scale-up flex flex-col max-h-[90vh]">
-            <div className="bg-[#1E3A8A] text-white p-6 flex justify-between items-center shrink-0">
-              <h2 className="text-2xl font-black text-[#F4A217]">{editingNewsId ? 'ØªØ¹Ø¯ÙŠÙ„ Ø§Ù„خبر' : 'إضافة خبر Ø¬Ø¯ÙŠد'}</h2>
+            <div className="bg-[#26462C] text-white p-6 flex justify-between items-center shrink-0">
+              <h2 className="text-2xl font-black text-[#F4A217]">{editingNewsId ? '╪¬╪╣╪»┘è┘ä ╪º┘ä╪«╪¿╪▒' : '╪Ñ╪╢╪º┘ü╪⌐ ╪«╪¿╪▒ ╪¼╪»┘è╪»'}</h2>
               <button 
                 onClick={() => setIsNewsModalOpen(false)}
                 className="w-8 h-8 flex items-center justify-center bg-white/10 hover:bg-white/20 rounded-full transition-colors font-bold"
               >
-                âœ•
+                Γ£ò
               </button>
             </div>
             
             <div className="p-6 overflow-y-auto flex-1">
               <form onSubmit={handleSaveNews} className="space-y-5">
                 <div>
-                  <label className="block text-sm font-bold text-slate-700 mb-2">Ø¹Ù†ÙˆØ§Ù† Ø§Ù„خبر *</label>
+                  <label className="block text-sm font-bold text-slate-700 mb-2">╪╣┘å┘ê╪º┘å ╪º┘ä╪«╪¿╪▒ *</label>
                   <input 
                     type="text" 
                     required
                     value={newNewsData.title}
                     onChange={(e) => setNewNewsData({...newNewsData, title: e.target.value})}
-                    className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-[#1E3A8A] focus:ring-1 focus:ring-[#1E3A8A] outline-none"
-                    placeholder="Ø§Ùƒتب Ø¹Ù†ÙˆØ§Ù† Ø§Ù„خبر Ù‡Ù†ا"
+                    className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-[#26462C] focus:ring-1 focus:ring-[#26462C] outline-none"
+                    placeholder="╪º┘â╪¬╪¿ ╪╣┘å┘ê╪º┘å ╪º┘ä╪«╪¿╪▒ ┘ç┘å╪º"
                   />
                 </div>
                 
                 <div>
-                  <label className="block text-sm font-bold text-slate-700 mb-2">Ù…Ø­ØªÙˆÙ‰ ÙˆØªÙØ§ØµÙŠÙ„ Ø§Ù„خبر *</label>
+                  <label className="block text-sm font-bold text-slate-700 mb-2">┘à╪¡╪¬┘ê┘ë ┘ê╪¬┘ü╪º╪╡┘è┘ä ╪º┘ä╪«╪¿╪▒ *</label>
                   <textarea 
                     required
                     rows={5}
                     value={newNewsData.content}
                     onChange={(e) => setNewNewsData({...newNewsData, content: e.target.value})}
-                    className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-[#1E3A8A] focus:ring-1 focus:ring-[#1E3A8A] outline-none resize-none"
-                    placeholder="Ø§Ùƒتب ØªÙØ§ØµÙŠÙ„ Ø§Ù„خبر Ù‡Ù†ا..."
+                    className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-[#26462C] focus:ring-1 focus:ring-[#26462C] outline-none resize-none"
+                    placeholder="╪º┘â╪¬╪¿ ╪¬┘ü╪º╪╡┘è┘ä ╪º┘ä╪«╪¿╪▒ ┘ç┘å╪º..."
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-bold text-slate-700 mb-2">رابط ØµÙˆرة Ø§Ù„خبر (Ø§Ø®ØªÙŠØ§Ø±ÙŠ)</label>
+                  <label className="block text-sm font-bold text-slate-700 mb-2">╪▒╪º╪¿╪╖ ╪╡┘ê╪▒╪⌐ ╪º┘ä╪«╪¿╪▒ (╪º╪«╪¬┘è╪º╪▒┘è)</label>
                   <input 
                     type="text" 
                     value={newNewsData.image_url}
                     onChange={(e) => setNewNewsData({...newNewsData, image_url: e.target.value})}
-                    className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-[#1E3A8A] focus:ring-1 focus:ring-[#1E3A8A] outline-none"
-                    placeholder="Ù…Ø«Ø§Ù„: https://example.com/image.jpg"
+                    className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-[#26462C] focus:ring-1 focus:ring-[#26462C] outline-none"
+                    placeholder="┘à╪½╪º┘ä: https://example.com/image.jpg"
                   />
-                  <p className="text-xs text-slate-500 mt-2 font-semibold">إذا ØªØ±Ùƒت Ù‡ذا Ø§Ù„Ø­Ù‚Ù„ ÙØ§Ø±ØºØ§Ù‹ØŒ Ø³ÙŠØªÙ… Ùˆضع Ø£ÙŠÙ‚ÙˆÙ†ة Ø§ÙØªØ±Ø§Ø¶ÙŠة.</p>
+                  <p className="text-xs text-slate-500 mt-2 font-semibold">╪Ñ╪░╪º ╪¬╪▒┘â╪¬ ┘ç╪░╪º ╪º┘ä╪¡┘é┘ä ┘ü╪º╪▒╪║╪º┘ï╪î ╪│┘è╪¬┘à ┘ê╪╢╪╣ ╪ú┘è┘é┘ê┘å╪⌐ ╪º┘ü╪¬╪▒╪º╪╢┘è╪⌐.</p>
                 </div>
                 
                 <div className="pt-6 border-t border-slate-100 flex gap-3">
                   <button 
                     type="submit"
-                    className="flex-1 bg-[#1E3A8A] hover:bg-[#1e3a8a] text-white px-6 py-3 rounded-xl font-bold transition-colors shadow-sm"
+                    className="flex-1 bg-[#26462C] hover:bg-[#1a301e] text-white px-6 py-3 rounded-xl font-bold transition-colors shadow-sm"
                   >
-                    {editingNewsId ? 'حفظ Ø§Ù„ØªØ¹Ø¯ÙŠÙ„ات' : 'Ù†شر Ø§Ù„خبر'}
+                    {editingNewsId ? '╪¡┘ü╪╕ ╪º┘ä╪¬╪╣╪»┘è┘ä╪º╪¬' : '┘å╪┤╪▒ ╪º┘ä╪«╪¿╪▒'}
                   </button>
                   <button 
                     type="button"
                     onClick={() => setIsNewsModalOpen(false)}
                     className="px-6 py-3 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl font-bold transition-colors"
                   >
-                    Ø¥Ù„غاء
+                    ╪Ñ┘ä╪║╪º╪í
                   </button>
                 </div>
               </form>
@@ -2804,13 +2601,13 @@ const AdminDashboard = () => {
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
           <div className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" onClick={() => setIsJobModalOpen(false)}></div>
           <div className="bg-white rounded-3xl w-full max-w-2xl overflow-hidden relative z-10 shadow-2xl animate-scale-up flex flex-col max-h-[90vh]">
-            <div className="bg-[#1E3A8A] text-white p-6 flex justify-between items-center shrink-0">
-              <h2 className="text-2xl font-black text-[#F4A217]">{jobEditItem ? 'ØªØ¹Ø¯ÙŠÙ„ ÙˆØ¸ÙŠفة' : 'إضافة ÙˆØ¸ÙŠفة Ø¬Ø¯ÙŠدة'}</h2>
+            <div className="bg-[#26462C] text-white p-6 flex justify-between items-center shrink-0">
+              <h2 className="text-2xl font-black text-[#F4A217]">{jobEditItem ? '╪¬╪╣╪»┘è┘ä ┘ê╪╕┘è┘ü╪⌐' : '╪Ñ╪╢╪º┘ü╪⌐ ┘ê╪╕┘è┘ü╪⌐ ╪¼╪»┘è╪»╪⌐'}</h2>
               <button 
                 onClick={() => setIsJobModalOpen(false)}
                 className="w-8 h-8 flex items-center justify-center bg-white/10 hover:bg-white/20 rounded-full transition-colors font-bold cursor-pointer"
               >
-                âœ•
+                Γ£ò
               </button>
             </div>
             
@@ -2818,99 +2615,99 @@ const AdminDashboard = () => {
               <form onSubmit={handleSaveJob} className="space-y-4">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-xs font-bold text-slate-700 mb-2">Ø§Ù„Ù…Ø³Ù…Ù‰ Ø§Ù„ÙˆØ¸ÙŠÙÙŠ *</label>
+                    <label className="block text-xs font-bold text-slate-700 mb-2">╪º┘ä┘à╪│┘à┘ë ╪º┘ä┘ê╪╕┘è┘ü┘è *</label>
                     <input 
                       type="text" 
                       required
                       value={jobFormData.title}
                       onChange={(e) => setJobFormData({...jobFormData, title: e.target.value})}
-                      className="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:border-[#1E3A8A] focus:ring-1 focus:ring-[#1E3A8A] outline-none font-semibold text-xs"
-                      placeholder="Ù…Ø«Ø§Ù„: Ù…Ù‡Ù†دس Ø¨Ø±Ù…Ø¬ÙŠات ÙˆØ§Ø¬Ù‡ات Ø£Ù…Ø§Ù…ÙŠة"
+                      className="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:border-[#26462C] focus:ring-1 focus:ring-[#26462C] outline-none font-semibold text-xs"
+                      placeholder="┘à╪½╪º┘ä: ┘à┘ç┘å╪»╪│ ╪¿╪▒┘à╪¼┘è╪º╪¬ ┘ê╪º╪¼┘ç╪º╪¬ ╪ú┘à╪º┘à┘è╪⌐"
                     />
                   </div>
                   <div>
-                    <label className="block text-xs font-bold text-slate-700 mb-2">Ø§Ø³Ù… Ø§Ù„Ø´Ø±Ùƒة *</label>
+                    <label className="block text-xs font-bold text-slate-700 mb-2">╪º╪│┘à ╪º┘ä╪┤╪▒┘â╪⌐ *</label>
                     <input 
                       type="text" 
                       required
                       value={jobFormData.company}
                       onChange={(e) => setJobFormData({...jobFormData, company: e.target.value})}
-                      className="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:border-[#1E3A8A] focus:ring-1 focus:ring-[#1E3A8A] outline-none font-semibold text-xs"
-                      placeholder="Ù…Ø«Ø§Ù„: TechVision Solutions"
+                      className="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:border-[#26462C] focus:ring-1 focus:ring-[#26462C] outline-none font-semibold text-xs"
+                      placeholder="┘à╪½╪º┘ä: TechVision Solutions"
                     />
                   </div>
                   <div>
-                    <label className="block text-xs font-bold text-slate-700 mb-2">Ø§Ù„Ù…ÙˆÙ‚ع Ø§Ù„Ø¬ØºØ±Ø§ÙÙŠ *</label>
+                    <label className="block text-xs font-bold text-slate-700 mb-2">╪º┘ä┘à┘ê┘é╪╣ ╪º┘ä╪¼╪║╪▒╪º┘ü┘è *</label>
                     <input 
                       type="text" 
                       required
                       value={jobFormData.location}
                       onChange={(e) => setJobFormData({...jobFormData, location: e.target.value})}
-                      className="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:border-[#1E3A8A] focus:ring-1 focus:ring-[#1E3A8A] outline-none font-semibold text-xs"
-                      placeholder="Ù…Ø«Ø§Ù„: Ø§Ù„Ù‚Ø±ÙŠة Ø§Ù„Ø°ÙƒÙŠØ©ØŒ Ø§Ù„Ù‚Ø§Ù‡رة"
+                      className="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:border-[#26462C] focus:ring-1 focus:ring-[#26462C] outline-none font-semibold text-xs"
+                      placeholder="┘à╪½╪º┘ä: ╪º┘ä┘é╪▒┘è╪⌐ ╪º┘ä╪░┘â┘è╪⌐╪î ╪º┘ä┘é╪º┘ç╪▒╪⌐"
                     />
                   </div>
                   <div>
-                    <label className="block text-xs font-bold text-slate-700 mb-2">رابط Ø§Ù„شعار (Ø§Ø®ØªÙŠØ§Ø±ÙŠ)</label>
+                    <label className="block text-xs font-bold text-slate-700 mb-2">╪▒╪º╪¿╪╖ ╪º┘ä╪┤╪╣╪º╪▒ (╪º╪«╪¬┘è╪º╪▒┘è)</label>
                     <input 
                       type="text" 
                       value={jobFormData.logo}
                       onChange={(e) => setJobFormData({...jobFormData, logo: e.target.value})}
-                      className="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:border-[#1E3A8A] focus:ring-1 focus:ring-[#1E3A8A] outline-none font-semibold text-xs"
-                      placeholder="Ù…Ø«Ø§Ù„: https://example.com/logo.jpg"
+                      className="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:border-[#26462C] focus:ring-1 focus:ring-[#26462C] outline-none font-semibold text-xs"
+                      placeholder="┘à╪½╪º┘ä: https://example.com/logo.jpg"
                     />
                   </div>
                   <div>
-                    <label className="block text-xs font-bold text-slate-700 mb-2">Ù†Ùˆع Ø§Ù„Ø¯ÙˆØ§Ù… *</label>
+                    <label className="block text-xs font-bold text-slate-700 mb-2">┘å┘ê╪╣ ╪º┘ä╪»┘ê╪º┘à *</label>
                     <select 
                       value={jobFormData.type}
                       onChange={(e) => setJobFormData({...jobFormData, type: e.target.value})}
-                      className="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:border-[#1E3A8A] focus:ring-1 focus:ring-[#1E3A8A] outline-none font-bold text-xs"
+                      className="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:border-[#26462C] focus:ring-1 focus:ring-[#26462C] outline-none font-bold text-xs"
                     >
-                      <option value="Ø¯ÙˆØ§Ù… ÙƒØ§Ù…Ù„">Ø¯ÙˆØ§Ù… ÙƒØ§Ù…Ù„</option>
-                      <option value="Ø¯ÙˆØ§Ù… Ø¬Ø²Ø¦ÙŠ">Ø¯ÙˆØ§Ù… Ø¬Ø²Ø¦ÙŠ</option>
-                      <option value="Ø¹Ù† بُعد (Remote)">Ø¹Ù† بُعد (Remote)</option>
-                      <option value="ØªØ¯Ø±ÙŠب (Internship)">ØªØ¯Ø±ÙŠب (Internship)</option>
+                      <option value="╪»┘ê╪º┘à ┘â╪º┘à┘ä">╪»┘ê╪º┘à ┘â╪º┘à┘ä</option>
+                      <option value="╪»┘ê╪º┘à ╪¼╪▓╪ª┘è">╪»┘ê╪º┘à ╪¼╪▓╪ª┘è</option>
+                      <option value="╪╣┘å ╪¿┘Å╪╣╪» (Remote)">╪╣┘å ╪¿┘Å╪╣╪» (Remote)</option>
+                      <option value="╪¬╪»╪▒┘è╪¿ (Internship)">╪¬╪»╪▒┘è╪¿ (Internship)</option>
                     </select>
                   </div>
                   <div>
-                    <label className="block text-xs font-bold text-slate-700 mb-2">Ø§Ù„خبرة Ø§Ù„Ù…Ø·Ù„Ùˆبة *</label>
+                    <label className="block text-xs font-bold text-slate-700 mb-2">╪º┘ä╪«╪¿╪▒╪⌐ ╪º┘ä┘à╪╖┘ä┘ê╪¿╪⌐ *</label>
                     <input 
                       type="text" 
                       required
                       value={jobFormData.experience}
                       onChange={(e) => setJobFormData({...jobFormData, experience: e.target.value})}
-                      className="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:border-[#1E3A8A] focus:ring-1 focus:ring-[#1E3A8A] outline-none font-semibold text-xs"
-                      placeholder="Ù…Ø«Ø§Ù„: Ø­Ø¯ÙŠث Ø§Ù„ØªØ®Ø±Ø¬ØŒ 1-3 Ø³Ù†Ùˆات"
+                      className="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:border-[#26462C] focus:ring-1 focus:ring-[#26462C] outline-none font-semibold text-xs"
+                      placeholder="┘à╪½╪º┘ä: ╪¡╪»┘è╪½ ╪º┘ä╪¬╪«╪▒╪¼╪î 1-3 ╪│┘å┘ê╪º╪¬"
                     />
                   </div>
                 </div>
 
                 <div>
-                  <label className="block text-xs font-bold text-slate-700 mb-2">ØªÙØ§ØµÙŠÙ„ ÙˆØ´Ø±Ùˆط Ø§Ù„ÙˆØ¸ÙŠفة *</label>
+                  <label className="block text-xs font-bold text-slate-700 mb-2">╪¬┘ü╪º╪╡┘è┘ä ┘ê╪┤╪▒┘ê╪╖ ╪º┘ä┘ê╪╕┘è┘ü╪⌐ *</label>
                   <textarea 
                     required
                     rows={4}
                     value={jobFormData.details}
                     onChange={(e) => setJobFormData({...jobFormData, details: e.target.value})}
-                    className="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:border-[#1E3A8A] focus:ring-1 focus:ring-[#1E3A8A] outline-none font-semibold text-xs resize-none"
-                    placeholder="Ø§Ùƒتب Ù…ØªØ·Ù„بات Ø§Ù„ÙˆØ¸ÙŠفة ÙˆÙˆصف Ø§Ù„Ø¯Ùˆر Ø¨Ø§Ù„ØªÙØµÙŠÙ„..."
+                    className="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:border-[#26462C] focus:ring-1 focus:ring-[#26462C] outline-none font-semibold text-xs resize-none"
+                    placeholder="╪º┘â╪¬╪¿ ┘à╪¬╪╖┘ä╪¿╪º╪¬ ╪º┘ä┘ê╪╕┘è┘ü╪⌐ ┘ê┘ê╪╡┘ü ╪º┘ä╪»┘ê╪▒ ╪¿╪º┘ä╪¬┘ü╪╡┘è┘ä..."
                   />
                 </div>
                 
                 <div className="pt-4 border-t border-slate-100 flex gap-3">
                   <button 
                     type="submit"
-                    className="flex-1 bg-[#1E3A8A] hover:bg-[#1e3a8a] text-white px-6 py-3 rounded-xl font-bold transition-colors shadow-sm cursor-pointer"
+                    className="flex-1 bg-[#26462C] hover:bg-[#1a301e] text-white px-6 py-3 rounded-xl font-bold transition-colors shadow-sm cursor-pointer"
                   >
-                    {jobEditItem ? 'حفظ Ø§Ù„ØªØ¹Ø¯ÙŠÙ„ات' : 'إضافة Ø§Ù„ÙˆØ¸ÙŠفة'}
+                    {jobEditItem ? '╪¡┘ü╪╕ ╪º┘ä╪¬╪╣╪»┘è┘ä╪º╪¬' : '╪Ñ╪╢╪º┘ü╪⌐ ╪º┘ä┘ê╪╕┘è┘ü╪⌐'}
                   </button>
                   <button 
                     type="button"
                     onClick={() => setIsJobModalOpen(false)}
                     className="px-6 py-3 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl font-bold transition-colors cursor-pointer"
                   >
-                    Ø¥Ù„غاء
+                    ╪Ñ┘ä╪║╪º╪í
                   </button>
                 </div>
               </form>
@@ -2924,5 +2721,3 @@ const AdminDashboard = () => {
 };
 
 export default AdminDashboard;
-
-
