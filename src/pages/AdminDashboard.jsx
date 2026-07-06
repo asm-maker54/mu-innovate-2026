@@ -4,7 +4,7 @@ import {
   Users, Award, BookOpen, Download, Search, CheckCircle, Clock, 
   AlertTriangle, Eye, ArrowLeft, RefreshCw, KeyRound, BarChart2,
   FileText, Briefcase, GraduationCap, Presentation, Newspaper,
-  Trash, FileSpreadsheet, Sparkles, ShoppingBag, Plus, Edit
+  Trash, FileSpreadsheet, Sparkles, ShoppingBag, Plus, Edit, Upload
 } from 'lucide-react';
 import { supabase, isSupabaseConfigured } from '../supabaseClient';
 
@@ -659,6 +659,47 @@ const AdminDashboard = () => {
     setAdminRole('superAdmin');
     sessionStorage.removeItem('isAdminAuthenticated');
     sessionStorage.removeItem('adminUsername');
+  };
+
+  const handleAvatarUpload = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    if (!file.type.startsWith('image/')) {
+      alert('يرجى اختيار ملف صورة (JPG, PNG, GIF).');
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const img = new Image();
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        const MAX_SIZE = 300;
+        let width = img.width;
+        let height = img.height;
+
+        if (width > height) {
+          if (width > MAX_SIZE) {
+            height *= MAX_SIZE / width;
+            width = MAX_SIZE;
+          }
+        } else {
+          if (height > MAX_SIZE) {
+            width *= MAX_SIZE / height;
+            height = MAX_SIZE;
+          }
+        }
+
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0, width, height);
+        
+        const dataUrl = canvas.toDataURL('image/jpeg', 0.85);
+        setProfileForm({ ...profileForm, avatar: dataUrl });
+      };
+      img.src = event.target.result;
+    };
+    reader.readAsDataURL(file);
   };
 
   const handleSaveProfile = (e) => {
@@ -1513,16 +1554,34 @@ const AdminDashboard = () => {
                           <span className="text-[#1E3A8A] font-black text-3xl">{(adminProfile.name || 'A').charAt(0).toUpperCase()}</span>
                         )}
                       </div>
-                      <div className="flex-1">
-                        <label className="block text-xs font-bold text-slate-500 mb-2">رابط الصورة الشخصية (URL)</label>
-                        <input
-                          type="url"
-                          placeholder="https://example.com/photo.jpg"
-                          value={profileForm.avatar}
-                          onChange={e => setProfileForm({...profileForm, avatar: e.target.value})}
-                          className="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:ring-2 focus:ring-[#1E3A8A] focus:border-[#1E3A8A] outline-none text-sm font-semibold"
-                        />
-                        <p className="text-[11px] text-slate-400 mt-1 font-semibold">أدخل رابط صورتك الشخصية من الإنترنت لتظهر في القائمة الجانبية</p>
+                      <div className="flex-1 space-y-3">
+                        <div>
+                          <label className="flex items-center justify-center gap-2 w-full px-4 py-2.5 bg-blue-50 hover:bg-blue-100 text-blue-700 rounded-xl border border-blue-200 cursor-pointer transition-colors font-bold text-sm">
+                            <Upload className="w-4 h-4" />
+                            <span>رفع صورة من الجهاز</span>
+                            <input
+                              type="file"
+                              accept="image/*"
+                              className="hidden"
+                              onChange={handleAvatarUpload}
+                            />
+                          </label>
+                          <p className="text-[11px] text-slate-400 mt-1 font-semibold text-center">يتم تصغير الصورة تلقائياً لتناسب القائمة (حجم أقصى 300 بكسل).</p>
+                        </div>
+                        <div className="flex items-center gap-3">
+                          <div className="h-px bg-slate-100 flex-1"></div>
+                          <span className="text-[10px] font-bold text-slate-400">أو</span>
+                          <div className="h-px bg-slate-100 flex-1"></div>
+                        </div>
+                        <div>
+                          <input
+                            type="url"
+                            placeholder="لصق رابط الصورة الشخصية (URL)"
+                            value={profileForm.avatar}
+                            onChange={e => setProfileForm({...profileForm, avatar: e.target.value})}
+                            className="w-full px-4 py-2 rounded-xl border border-slate-200 focus:ring-2 focus:ring-[#1E3A8A] focus:border-[#1E3A8A] outline-none text-xs font-semibold"
+                          />
+                        </div>
                       </div>
                     </div>
                   </div>
