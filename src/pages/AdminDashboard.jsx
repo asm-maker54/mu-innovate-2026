@@ -112,6 +112,7 @@ const AdminDashboard = () => {
   const [password, setPassword] = useState('');
   const [loginError, setLoginError] = useState('');
   const [adminRole, setAdminRole] = useState('superAdmin');
+  const [adminPermissions, setAdminPermissions] = useState([]);
   const [activeTab, setActiveTab] = useState('overview');
 
   const defaultProfile = { name: 'أدمن القمة الرئيسي', title: 'رئيس لجنة الإشراف العام', avatar: '' };
@@ -137,6 +138,10 @@ const AdminDashboard = () => {
   const [newNewsData, setNewNewsData] = useState({ title: '', content: '', image_url: '', uploader_name: adminProfile.name });
   const [selectedType, setSelectedType] = useState(null); // 'graduation', 'research', 'registration'
   
+  // Custom Admins State
+  const [customAdmins, setCustomAdmins] = useState(() => JSON.parse(localStorage.getItem('custom_admins') || '[]'));
+  const [adminForm, setAdminForm] = useState({ username: '', password: '', displayName: '', title: '', permissions: [] });
+
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState('الكل');
 
@@ -625,6 +630,25 @@ const AdminDashboard = () => {
     const authStatus = sessionStorage.getItem('isAdminAuthenticated');
     if (authStatus === 'true') {
       setIsAuthenticated(true);
+      const usernameKey = sessionStorage.getItem('adminUsername');
+      if (usernameKey) {
+        let account = ADMIN_ACCOUNTS[usernameKey];
+        if (!account) {
+          const customAdmins = JSON.parse(localStorage.getItem('custom_admins') || '[]');
+          const found = customAdmins.find(a => a.username.toLowerCase() === usernameKey);
+          if (found) account = { ...found, role: 'custom_admin' };
+        }
+        if (account) {
+          setAdminRole(account.role);
+          if (account.role === 'superAdmin') {
+            setAdminPermissions(['overview', 'projects', 'research', 'jobs', 'news', 'registrations', 'admins', 'profile']);
+          } else if (account.role === 'academic') {
+            setAdminPermissions(['overview', 'projects', 'research', 'registrations', 'profile']);
+          } else {
+            setAdminPermissions(account.permissions || []);
+          }
+        }
+      }
     }
   }, []);
 
@@ -637,21 +661,40 @@ const AdminDashboard = () => {
   const handleLogin = (e) => {
     e.preventDefault();
     const usernameKey = username.trim().toLowerCase();
-    const account = ADMIN_ACCOUNTS[usernameKey];
-    const savedPw = localStorage.getItem('admin_password_' + usernameKey);
-    const validPassword = savedPw || account?.password;
-    if (account && password === validPassword) {
-      setIsAuthenticated(true);
-      setAdminRole(account.role);
-      const savedProfile = localStorage.getItem('admin_profile_' + usernameKey);
-      const loadedProfile = savedProfile ? JSON.parse(savedProfile) : { name: account.displayName, title: account.title, avatar: '' };
-      setAdminProfile(loadedProfile);
-      sessionStorage.setItem('isAdminAuthenticated', 'true');
-      sessionStorage.setItem('adminUsername', usernameKey);
-      setLoginError('');
-    } else {
-      setLoginError('اسم المستخدم أو كلمة المرور غير صحيحة!');
+    
+    let account = ADMIN_ACCOUNTS[usernameKey];
+    if (!account) {
+      const customAdmins = JSON.parse(localStorage.getItem('custom_admins') || '[]');
+      const found = customAdmins.find(a => a.username.toLowerCase() === usernameKey);
+      if (found) account = { ...found, role: 'custom_admin' };
     }
+
+    if (account) {
+      const savedPw = localStorage.getItem('admin_password_' + usernameKey);
+      const validPassword = savedPw || account.password;
+      
+      if (password === validPassword) {
+        setIsAuthenticated(true);
+        setAdminRole(account.role);
+        
+        if (account.role === 'superAdmin') {
+          setAdminPermissions(['overview', 'graduation', 'research', 'news', 'jobs', 'exhibition_innovations', 'exhibition_products', 'speakers', 'startups', 'investors', 'mentors', 'researchers', 'partners', 'volunteers', 'profile', 'admins']);
+        } else if (account.role === 'academic') {
+          setAdminPermissions(['overview', 'graduation', 'research', 'researchers', 'profile']);
+        } else {
+          setAdminPermissions(account.permissions || []);
+        }
+
+        const savedProfile = localStorage.getItem('admin_profile_' + usernameKey);
+        const loadedProfile = savedProfile ? JSON.parse(savedProfile) : { name: account.displayName, title: account.title, avatar: account.avatar || '' };
+        setAdminProfile(loadedProfile);
+        sessionStorage.setItem('isAdminAuthenticated', 'true');
+        sessionStorage.setItem('adminUsername', usernameKey);
+        setLoginError('');
+        return;
+      }
+    }
+    setLoginError('اسم المستخدم أو كلمة المرور غير صحيحة!');
   };
 
   const handleLogout = () => {
@@ -659,6 +702,36 @@ const AdminDashboard = () => {
     setAdminRole('superAdmin');
     sessionStorage.removeItem('isAdminAuthenticated');
     sessionStorage.removeItem('adminUsername');
+  };
+
+  const handleSaveAdmin = (e) => {
+    e.preventDefault();
+    if (!adminForm.username || !adminForm.password) return alert('يرجى إدخال اسم المستخدم وكلمة المرور');
+    const existing = customAdmins.find(a => a.username.toLowerCase() === adminForm.username.toLowerCase()) || ADMIN_ACCOUNTS[adminForm.username.toLowerCase()];
+    if (existing) return alert('اسم المستخدم مسجل مسبقاً!');
+    
+    const newAdmin = { ...adminForm, id: Date.now().toString() };
+    const updated = [...customAdmins, newAdmin];
+    setCustomAdmins(updated);
+    localStorage.setItem('custom_admins', JSON.stringify(updated));
+    setAdminForm({ username: '', password: '', displayName: '', title: '', permissions: [] });
+    alert('تم إنشاء حساب الإدارة بنجاح!');
+  };
+
+  const handleDeleteAdmin = (id) => {
+    if (window.confirm('هل أنت متأكد من حذف هذا الحساب نهائياً؟')) {
+      const updated = customAdmins.filter(a => a.id !== id);
+      setCustomAdmins(updated);
+      localStorage.setItem('custom_admins', JSON.stringify(updated));
+    }
+  };
+
+  const togglePermission = (permId) => {
+    setAdminForm(prev => {
+      const perms = prev.permissions;
+      if (perms.includes(permId)) return { ...prev, permissions: perms.filter(p => p !== permId) };
+      return { ...prev, permissions: [...perms, permId] };
+    });
   };
 
   const handleAvatarUpload = (e) => {
@@ -1420,22 +1493,23 @@ const AdminDashboard = () => {
         {/* Sidebar Menu Items */}
         <nav className="flex-1 p-4 space-y-1 overflow-y-auto">
           {[
-            { id: 'overview', label: 'نظرة عامة', count: null, icon: BarChart2, roles: ['superAdmin', 'academic'] },
-            { id: 'graduation', label: 'مشروعات التخرج', count: stats.totalGP, icon: GraduationCap, roles: ['superAdmin', 'academic'] },
-            { id: 'research', label: 'البحوث التطبيقية', count: stats.totalAR, icon: BookOpen, roles: ['superAdmin', 'academic'] },
-            { id: 'news', label: 'الأخبار الإعلانية', count: newsList.length, icon: Newspaper, roles: ['superAdmin'] },
-            { id: 'jobs', label: 'وظائف الملتقى', count: jobs.length, icon: Briefcase, roles: ['superAdmin'] },
-            { id: 'exhibition_innovations', label: 'معرض الابتكارات', count: innovations.length, icon: Sparkles, roles: ['superAdmin'] },
-            { id: 'exhibition_products', label: 'معرض الوحدات', count: products.length, icon: ShoppingBag, roles: ['superAdmin'] },
-            { id: 'speakers', label: 'المتحدثون والمدربون', count: stats.totalSpeakers, icon: Presentation, roles: ['superAdmin'] },
-            { id: 'startups', label: 'الشركات الناشئة', count: stats.totalStartups, icon: Briefcase, roles: ['superAdmin'] },
-            { id: 'investors', label: 'المستثمرون للتمويل', count: stats.totalInvestors, icon: Users, roles: ['superAdmin'] },
-            { id: 'mentors', label: 'الموجهون والإرشاد', count: stats.totalMentors, icon: Users, roles: ['superAdmin'] },
-            { id: 'researchers', label: 'الباحثون / المبتكرون', count: stats.totalResearchers, icon: BookOpen, roles: ['superAdmin'] },
-            { id: 'partners', label: 'الشركاء والجهات الراعية', count: stats.totalPartners, icon: Users, roles: ['superAdmin'] },
-            { id: 'volunteers', label: 'لجان التطوع والتنظيم', count: stats.totalVolunteers, icon: Users, roles: ['superAdmin'] },
-            { id: 'profile', label: 'الملف الشخصي', count: null, icon: Users, roles: ['superAdmin', 'academic'] },
-          ].filter(tab => tab.roles.includes(adminRole)).map(tab => (
+            { id: 'overview', label: 'نظرة عامة', count: null, icon: BarChart2 },
+            { id: 'graduation', label: 'مشروعات التخرج', count: stats.totalGP, icon: GraduationCap },
+            { id: 'research', label: 'البحوث التطبيقية', count: stats.totalAR, icon: BookOpen },
+            { id: 'news', label: 'الأخبار الإعلانية', count: newsList.length, icon: Newspaper },
+            { id: 'jobs', label: 'وظائف الملتقى', count: jobs.length, icon: Briefcase },
+            { id: 'exhibition_innovations', label: 'معرض الابتكارات', count: innovations.length, icon: Sparkles },
+            { id: 'exhibition_products', label: 'معرض الوحدات', count: products.length, icon: ShoppingBag },
+            { id: 'speakers', label: 'المتحدثون والمدربون', count: stats.totalSpeakers, icon: Presentation },
+            { id: 'startups', label: 'الشركات الناشئة', count: stats.totalStartups, icon: Briefcase },
+            { id: 'investors', label: 'المستثمرون للتمويل', count: stats.totalInvestors, icon: Users },
+            { id: 'mentors', label: 'الموجهون والإرشاد', count: stats.totalMentors, icon: Users },
+            { id: 'researchers', label: 'الباحثون / المبتكرون', count: stats.totalResearchers, icon: BookOpen },
+            { id: 'partners', label: 'الشركاء والجهات الراعية', count: stats.totalPartners, icon: Users },
+            { id: 'volunteers', label: 'لجان التطوع والتنظيم', count: stats.totalVolunteers, icon: Users },
+            { id: 'admins', label: 'إدارة الصلاحيات', count: null, icon: KeyRound },
+            { id: 'profile', label: 'الملف الشخصي', count: null, icon: Users },
+          ].filter(tab => adminPermissions.includes(tab.id)).map(tab => (
             <button
               key={tab.id}
               onClick={() => { setActiveTab(tab.id); setSelectedItem(null); }}
@@ -1529,6 +1603,125 @@ const AdminDashboard = () => {
             </div>
           ) : (
             <>
+              {/* ===== ADMINS MANAGEMENT TAB ===== */}
+              {activeTab === 'admins' && adminRole === 'superAdmin' && (
+                <div className="max-w-5xl mx-auto space-y-6 animate-fade-in">
+                  <div className="mb-2">
+                    <h3 className="text-2xl font-black text-slate-800">إدارة الصلاحيات وحسابات المديرين</h3>
+                    <p className="text-sm font-bold text-slate-500 mt-1">إنشاء مدراء فرعيين وتحديد أقسام لوحة التحكم المسموح لهم بالوصول إليها.</p>
+                  </div>
+
+                  <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    {/* Add Admin Form */}
+                    <div className="lg:col-span-1">
+                      <form onSubmit={handleSaveAdmin} className="bg-white rounded-3xl border border-slate-100 shadow-sm p-6 space-y-5">
+                        <h4 className="font-black text-slate-800 text-sm border-b border-slate-100 pb-3">إضافة مدير جديد</h4>
+                        
+                        <div className="space-y-4">
+                          <div>
+                            <label className="block text-xs font-bold text-slate-500 mb-2">اسم المستخدم (للدخول) *</label>
+                            <input type="text" required value={adminForm.username} onChange={e => setAdminForm({...adminForm, username: e.target.value})} className="w-full px-4 py-2 rounded-xl border border-slate-200 focus:ring-2 focus:ring-[#1E3A8A] outline-none text-xs font-semibold" placeholder="مثال: hr_admin" />
+                          </div>
+                          <div>
+                            <label className="block text-xs font-bold text-slate-500 mb-2">كلمة المرور *</label>
+                            <input type="password" required value={adminForm.password} onChange={e => setAdminForm({...adminForm, password: e.target.value})} className="w-full px-4 py-2 rounded-xl border border-slate-200 focus:ring-2 focus:ring-[#1E3A8A] outline-none text-xs font-semibold" placeholder="••••••••" />
+                          </div>
+                          <div>
+                            <label className="block text-xs font-bold text-slate-500 mb-2">الاسم الظاهر</label>
+                            <input type="text" value={adminForm.displayName} onChange={e => setAdminForm({...adminForm, displayName: e.target.value})} className="w-full px-4 py-2 rounded-xl border border-slate-200 focus:ring-2 focus:ring-[#1E3A8A] outline-none text-xs font-semibold" placeholder="أدمن التوظيف" />
+                          </div>
+                          <div>
+                            <label className="block text-xs font-bold text-slate-500 mb-2">المسمى الوظيفي</label>
+                            <input type="text" value={adminForm.title} onChange={e => setAdminForm({...adminForm, title: e.target.value})} className="w-full px-4 py-2 rounded-xl border border-slate-200 focus:ring-2 focus:ring-[#1E3A8A] outline-none text-xs font-semibold" placeholder="مسؤول قسم الموارد البشرية" />
+                          </div>
+                          
+                          <div className="pt-2 border-t border-slate-100">
+                            <label className="block text-xs font-black text-slate-800 mb-3">الصلاحيات (تحديد التبويبات المسموحة)</label>
+                            <div className="space-y-2 max-h-48 overflow-y-auto pr-1">
+                              {[
+                                { id: 'overview', label: 'نظرة عامة' },
+                                { id: 'graduation', label: 'مشاريع التخرج' },
+                                { id: 'research', label: 'البحوث التطبيقية' },
+                                { id: 'news', label: 'الأخبار' },
+                                { id: 'jobs', label: 'الوظائف' },
+                                { id: 'exhibition_innovations', label: 'معرض الابتكارات' },
+                                { id: 'exhibition_products', label: 'معرض الوحدات' },
+                                { id: 'speakers', label: 'المتحدثون' },
+                                { id: 'startups', label: 'الشركات الناشئة' },
+                                { id: 'investors', label: 'المستثمرون' },
+                                { id: 'mentors', label: 'الموجهون' },
+                                { id: 'researchers', label: 'الباحثون' },
+                                { id: 'partners', label: 'الشركاء' },
+                                { id: 'volunteers', label: 'المتطوعون' },
+                                { id: 'profile', label: 'الملف الشخصي' },
+                              ].map(perm => (
+                                <label key={perm.id} className="flex items-center gap-2 cursor-pointer p-2 hover:bg-slate-50 rounded-lg">
+                                  <input 
+                                    type="checkbox" 
+                                    checked={adminForm.permissions.includes(perm.id)}
+                                    onChange={() => togglePermission(perm.id)}
+                                    className="w-4 h-4 rounded text-[#1E3A8A] focus:ring-[#1E3A8A]"
+                                  />
+                                  <span className="text-xs font-bold text-slate-600">{perm.label}</span>
+                                </label>
+                              ))}
+                            </div>
+                          </div>
+                        </div>
+
+                        <button type="submit" className="w-full py-3 bg-[#1E3A8A] hover:bg-[#152C69] text-white rounded-xl font-black text-sm transition-colors shadow-md shadow-blue-900/20">
+                          إنشاء الحساب الإداري
+                        </button>
+                      </form>
+                    </div>
+
+                    {/* Admins List */}
+                    <div className="lg:col-span-2 space-y-4">
+                      {customAdmins.length === 0 ? (
+                        <div className="bg-white rounded-3xl border border-slate-100 p-12 text-center">
+                          <div className="w-16 h-16 rounded-full bg-slate-50 flex items-center justify-center mx-auto mb-4">
+                            <KeyRound className="w-8 h-8 text-slate-300" />
+                          </div>
+                          <h4 className="text-sm font-black text-slate-500">لا يوجد حسابات فرعية حالياً</h4>
+                          <p className="text-xs font-bold text-slate-400 mt-2">استخدم النموذج لإضافة حسابات للمشرفين الآخرين.</p>
+                        </div>
+                      ) : (
+                        customAdmins.map(admin => (
+                          <div key={admin.id} className="bg-white rounded-2xl border border-slate-100 p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-sm hover:shadow-md transition-shadow">
+                            <div className="flex items-center gap-4">
+                              <div className="w-12 h-12 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center font-black text-xl shrink-0">
+                                {admin.displayName ? admin.displayName.charAt(0) : admin.username.charAt(0).toUpperCase()}
+                              </div>
+                              <div>
+                                <h5 className="font-black text-slate-800 text-sm flex items-center gap-2">
+                                  {admin.displayName || admin.username}
+                                  <span className="px-2 py-0.5 rounded-full bg-slate-100 text-slate-500 text-[10px] font-bold">@{admin.username}</span>
+                                </h5>
+                                <p className="text-[11px] font-bold text-slate-400 mt-1">{admin.title || 'بدون مسمى وظيفي'}</p>
+                                <div className="flex flex-wrap gap-1 mt-2">
+                                  {admin.permissions.slice(0, 5).map(p => (
+                                    <span key={p} className="px-2 py-0.5 bg-blue-50 text-blue-600 rounded text-[9px] font-black">{p}</span>
+                                  ))}
+                                  {admin.permissions.length > 5 && (
+                                    <span className="px-2 py-0.5 bg-slate-50 text-slate-500 rounded text-[9px] font-black">+{admin.permissions.length - 5} أكثر</span>
+                                  )}
+                                  {admin.permissions.length === 0 && (
+                                    <span className="px-2 py-0.5 bg-red-50 text-red-500 rounded text-[9px] font-black">بدون صلاحيات مقيدة</span>
+                                  )}
+                                </div>
+                              </div>
+                            </div>
+                            <button onClick={() => handleDeleteAdmin(admin.id)} className="px-4 py-2 bg-red-50 text-red-600 hover:bg-red-100 rounded-xl font-bold text-xs transition-colors shrink-0">
+                              حذف الحساب
+                            </button>
+                          </div>
+                        ))
+                      )}
+                    </div>
+                  </div>
+                </div>
+              )}
+
               {/* ===== PROFILE TAB ===== */}
               {activeTab === 'profile' && (
                 <div className="max-w-2xl mx-auto space-y-6 animate-fade-in">
