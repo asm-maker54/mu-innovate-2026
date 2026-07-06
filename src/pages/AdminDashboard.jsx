@@ -494,6 +494,22 @@ const AdminDashboard = () => {
     setIsExhibitionModalOpen(true);
   };
 
+  const handleNewsImageUpload = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    
+    if (file.size > 1024 * 1024) {
+      alert('حجم الصورة كبير جداً، يرجى اختيار صورة أقل من 1 ميجابايت لضمان سرعة التحميل.');
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      setNewNewsData(prev => ({ ...prev, image_url: reader.result }));
+    };
+    reader.readAsDataURL(file);
+  };
+
   const handleSaveNews = async (e) => {
     e.preventDefault();
     if (!newNewsData.title || !newNewsData.content) return;
@@ -3164,15 +3180,40 @@ const AdminDashboard = () => {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-bold text-slate-700 mb-2">رابط صورة الخبر (اختياري)</label>
-                  <input 
-                    type="text" 
-                    value={newNewsData.image_url}
-                    onChange={(e) => setNewNewsData({...newNewsData, image_url: e.target.value})}
-                    className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-[#1E3A8A] focus:ring-1 focus:ring-[#1E3A8A] outline-none"
-                    placeholder="مثال: https://example.com/image.jpg"
-                  />
-                  <p className="text-xs text-slate-500 mt-2 font-semibold">إذا تركت هذا الحقل فارغاً، سيتم وضع أيقونة افتراضية.</p>
+                  <label className="block text-sm font-bold text-slate-700 mb-2">صورة الخبر (اختياري)</label>
+                  <div className="flex items-center gap-4">
+                    {newNewsData.image_url ? (
+                      <div className="relative w-24 h-24 rounded-xl overflow-hidden border border-slate-200 shrink-0">
+                        <img src={newNewsData.image_url} alt="News preview" className="w-full h-full object-cover" />
+                        <button 
+                          type="button"
+                          onClick={() => setNewNewsData({...newNewsData, image_url: ''})}
+                          className="absolute top-1 left-1 bg-red-500 text-white w-6 h-6 flex items-center justify-center rounded-full text-xs font-bold shadow-md hover:bg-red-600 transition-colors"
+                        >
+                          ✕
+                        </button>
+                      </div>
+                    ) : (
+                      <div className="w-24 h-24 rounded-xl border-2 border-dashed border-slate-300 flex items-center justify-center shrink-0 bg-slate-50 text-slate-400">
+                        <span className="text-xs font-bold">بدون صورة</span>
+                      </div>
+                    )}
+                    
+                    <div className="flex-1 space-y-3">
+                      <label className="cursor-pointer bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 px-4 py-2 rounded-xl text-xs font-bold inline-flex items-center gap-2 transition-colors">
+                        <span>رفع صورة جديدة</span>
+                        <input type="file" accept="image/*" onChange={handleNewsImageUpload} className="hidden" />
+                      </label>
+                      <p className="text-xs text-slate-500 font-semibold block">أو أدخل رابط الصورة مباشرة:</p>
+                      <input 
+                        type="text" 
+                        value={newNewsData.image_url}
+                        onChange={(e) => setNewNewsData({...newNewsData, image_url: e.target.value})}
+                        className="w-full px-3 py-2 rounded-lg border border-slate-200 focus:border-[#1E3A8A] focus:ring-1 focus:ring-[#1E3A8A] outline-none text-xs"
+                        placeholder="مثال: https://example.com/image.jpg"
+                      />
+                    </div>
+                  </div>
                 </div>
                 
                 <div className="pt-6 border-t border-slate-100 flex gap-3">
