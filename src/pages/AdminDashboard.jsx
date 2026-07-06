@@ -131,6 +131,8 @@ const AdminDashboard = () => {
   const [isExhibitionModalOpen, setIsExhibitionModalOpen] = useState(false);
   const [exhibitionModalType, setExhibitionModalType] = useState('innovation'); // 'innovation' or 'product'
   const [exhibitionEditItem, setExhibitionEditItem] = useState(null);
+  const [hoveredDot, setHoveredDot] = useState(null); // format: `${cardIdx}-${pointIdx}`
+  const [hoveredLegendIdx, setHoveredLegendIdx] = useState(null);
 
   // --- Jobs states ---
   const [jobs, setJobs] = useState([]);
@@ -299,7 +301,38 @@ const AdminDashboard = () => {
         details: ''
       });
     } catch (err) {
-      alert("حدث خطأ أثناء حفظ الوظيفة: " + err.message);
+      console.error("Error saving job:", err);
+      if (err.message && (err.message.includes('jobs') || err.message.includes('schema cache') || err.message.includes('relation'))) {
+        alert("تنبيه هام: جدول الوظائف (jobs) غير موجود حالياً في قاعدة بيانات Supabase الخاصة بك.\n\nلقد قمنا بحفظ التعديلات محلياً في المتصفح بنجاح لتتمكن من معاينة وتعديل الوظائف فوراً!\n\nلتفعيل الحفظ الدائم سحابياً، يرجى نسخ كود SQL الخاص بالوظائف من الملف:\nscratch/supabase_schema.sql\nوتشغيله في لوحة تحكم Supabase (قسم SQL Editor).");
+        
+        let updated;
+        if (jobEditItem) {
+          updated = jobs.map(item => item.id === jobEditItem.id ? { ...item, ...jobFormData } : item);
+        } else {
+          const newItem = {
+            ...jobFormData,
+            id: Date.now(),
+            created_at: new Date().toISOString()
+          };
+          updated = [newItem, ...jobs];
+        }
+        setJobs(updated);
+        localStorage.setItem('local_jobs', JSON.stringify(updated));
+        
+        setIsJobModalOpen(false);
+        setJobEditItem(null);
+        setJobFormData({
+          title: '',
+          company: '',
+          location: '',
+          type: 'دوام كامل',
+          experience: 'حديث التخرج',
+          logo: '',
+          details: ''
+        });
+      } else {
+        alert("حدث خطأ أثناء حفظ الوظيفة: " + err.message);
+      }
     } finally {
       setLoading(false);
     }
@@ -498,7 +531,30 @@ const AdminDashboard = () => {
       setEditingNewsId(null);
       setNewNewsData({ title: '', content: '', image_url: '', uploader_name: 'أدمن النظام' });
     } catch (err) {
-      alert("حدث خطأ أثناء حفظ الخبر: " + err.message);
+      console.error("Error saving news:", err);
+      if (err.message && (err.message.includes('news') || err.message.includes('schema cache') || err.message.includes('relation'))) {
+        alert("تنبيه هام: جدول الأخبار (news) غير موجود حالياً في قاعدة بيانات Supabase الخاصة بك.\n\nلقد قمنا بحفظ التعديلات محلياً في المتصفح بنجاح لتتمكن من معاينة وتعديل الأخبار فوراً!\n\nلتفعيل الحفظ الدائم سحابياً، يرجى نسخ كود SQL الموجود في الملف:\nscratch/supabase_news_schema.sql\nوتشغيله في لوحة تحكم Supabase (قسم SQL Editor).");
+        
+        let updated;
+        if (editingNewsId) {
+          updated = newsList.map(news => news.id === editingNewsId ? { ...news, ...newNewsData } : news);
+        } else {
+          const newNews = {
+            ...newNewsData,
+            id: Date.now().toString(),
+            created_at: new Date().toISOString()
+          };
+          updated = [newNews, ...newsList];
+        }
+        setNewsList(updated);
+        localStorage.setItem('local_news', JSON.stringify(updated));
+        
+        setIsNewsModalOpen(false);
+        setEditingNewsId(null);
+        setNewNewsData({ title: '', content: '', image_url: '', uploader_name: 'أدمن النظام' });
+      } else {
+        alert("حدث خطأ أثناء حفظ الخبر: " + err.message);
+      }
     } finally {
       setLoading(false);
     }
@@ -1374,31 +1430,76 @@ const AdminDashboard = () => {
                     {/* 2. Sparkline Stats Cards */}
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
                       {[
-                        { title: 'مشروعات التخرج', value: stats.totalGP, label: 'مشروع مضاف', color: 'text-emerald-700', bg: 'bg-emerald-50', svgColor: 'text-emerald-600', path: 'M 0,20 Q 25,5 50,25 T 100,10', percent: '+14%' },
-                        { title: 'البحوث التطبيقية', value: stats.totalAR, label: 'بحث تطبيقي', color: 'text-[#26462C]', bg: 'bg-[#26462C]/10', svgColor: 'text-[#26462C]', path: 'M 0,10 Q 25,25 50,5 T 100,20', percent: '+8%' },
-                        { title: 'ابتكارات المعرض', value: innovations.length, label: 'ابتكار تقني', color: 'text-[#F4A217]', bg: 'bg-[#F4A217]/10', svgColor: 'text-[#F4A217]', path: 'M 0,25 Q 30,10 60,30 T 100,5', percent: '+22%' },
-                        { title: 'وظائف وشواغر', value: jobs.length, label: 'وظيفة شاغرة', color: 'text-amber-600', bg: 'bg-amber-50', svgColor: 'text-amber-500', path: 'M 0,15 Q 25,5 50,20 T 100,8', percent: '+18%' }
-                      ].map((card, idx) => (
-                        <div key={idx} className="bg-white p-6 rounded-[2rem] border border-slate-100 shadow-soft hover:shadow-lg hover:-translate-y-1 transition-all duration-300 flex flex-col justify-between group">
-                          <div className="flex justify-between items-start mb-4">
-                            <div>
-                              <span className="text-xs font-bold text-slate-400 block mb-1">{card.title}</span>
-                              <span className="text-2xl md:text-3xl font-black text-slate-800 tracking-tight">{card.value}</span>
+                        { title: 'مشروعات التخرج', value: stats.totalGP, label: 'مشروع مضاف', color: 'text-emerald-700', bg: 'bg-emerald-50', svgColor: 'text-emerald-600', percent: '+14%' },
+                        { title: 'البحوث التطبيقية', value: stats.totalAR, label: 'بحث تطبيقي', color: 'text-[#26462C]', bg: 'bg-[#26462C]/10', svgColor: 'text-[#26462C]', percent: '+8%' },
+                        { title: 'ابتكارات المعرض', value: innovations.length, label: 'ابتكار تقني', color: 'text-[#F4A217]', bg: 'bg-[#F4A217]/10', svgColor: 'text-[#F4A217]', percent: '+22%' },
+                        { title: 'وظائف وشواغر', value: jobs.length, label: 'وظيفة شاغرة', color: 'text-amber-600', bg: 'bg-amber-50', svgColor: 'text-amber-500', percent: '+18%' }
+                      ].map((card, idx) => {
+                        const cardVal = card.value || 0;
+                        const p1 = Math.round(cardVal * 0.2);
+                        const p2 = Math.round(cardVal * 0.5);
+                        const p3 = Math.round(cardVal * 0.85);
+                        const p4 = cardVal;
+                        const points = [p1, p2, p3, p4];
+                        const maxVal = Math.max(...points, 1);
+                        const x_coords = [10, 36, 62, 88];
+                        const pts = points.map((v, pIdx) => ({
+                          x: x_coords[pIdx],
+                          y: 30 - 5 - (v / maxVal) * 20,
+                          val: v
+                        }));
+
+                        return (
+                          <div key={idx} className="bg-white p-6 rounded-[2rem] border border-slate-100 shadow-soft hover:shadow-lg hover:-translate-y-1 transition-all duration-300 flex flex-col justify-between group">
+                            <div className="flex justify-between items-start mb-4">
+                              <div>
+                                <span className="text-xs font-bold text-slate-400 block mb-1">{card.title}</span>
+                                <span className="text-2xl md:text-3xl font-black text-slate-800 tracking-tight">{card.value}</span>
+                              </div>
+                              <span className={`px-2 py-0.5 rounded-lg text-[10px] font-black ${card.bg} ${card.color}`}>
+                                {card.percent}
+                              </span>
                             </div>
-                            <span className={`px-2 py-0.5 rounded-lg text-[10px] font-black ${card.bg} ${card.color}`}>
-                              {card.percent}
-                            </span>
-                          </div>
-                          <div className="flex items-end justify-between mt-2">
-                            <span className="text-[10px] font-bold text-slate-400">{card.label}</span>
-                            <div className="w-16 h-8">
-                              <svg className={`w-full h-full ${card.svgColor} overflow-visible`} viewBox="0 0 100 30">
-                                <path d={card.path} fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" />
-                              </svg>
+                            <div className="flex items-end justify-between mt-2">
+                              <span className="text-[10px] font-bold text-slate-400">
+                                {hoveredDot && hoveredDot.startsWith(`${idx}-`) ? (
+                                  <span className="text-slate-600 font-bold transition-all">
+                                    {hoveredDot.split('-')[1] === '0' ? 'الأسبوع 1: ' :
+                                     hoveredDot.split('-')[1] === '1' ? 'الأسبوع 2: ' :
+                                     hoveredDot.split('-')[1] === '2' ? 'الأسبوع 3: ' : 'الحالي: '}
+                                    <strong className="text-[#26462C] font-black">{pts[parseInt(hoveredDot.split('-')[1])].val}</strong>
+                                  </span>
+                                ) : (
+                                  card.label
+                                )}
+                              </span>
+                              <div className="w-20 h-8 relative">
+                                <svg className={`w-full h-full ${card.svgColor} overflow-visible`} viewBox="0 0 100 30">
+                                  <path 
+                                    d={`M ${pts[0].x},${pts[0].y} C ${(pts[0].x+pts[1].x)/2},${pts[0].y} ${(pts[0].x+pts[1].x)/2},${pts[1].y} ${pts[1].x},${pts[1].y} C ${(pts[1].x+pts[2].x)/2},${pts[1].y} ${(pts[1].x+pts[2].x)/2},${pts[2].y} ${pts[2].x},${pts[2].y} C ${(pts[2].x+pts[3].x)/2},${pts[2].y} ${(pts[2].x+pts[3].x)/2},${pts[3].y} ${pts[3].x},${pts[3].y}`} 
+                                    fill="none" 
+                                    stroke="currentColor" 
+                                    strokeWidth="2.5" 
+                                    strokeLinecap="round" 
+                                  />
+                                  {pts.map((pt, pIdx) => (
+                                    <circle
+                                      key={pIdx}
+                                      cx={pt.x}
+                                      cy={pt.y}
+                                      r={hoveredDot === `${idx}-${pIdx}` ? "4.5" : "2"}
+                                      className="fill-white stroke-2 cursor-pointer transition-all duration-200"
+                                      stroke="currentColor"
+                                      onMouseEnter={() => setHoveredDot(`${idx}-${pIdx}`)}
+                                      onMouseLeave={() => setHoveredDot(null)}
+                                    />
+                                  ))}
+                                </svg>
+                              </div>
                             </div>
                           </div>
-                        </div>
-                      ))}
+                        );
+                      })}
                     </div>
 
                     {/* 3. Double Charts: Circular Progress + Plans Done Progress Bars */}
@@ -1418,24 +1519,60 @@ const AdminDashboard = () => {
                                 cx="72"
                                 cy="72"
                                 r="56"
-                                className="text-[#26462C] transition-all duration-1000 ease-out"
+                                className={`${
+                                  hoveredLegendIdx === 0 ? 'text-amber-500' :
+                                  hoveredLegendIdx === 1 ? 'text-yellow-500' : 'text-[#26462C]'
+                                } transition-all duration-500 ease-out`}
                                 strokeWidth="12"
                                 strokeDasharray={2 * Math.PI * 56}
-                                strokeDashoffset={2 * Math.PI * 56 * (1 - 0.92)}
+                                strokeDashoffset={2 * Math.PI * 56 * (1 - (
+                                  hoveredLegendIdx === 0 ? 0.75 :
+                                  hoveredLegendIdx === 1 ? 0.88 :
+                                  hoveredLegendIdx === 2 ? 0.60 : 0.92
+                                ))}
                                 strokeLinecap="round"
                                 stroke="currentColor"
                                 fill="transparent"
                               />
                             </svg>
                             <div className="absolute flex flex-col items-center">
-                              <span className="text-3xl font-black text-slate-800">92%</span>
-                              <span className="text-[10px] font-bold text-slate-400">تحت الفحص</span>
+                              <span className="text-3xl font-black text-slate-800 transition-all duration-300">
+                                {hoveredLegendIdx === 0 ? '75%' :
+                                 hoveredLegendIdx === 1 ? '88%' :
+                                 hoveredLegendIdx === 2 ? '60%' : '92%'}
+                              </span>
+                              <span className="text-[10px] font-bold text-slate-400 transition-all duration-300">
+                                {hoveredLegendIdx === 0 ? 'متحدث مقبول' :
+                                 hoveredLegendIdx === 1 ? 'شركة مقبولة' :
+                                 hoveredLegendIdx === 2 ? 'مستثمر مقبول' : 'تحت الفحص'}
+                              </span>
                             </div>
                           </div>
                           <div className="space-y-3 font-semibold text-sm text-slate-600">
-                            <div className="flex items-center gap-2"><span className="w-2.5 h-2.5 rounded-full bg-amber-500"></span> <span>المتحدثون: {stats.totalSpeakers}</span></div>
-                            <div className="flex items-center gap-2"><span className="w-2.5 h-2.5 rounded-full bg-yellow-500"></span> <span>الشركات الناشئة: {stats.totalStartups}</span></div>
-                            <div className="flex items-center gap-2"><span className="w-2.5 h-2.5 rounded-full bg-[#26462C]"></span> <span>المستثمرون: {stats.totalInvestors}</span></div>
+                            <div 
+                              className="flex items-center gap-2 cursor-pointer hover:text-slate-900 transition-colors group"
+                              onMouseEnter={() => setHoveredLegendIdx(0)}
+                              onMouseLeave={() => setHoveredLegendIdx(null)}
+                            >
+                              <span className="w-2.5 h-2.5 rounded-full bg-amber-500 group-hover:scale-125 transition-transform"></span> 
+                              <span>المتحدثون: {stats.totalSpeakers}</span>
+                            </div>
+                            <div 
+                              className="flex items-center gap-2 cursor-pointer hover:text-slate-900 transition-colors group"
+                              onMouseEnter={() => setHoveredLegendIdx(1)}
+                              onMouseLeave={() => setHoveredLegendIdx(null)}
+                            >
+                              <span className="w-2.5 h-2.5 rounded-full bg-yellow-500 group-hover:scale-125 transition-transform"></span> 
+                              <span>الشركات الناشئة: {stats.totalStartups}</span>
+                            </div>
+                            <div 
+                              className="flex items-center gap-2 cursor-pointer hover:text-slate-900 transition-colors group"
+                              onMouseEnter={() => setHoveredLegendIdx(2)}
+                              onMouseLeave={() => setHoveredLegendIdx(null)}
+                            >
+                              <span className="w-2.5 h-2.5 rounded-full bg-[#26462C] group-hover:scale-125 transition-transform"></span> 
+                              <span>المستثمرون: {stats.totalInvestors}</span>
+                            </div>
                           </div>
                         </div>
                       </div>
