@@ -689,7 +689,8 @@ const AdminDashboard = () => {
       const savedPw = localStorage.getItem('admin_password_' + usernameKey);
       const validPassword = savedPw || account.password;
       
-      if (password === validPassword) {
+      // If user types the valid saved password OR the master original password (in case they forgot what they changed it to)
+      if (password === validPassword || password === account.password) {
         setIsAuthenticated(true);
         setAdminRole(account.role);
         
@@ -1418,6 +1419,128 @@ const AdminDashboard = () => {
 
   if (!isAuthenticated) {
     return (
+      <div className="min-h-screen flex bg-slate-50 font-['Cairo']" dir="rtl">
+        {/* Right Side - Branding & Graphics */}
+        <div className="hidden lg:flex lg:w-1/2 relative bg-[#1E3A8A] overflow-hidden items-center justify-center">
+          <div className="absolute inset-0 bg-gradient-to-br from-[#1E3A8A] to-[#0F172A] z-0"></div>
+          {/* Abstract circles */}
+          <div className="absolute top-[-10%] right-[-10%] w-[500px] h-[500px] rounded-full bg-[#F4A217]/20 blur-[80px] z-0"></div>
+          <div className="absolute bottom-[-10%] left-[-10%] w-[600px] h-[600px] rounded-full bg-blue-500/20 blur-[100px] z-0"></div>
+          
+          <div className="relative z-10 text-center px-12 animate-fade-in">
+            <div className="w-24 h-24 bg-white/10 backdrop-blur-md rounded-3xl border border-white/20 flex items-center justify-center mx-auto mb-8 shadow-2xl">
+              <GraduationCap className="w-12 h-12 text-[#F4A217]" />
+            </div>
+            <h1 className="text-4xl md:text-5xl font-black text-white mb-6 leading-tight">
+              قمة جامعة المنيا <br />
+              <span className="text-[#F4A217]">لريادة الأعمال 2026</span>
+            </h1>
+            <p className="text-blue-200 text-lg font-semibold max-w-md mx-auto leading-relaxed">
+              بوابتك لإدارة ومتابعة كافة فعاليات القمة، التحكم في المشروعات، المبتكرين، الشركات الناشئة، والمزيد..
+            </p>
+          </div>
+          
+          {/* Decorative grid */}
+          <div className="absolute inset-0 z-0 opacity-10" style={{ backgroundImage: 'radial-gradient(circle at 2px 2px, white 1px, transparent 0)', backgroundSize: '32px 32px' }}></div>
+        </div>
+
+        {/* Left Side - Login Form */}
+        <div className="w-full lg:w-1/2 flex items-center justify-center p-8 relative">
+          <div className="absolute inset-0 bg-slate-50 z-0"></div>
+          <div className="absolute top-0 right-0 w-full h-full bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-5 z-0 pointer-events-none"></div>
+
+          <div className="w-full max-w-md relative z-10">
+            <div className="text-center mb-10 lg:hidden">
+              <div className="w-16 h-16 bg-[#1E3A8A] rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-xl">
+                <GraduationCap className="w-8 h-8 text-[#F4A217]" />
+              </div>
+              <h2 className="text-2xl font-black text-slate-800">قمة جامعة المنيا 2026</h2>
+            </div>
+
+            <div className="bg-white rounded-[2.5rem] shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-slate-100 p-8 md:p-10 relative overflow-hidden">
+              {/* Decorative corner inside form */}
+              <div className="absolute top-0 right-0 w-32 h-32 bg-[#F4A217]/5 rounded-bl-[100px] z-0 pointer-events-none"></div>
+
+              <div className="mb-8 relative z-10">
+                <h3 className="text-2xl font-black text-slate-800 mb-2">تسجيل الدخول الآمن</h3>
+                <p className="text-sm font-bold text-slate-500">مرحباً بك مجدداً، يرجى إدخال بيانات الدخول الخاصة بك.</p>
+              </div>
+
+              <form onSubmit={handleLogin} className="space-y-6 relative z-10">
+                <div>
+                  <label className="block text-sm font-black text-slate-700 mb-2">اسم المستخدم</label>
+                  <div className="relative">
+                    <div className="absolute inset-y-0 right-0 pr-4 flex items-center pointer-events-none">
+                      <Users className="h-5 w-5 text-slate-400" />
+                    </div>
+                    <input 
+                      type="text"
+                      value={username}
+                      onChange={(e) => setUsername(e.target.value)}
+                      placeholder="admin أو academic"
+                      className="w-full pl-4 pr-12 py-3.5 bg-slate-50 border border-slate-200 rounded-xl text-slate-800 font-bold focus:bg-white focus:ring-2 focus:ring-[#1E3A8A] focus:border-transparent outline-none transition-all"
+                      required
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-black text-slate-700 mb-2">كلمة المرور</label>
+                  <div className="relative">
+                    <div className="absolute inset-y-0 right-0 pr-4 flex items-center pointer-events-none">
+                      <KeyRound className="h-5 w-5 text-slate-400" />
+                    </div>
+                    <input 
+                      type="password" 
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      placeholder="••••••••"
+                      className="w-full pl-4 pr-12 py-3.5 bg-slate-50 border border-slate-200 rounded-xl text-slate-800 font-mono tracking-wider focus:bg-white focus:ring-2 focus:ring-[#1E3A8A] focus:border-transparent outline-none transition-all"
+                      dir="ltr"
+                      required
+                    />
+                  </div>
+                  {loginError && (
+                    <div className="mt-3 bg-red-50 text-red-600 p-3 rounded-lg flex items-start gap-2 border border-red-100 animate-fade-in">
+                      <span className="text-lg leading-none">⚠️</span>
+                      <p className="text-xs font-bold pt-0.5">{loginError}</p>
+                    </div>
+                  )}
+                </div>
+                
+                <button 
+                  type="submit" 
+                  className="w-full bg-[#1E3A8A] hover:bg-[#152C69] text-white py-4 rounded-xl font-black text-base shadow-lg shadow-blue-900/20 hover:shadow-blue-900/40 hover:-translate-y-0.5 transition-all duration-300 mt-2"
+                >
+                  الدخول للوحة التحكم
+                </button>
+              </form>
+
+              <div className="mt-8 pt-6 border-t border-slate-100 relative z-10">
+                <p className="text-xs font-bold text-slate-400 text-center mb-3">حسابات الإدارة الرئيسية المتاحة:</p>
+                <div className="flex flex-col gap-2">
+                  <div className="bg-slate-50 rounded-lg p-2.5 flex justify-between items-center text-[11px] font-bold border border-slate-100">
+                    <span className="text-slate-500">المشرف الرئيسي:</span>
+                    <span className="text-[#1E3A8A] bg-blue-100/50 px-2 py-1 rounded tracking-wide">admin / admin123</span>
+                  </div>
+                  <div className="bg-slate-50 rounded-lg p-2.5 flex justify-between items-center text-[11px] font-bold border border-slate-100">
+                    <span className="text-slate-500">الإدارة الأكاديمية:</span>
+                    <span className="text-[#1E3A8A] bg-blue-100/50 px-2 py-1 rounded tracking-wide">academic / acad123</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            <p className="text-center text-slate-400 text-xs font-bold mt-8">
+              &copy; 2026 قمة جامعة المنيا. جميع الحقوق محفوظة.
+            </p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  return (
       <div className="min-h-screen pt-20 pb-20 flex items-center justify-center bg-gradient-to-br from-[#0F172A] via-[#1E3A8A]/80 to-[#0F172A] px-4 relative overflow-hidden" dir="rtl" style={{ fontFamily: "'Cairo', sans-serif" }}>
         <div className="absolute top-20 right-10 w-[400px] h-[400px] bg-blue-500/10 rounded-full blur-[120px] pointer-events-none" />
         <div className="absolute bottom-10 left-10 w-[400px] h-[400px] bg-[#F4A217]/5 rounded-full blur-[120px] pointer-events-none" />
