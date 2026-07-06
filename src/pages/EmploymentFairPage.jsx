@@ -5,12 +5,9 @@ import {
   BookOpen, Sparkles, UserCheck, TrendingUp, Send
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { supabase, isSupabaseConfigured } from '../supabaseClient';
 
 const EmploymentFairPage = () => {
-  useEffect(() => {
-    window.scrollTo(0, 0);
-  }, []);
-
   const [searchQuery, setSearchQuery] = useState('');
   const [formSubmitted, setFormSubmitted] = useState(false);
   const [formData, setFormData] = useState({
@@ -21,6 +18,8 @@ const EmploymentFairPage = () => {
     cvUrl: '',
     message: ''
   });
+  const [jobs, setJobs] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   const handleFormSubmit = (e) => {
     e.preventDefault();
@@ -31,44 +30,90 @@ const EmploymentFairPage = () => {
     }, 5000);
   };
 
-  const jobs = [
-    {
-      id: 1,
-      title: 'مهندس برمجيات واجهات أمامية (Frontend)',
-      company: 'TechVision Solutions',
-      location: 'القرية الذكية، القاهرة',
-      type: 'دوام كامل',
-      experience: '1-3 سنوات',
-      logo: 'https://images.unsplash.com/photo-1560179707-f14e90ef3623?auto=format&fit=crop&q=80&w=200'
-    },
-    {
-      id: 2,
-      title: 'أخصائي تسويق إلكتروني',
-      company: 'Global Media',
-      location: 'عن بُعد (Remote)',
-      type: 'دوام كامل',
-      experience: 'حديث التخرج',
-      logo: 'https://images.unsplash.com/photo-1572044162444-ad60f128bdea?auto=format&fit=crop&q=80&w=200'
-    },
-    {
-      id: 3,
-      title: 'محلل بيانات',
-      company: 'Data Insights',
-      location: 'المعادي، القاهرة',
-      type: 'دوام جزئي',
-      experience: '0-2 سنوات',
-      logo: 'https://images.unsplash.com/photo-1551434678-e076c223a692?auto=format&fit=crop&q=80&w=200'
-    },
-    {
-      id: 4,
-      title: 'مهندس جودة برمجيات (QA)',
-      company: 'SoftCore',
-      location: 'المنيا الجديدة',
-      type: 'دوام كامل',
-      experience: '2+ سنوات',
-      logo: 'https://images.unsplash.com/photo-1496200502058-a73099b244ce?auto=format&fit=crop&q=80&w=200'
-    }
-  ];
+  useEffect(() => {
+    window.scrollTo(0, 0);
+
+    const fetchJobs = async () => {
+      setLoading(true);
+      try {
+        if (isSupabaseConfigured) {
+          const { data, error } = await supabase
+            .from('jobs')
+            .select('*')
+            .order('created_at', { ascending: false });
+          if (!error && data && data.length > 0) {
+            setJobs(data);
+            setLoading(false);
+            return;
+          }
+        }
+      } catch (err) {
+        console.error("Error fetching jobs from Supabase:", err);
+      }
+
+      // Local storage fallback
+      const local = localStorage.getItem('local_jobs');
+      if (local) {
+        try {
+          setJobs(JSON.parse(local));
+          setLoading(false);
+          return;
+        } catch (e) {
+          console.error("Error parsing local_jobs", e);
+        }
+      }
+
+      // Default mock jobs
+      const defaultJobs = [
+        {
+          id: 1,
+          title: 'مهندس برمجيات واجهات أمامية (Frontend)',
+          company: 'TechVision Solutions',
+          location: 'القرية الذكية، القاهرة',
+          type: 'دوام كامل',
+          experience: '1-3 سنوات',
+          logo: 'https://images.unsplash.com/photo-1560179707-f14e90ef3623?auto=format&fit=crop&q=80&w=200',
+          details: 'تطوير وتصميم واجهات وتطبيقات الويب باستخدام React.js و TailwindCSS.'
+        },
+        {
+          id: 2,
+          title: 'أخصائي تسويق إلكتروني',
+          company: 'Global Media',
+          location: 'عن بُعد (Remote)',
+          type: 'دوام كامل',
+          experience: 'حديث التخرج',
+          logo: 'https://images.unsplash.com/photo-1572044162444-ad60f128bdea?auto=format&fit=crop&q=80&w=200',
+          details: 'إدارة حملات التواصل الاجتماعي وجوجل أدز وتهيئة محركات البحث.'
+        },
+        {
+          id: 3,
+          title: 'محلل بيانات',
+          company: 'Data Insights',
+          location: 'المعادي، القاهرة',
+          type: 'دوام جزئي',
+          experience: '0-2 سنوات',
+          logo: 'https://images.unsplash.com/photo-1551434678-e076c223a692?auto=format&fit=crop&q=80&w=200',
+          details: 'تحليل البيانات واستخراج التقارير وتصميم لوحات عرض البيانات Power BI.'
+        },
+        {
+          id: 4,
+          title: 'مهندس جودة برمجيات (QA)',
+          company: 'SoftCore',
+          location: 'المنيا الجديدة',
+          type: 'دوام كامل',
+          experience: '2+ سنوات',
+          logo: 'https://images.unsplash.com/photo-1496200502058-a73099b244ce?auto=format&fit=crop&q=80&w=200',
+          details: 'اختبار البرمجيات وتحديد الأخطاء وإعداد التقارير الفنية وعمل أتمتة للاختبارات.'
+        }
+      ];
+      localStorage.setItem('local_jobs', JSON.stringify(defaultJobs));
+      setJobs(defaultJobs);
+      setLoading(false);
+    };
+
+    fetchJobs();
+  }, []);
+
 
   const filteredJobs = jobs.filter(job => 
     job.title.toLowerCase().includes(searchQuery.toLowerCase()) ||

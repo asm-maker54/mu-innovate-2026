@@ -132,6 +132,20 @@ const AdminDashboard = () => {
   const [exhibitionModalType, setExhibitionModalType] = useState('innovation'); // 'innovation' or 'product'
   const [exhibitionEditItem, setExhibitionEditItem] = useState(null);
 
+  // --- Jobs states ---
+  const [jobs, setJobs] = useState([]);
+  const [isJobModalOpen, setIsJobModalOpen] = useState(false);
+  const [jobEditItem, setJobEditItem] = useState(null);
+  const [jobFormData, setJobFormData] = useState({
+    title: '',
+    company: '',
+    location: '',
+    type: 'دوام كامل',
+    experience: 'حديث التخرج',
+    logo: '',
+    details: ''
+  });
+
   const [innovationFormData, setInnovationFormData] = useState({
     name: '',
     category: 'ai',
@@ -210,6 +224,145 @@ const AdminDashboard = () => {
       setProducts(updated);
       localStorage.setItem('exhibition_products', JSON.stringify(updated));
     }
+  };
+
+  // --- Jobs Save/Delete/Modal Handlers ---
+  const handleSaveJob = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+    try {
+      if (isSupabaseConfigured) {
+        if (jobEditItem) {
+          const { error } = await supabase
+            .from('jobs')
+            .update({
+              title: jobFormData.title,
+              company: jobFormData.company,
+              location: jobFormData.location,
+              type: jobFormData.type,
+              experience: jobFormData.experience,
+              logo: jobFormData.logo,
+              details: jobFormData.details
+            })
+            .eq('id', jobEditItem.id);
+          if (error) throw error;
+        } else {
+          const { error } = await supabase
+            .from('jobs')
+            .insert([{
+              title: jobFormData.title,
+              company: jobFormData.company,
+              location: jobFormData.location,
+              type: jobFormData.type,
+              experience: jobFormData.experience,
+              logo: jobFormData.logo,
+              details: jobFormData.details
+            }]);
+          if (error) throw error;
+        }
+      }
+
+      // Offline / state handling
+      let updated;
+      if (jobEditItem) {
+        updated = jobs.map(item => item.id === jobEditItem.id ? { ...item, ...jobFormData } : item);
+      } else {
+        const newItem = {
+          ...jobFormData,
+          id: isSupabaseConfigured ? undefined : Date.now(),
+          created_at: new Date().toISOString()
+        };
+        updated = isSupabaseConfigured ? jobs : [newItem, ...jobs];
+      }
+
+      if (!isSupabaseConfigured) {
+        setJobs(updated);
+        localStorage.setItem('local_jobs', JSON.stringify(updated));
+      } else {
+        // Refresh online data
+        const { data, error } = await supabase
+          .from('jobs')
+          .select('*')
+          .order('created_at', { ascending: false });
+        if (!error) setJobs(data || []);
+      }
+
+      setIsJobModalOpen(false);
+      setJobEditItem(null);
+      setJobFormData({
+        title: '',
+        company: '',
+        location: '',
+        type: 'دوام كامل',
+        experience: 'حديث التخرج',
+        logo: '',
+        details: ''
+      });
+    } catch (err) {
+      alert("حدث خطأ أثناء حفظ الوظيفة: " + err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleDeleteJob = async (id) => {
+    if (window.confirm('هل أنت متأكد من حذف هذه الوظيفة نهائياً؟')) {
+      setLoading(true);
+      try {
+        if (isSupabaseConfigured) {
+          const { error } = await supabase
+            .from('jobs')
+            .delete()
+            .eq('id', id);
+          if (error) throw error;
+        }
+
+        const updated = jobs.filter(item => item.id !== id);
+        setJobs(updated);
+        if (!isSupabaseConfigured) {
+          localStorage.setItem('local_jobs', JSON.stringify(updated));
+        } else {
+          // Sync with server just in case
+          const { data, error } = await supabase
+            .from('jobs')
+            .select('*')
+            .order('created_at', { ascending: false });
+          if (!error) setJobs(data || []);
+        }
+      } catch (err) {
+        alert("حدث خطأ أثناء حذف الوظيفة: " + err.message);
+      } finally {
+        setLoading(false);
+      }
+    }
+  };
+
+  const openAddJobModal = () => {
+    setJobEditItem(null);
+    setJobFormData({
+      title: '',
+      company: '',
+      location: '',
+      type: 'دوام كامل',
+      experience: 'حديث التخرج',
+      logo: 'https://images.unsplash.com/photo-1560179707-f14e90ef3623?auto=format&fit=crop&q=80&w=200',
+      details: ''
+    });
+    setIsJobModalOpen(true);
+  };
+
+  const openEditJobModal = (item) => {
+    setJobEditItem(item);
+    setJobFormData({
+      title: item.title || '',
+      company: item.company || '',
+      location: item.location || '',
+      type: item.type || 'دوام كامل',
+      experience: item.experience || 'حديث التخرج',
+      logo: item.logo || 'https://images.unsplash.com/photo-1560179707-f14e90ef3623?auto=format&fit=crop&q=80&w=200',
+      details: item.details || ''
+    });
+    setIsJobModalOpen(true);
   };
 
   const openAddInnovationModal = () => {
@@ -380,6 +533,17 @@ const AdminDashboard = () => {
           .order('created_at', { ascending: false });
         if (regErr) throw regErr;
         setRegistrants(regData || []);
+
+        // Fetch Jobs
+        const { data: jData, error: jErr } = await supabase
+          .from('jobs')
+          .select('*')
+          .order('created_at', { ascending: false });
+        if (!jErr) {
+          setJobs(jData || []);
+        } else {
+          console.error("Error fetching jobs from supabase:", jErr);
+        }
       } else {
         // Use Mock Data merged with localStorage Data for offline/demo persistence
         const localRegs = JSON.parse(localStorage.getItem('local_registrations') || '[]');
@@ -389,7 +553,189 @@ const AdminDashboard = () => {
         setGradProjects([...localGradProjects, ...mockGraduationProjects]);
         setAppliedResearch([...localAppliedResearch, ...mockAppliedResearch]);
         setRegistrants([...localRegs, ...mockRegistrations]);
+
+        // Jobs local fallback
+        const localJobs = JSON.parse(localStorage.getItem('local_jobs') || '[]');
+        const defaultJobs = [
+          {
+            id: 1,
+            title: 'مهندس برمجيات واجهات أمامية (Frontend)',
+            company: 'TechVision Solutions',
+            location: 'القرية الذكية، القاهرة',
+            type: 'دوام كامل',
+            experience: '1-3 سنوات',
+            logo: 'https://images.unsplash.com/photo-1560179707-f14e90ef3623?auto=format&fit=crop&q=80&w=200',
+            details: 'تطوير وتصميم واجهات وتطبيقات الويب باستخدام React.js و TailwindCSS.'
+          },
+          {
+            id: 2,
+            title: 'أخصائي تسويق إلكتروني',
+            company: 'Global Media',
+            location: 'عن بُعد (Remote)',
+            type: 'دوام كامل',
+            experience: 'حديث التخرج',
+            logo: 'https://images.unsplash.com/photo-1572044162444-ad60f128bdea?auto=format&fit=crop&q=80&w=200',
+            details: 'إدارة حملات التواصل الاجتماعي وجوجل أدز وتهيئة محركات البحث.'
+          },
+          {
+            id: 3,
+            title: 'محلل بيانات',
+            company: 'Data Insights',
+            location: 'المعادي، القاهرة',
+            type: 'دوام جزئي',
+            experience: '0-2 سنوات',
+            logo: 'https://images.unsplash.com/photo-1551434678-e076c223a692?auto=format&fit=crop&q=80&w=200',
+            details: 'تحليل البيانات واستخراج التقارير وتصميم لوحات عرض البيانات Power BI.'
+          },
+          {
+            id: 4,
+            title: 'مهندس جودة برمجيات (QA)',
+            company: 'SoftCore',
+            location: 'المنيا الجديدة',
+            type: 'دوام كامل',
+            experience: '2+ سنوات',
+            logo: 'https://images.unsplash.com/photo-1496200502058-a73099b244ce?auto=format&fit=crop&q=80&w=200',
+            details: 'اختبار البرمجيات وتحديد الأخطاء وإعداد التقارير الفنية وعمل أتمتة للاختبارات.'
+          }
+        ];
+        if (!localStorage.getItem('local_jobs')) {
+          localStorage.setItem('local_jobs', JSON.stringify(defaultJobs));
+          setJobs(defaultJobs);
+        } else {
+          setJobs(localJobs);
+        }
       }
+
+      // Load innovations from localStorage with fallback
+      const localInnos = localStorage.getItem('exhibition_innovations');
+      if (localInnos) {
+        try { setInnovations(JSON.parse(localInnos)); } catch(e) {}
+      } else {
+        const defaultInnovations = [
+          {
+            id: 1,
+            name: 'نظام تشخيص الأورام الذكي بالرنين المغناطيسي',
+            category: 'ai',
+            level: 'advanced',
+            levelName: 'مستوى متقدم',
+            team: 'فريق سيجما الطبي',
+            desc: 'برمجيات ذكاء اصطناعي تقوم بتحليل صور الرنين لسرعة رصد الأورام بنسبة دقة تفوق 98% وتوفير الوقت للأطباء.',
+            image: 'https://images.unsplash.com/photo-1576091160550-2173dba999ef?w=600&auto=format&fit=crop&q=80',
+            tech: 'Python / PyTorch', speed: '3 ثوانٍ', accuracy: '98%', icon: 'Cpu'
+          },
+          {
+            id: 2,
+            name: 'جدار الحماية الفائق للأجهزة الطبية الذكية',
+            category: 'cyber',
+            level: 'ready',
+            levelName: 'جاهز للتبني التجاري',
+            team: 'حصن المنيا الرقمي',
+            desc: 'بروتوكول حماية شبكية يمنع اختراقات أجهزة إنعاش القلب والأسرّة المتصلة بالإنترنت داخل المستشفيات والمراكز.',
+            image: 'https://images.unsplash.com/photo-1550751827-4bd374c3f58b?w=600&auto=format&fit=crop&q=80',
+            tech: 'Rust / C++', speed: 'فوري', accuracy: '99.9%', icon: 'Lock'
+          },
+          {
+            id: 3,
+            name: 'حاوية النفايات الذكية لحسابات البيئة المستدامة',
+            category: 'iot',
+            level: 'prototype',
+            levelName: 'نموذج أولي',
+            team: 'مبتكرو الغد البيئي',
+            desc: 'جهاز رصد يستشعر امتلاء الحاويات ويفرز النفايات تلقائياً باستخدام حساسات المسافة ومعالجة الصور المتقدمة.',
+            image: 'https://images.unsplash.com/photo-1532996122724-e3c354a0b15b?w=600&auto=format&fit=crop&q=80',
+            tech: 'Arduino / ESP32', speed: 'تلقائي', accuracy: '90%', icon: 'Sprout'
+          },
+          {
+            id: 4,
+            name: 'منصة تسويق وتوجيه المشروعات التعليمية للشباب',
+            category: 'apps',
+            level: 'ready',
+            levelName: 'جاهز للتبني التجاري',
+            team: 'فريق إنجاز للبرمجيات',
+            desc: 'بوابة إلكترونية تربط أفكار الخريجين والمبتكرين بالمشرفين والمستثمرين لتمويل دراسات الجدوى والتدريب الفعلي.',
+            image: 'https://images.unsplash.com/photo-1522202176988-66273c2fd55f?w=600&auto=format&fit=crop&q=80',
+            tech: 'React / Node.js', speed: 'سحابي', accuracy: '100%', icon: 'Globe'
+          },
+          {
+            id: 5,
+            name: 'ذراع آلية لإجراء الجراحات الدقيقة عن بعد',
+            category: 'ai',
+            level: 'prototype',
+            levelName: 'نموذج أولي',
+            team: 'نبض ميكاترونكس',
+            desc: 'نموذج أولي لذراع روبوتية تحاكي حركة يد الطبيب بإحداثيات دقيقة جداً عبر الويب والأوامر الصوتية الفورية.',
+            image: 'https://images.unsplash.com/photo-1485827404703-89b55fcc595e?w=600&auto=format&fit=crop&q=80',
+            tech: 'Python / ROS', speed: 'لحظي', accuracy: '95%', icon: 'Cpu'
+          },
+          {
+            id: 6,
+            name: 'بروتوكول تأمين المعاملات الزراعية بسلاسل الكتل',
+            category: 'cyber',
+            level: 'advanced',
+            levelName: 'مستوى متقدم',
+            team: 'سنابل التشفير',
+            desc: 'نظام تشفير غير مركزي لتأمين مبيعات المحاصيل والوحدات الإنتاجية لمنع التلاعب بالأسعار وسجلات المزارعين.',
+            image: 'https://images.unsplash.com/photo-1639762681485-074b7f938ba0?w=600&auto=format&fit=crop&q=80',
+            tech: 'Solidity / JS', speed: 'ثانيتان', accuracy: '100%', icon: 'Database'
+          }
+        ];
+        localStorage.setItem('exhibition_innovations', JSON.stringify(defaultInnovations));
+        setInnovations(defaultInnovations);
+      }
+
+      // Load products from localStorage with fallback
+      const localProducts = localStorage.getItem('exhibition_products');
+      if (localProducts) {
+        try { setProducts(JSON.parse(localProducts)); } catch(e) {}
+      } else {
+        const defaultProducts = [
+          {
+            id: 1,
+            name: 'عسل نحل طبيعي مصفى نقي', category: 'منتجات زراعية', faculty: 'كلية الزراعة', facultyId: 'agriculture',
+            price: '150 ج.م', image: 'https://images.unsplash.com/photo-1587049352846-4a222e784d38?auto=format&fit=crop&q=80&w=500',
+            rating: '4.9 (1.2K)', tag: 'الأكثر مبيعاً', tagColor: 'bg-amber-500 text-white',
+            details: 'عبوة 1 كجم عسل مصفى نقي خالي تماماً من السكر المضاف أو المواد الحافظة، من إنتاج مناحل كلية الزراعة.'
+          },
+          {
+            id: 2,
+            name: 'زيت زيتون بكر ممتاز معصور بارد', category: 'منتجات زراعية', faculty: 'كلية الزراعة', facultyId: 'agriculture',
+            price: '180 ج.م', image: 'https://images.unsplash.com/photo-1474979266404-7eaacbcd87c5?auto=format&fit=crop&q=80&w=500',
+            rating: '4.8 (850)', tag: 'عصر بارد طبيعي', tagColor: 'bg-amber-600 text-white',
+            details: 'زيت زيتون بكر ممتاز درجة أولى، نسبة حموضة منخفضة جداً، معصور ميكانيكياً على البارد لفوائد كاملة.'
+          },
+          {
+            id: 3,
+            name: 'نباتات زينة وشتلات زهور منزلية', category: 'منتجات زراعية', faculty: 'كلية الزراعة', facultyId: 'agriculture',
+            price: '35 ج.م', image: 'https://images.unsplash.com/photo-1463936575829-25148e1db1b8?auto=format&fit=crop&q=80&w=500',
+            rating: '4.7 (310)', tag: 'شتلات زهور', tagColor: 'bg-green-600 text-white',
+            details: 'مجموعة متميزة من نباتات الظل والزينة المنزلية المجهزة للزراعة وتجميل المكاتب والبلكونات.'
+          },
+          {
+            id: 4,
+            name: 'منظفات ومطهر أرضيات عالي الجودة', category: 'منظفات صناعية', faculty: 'كلية العلوم', facultyId: 'science',
+            price: '45 ج.م', image: 'https://images.unsplash.com/photo-1584820927498-cfe5211fd8bf?auto=format&fit=crop&q=80&w=500',
+            rating: '4.7 (2.1K)', tag: 'الأعلى مبيعاً', tagColor: 'bg-emerald-600 text-white',
+            details: 'مطهرات ومنظفات آمنة عالية التركيز للإنتاج المنزلي والتجاري، مصنعة وفق المعايير الطبية بقسم الكيمياء.'
+          },
+          {
+            id: 5,
+            name: 'صابون سائل معقم مضاد للبكتيريا', category: 'منظفات صناعية', faculty: 'كلية العلوم', facultyId: 'science',
+            price: '60 ج.م', image: 'https://images.unsplash.com/photo-1607006342411-101a4e101155?auto=format&fit=crop&q=80&w=500',
+            rating: '4.6 (950)', tag: 'مطهر آمن', tagColor: 'bg-emerald-700 text-white',
+            details: 'عبوة عائلية 3 لتر من الصابون السائل المعزز بمرطبات الجلسرين لحماية الأيدي وترطيبها بفاعلية تامة.'
+          },
+          {
+            id: 6,
+            name: 'معقم كحولي طبي بتركيز 70%', category: 'منظفات صناعية', faculty: 'كلية العلوم', facultyId: 'science',
+            price: '50 ج.م', image: 'https://images.unsplash.com/photo-1584622650111-993a426fbf0a?auto=format&fit=crop&q=80&w=500',
+            rating: '4.9 (1.4K)', tag: 'طبي معتمد', tagColor: 'bg-cyan-600 text-white',
+            details: 'بخاخ كحول إيثيلي نقي تركيز 70% للتعقيم المباشر وحماية الأسطح والأيدي بفاعلية تامة مصنع بمعامل الكلية.'
+          }
+        ];
+        localStorage.setItem('exhibition_products', JSON.stringify(defaultProducts));
+        setProducts(defaultProducts);
+      }
+
     } catch (err) {
       console.error("Error fetching data:", err);
     } finally {
@@ -563,6 +909,18 @@ const AdminDashboard = () => {
         n.content
       ]);
       filename = 'الأخبار.csv';
+    } else if (activeTab === 'jobs') {
+      headers = ['التاريخ', 'المسمى الوظيفي', 'الشركة', 'الموقع', 'النوع', 'الخبرة', 'تفاصيل الوظيفة'];
+      dataToExport = jobs.map(j => [
+        j.created_at ? new Date(j.created_at).toLocaleDateString('ar-EG') : '',
+        j.title,
+        j.company,
+        j.location,
+        j.type,
+        j.experience,
+        j.details || ''
+      ]);
+      filename = 'شواغر_الوظائف.csv';
     } else {
       return;
     }
@@ -634,6 +992,7 @@ const AdminDashboard = () => {
     const totalResearchers = registrants.filter(r => r.role === 'researcher').length;
     const totalPartners = registrants.filter(r => r.role === 'partner').length;
     const totalVolunteers = registrants.filter(r => r.role === 'volunteer').length;
+    const totalJobs = jobs.length;
     return { 
       totalGP, 
       totalAR, 
@@ -644,6 +1003,7 @@ const AdminDashboard = () => {
       totalResearchers,
       totalPartners,
       totalVolunteers,
+      totalJobs,
       totalReg: registrants.length 
     };
   };
@@ -652,30 +1012,35 @@ const AdminDashboard = () => {
 
   if (!isAuthenticated) {
     return (
-      <div className="min-h-screen pt-32 pb-20 flex items-center justify-center bg-slate-50 px-4" dir="rtl" style={{ fontFamily: "'Cairo', sans-serif" }}>
-        <div className="max-w-md w-full bg-white rounded-3xl shadow-xl border border-slate-100 p-8 md:p-10 animate-fade-in">
-          <div className="w-16 h-16 bg-[#26462C]/10 rounded-2xl flex items-center justify-center mx-auto mb-6">
-            <KeyRound className="w-8 h-8 text-[#26462C]" />
+      <div className="min-h-screen pt-32 pb-20 flex items-center justify-center bg-gradient-to-br from-slate-50 via-emerald-50/20 to-slate-100 px-4 relative overflow-hidden" dir="rtl" style={{ fontFamily: "'Cairo', sans-serif" }}>
+        {/* Decorative background glows */}
+        <div className="absolute top-20 right-10 w-[300px] h-[300px] bg-emerald-200/10 rounded-full blur-[100px] pointer-events-none" />
+        <div className="absolute bottom-10 left-10 w-[300px] h-[300px] bg-[#F4A217]/5 rounded-full blur-[100px] pointer-events-none" />
+        
+        <div className="max-w-md w-full bg-white/90 backdrop-blur-md rounded-3xl shadow-2xl border border-slate-100/80 p-8 md:p-10 relative z-10 hover:shadow-emerald-900/5 transition-all duration-500">
+          <div className="w-20 h-20 bg-[#26462C]/10 rounded-3xl flex items-center justify-center mx-auto mb-6 relative group">
+            <div className="absolute inset-0 bg-[#26462C]/5 rounded-3xl animate-ping opacity-60"></div>
+            <KeyRound className="w-10 h-10 text-[#26462C] group-hover:scale-110 transition-transform duration-300" />
           </div>
-          <h2 className="text-2xl md:text-3xl font-black text-center text-[#26462C] mb-2">لوحة الإدارة القمة 2026</h2>
-          <p className="text-sm font-semibold text-slate-500 text-center mb-8">يرجى إدخال رمز التحقق للوصول إلى لوحة التحكم</p>
+          <h2 className="text-2xl md:text-3xl font-black text-center text-[#26462C] mb-2 tracking-tight">لوحة الإدارة القمة 2026</h2>
+          <p className="text-xs font-bold text-slate-400 text-center mb-8">يرجى إدخال رمز التحقق للوصول الآمن للوحة التحكم</p>
           
           <form onSubmit={handleLogin} className="space-y-6">
             <div>
-              <label className="block text-sm font-bold text-slate-700 mb-2">كلمة مرور المسؤول</label>
+              <label className="block text-xs font-black text-slate-600 mb-2.5">كلمة مرور المسؤول *</label>
               <input 
                 type="password" 
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="••••••••"
-                className="w-full border border-slate-300 rounded-xl p-3 focus:ring-2 focus:ring-[#26462C] focus:border-[#26462C] font-mono text-center text-lg"
+                className="w-full border border-slate-200 bg-slate-50/50 rounded-xl p-3.5 focus:bg-white focus:ring-2 focus:ring-[#26462C] focus:border-[#26462C] font-mono text-center text-lg outline-none transition-all duration-300 shadow-inner"
                 required
               />
-              {loginError && <p className="text-red-500 text-sm font-bold mt-2 text-center">{loginError}</p>}
+              {loginError && <p className="text-red-500 text-xs font-bold mt-2.5 text-center">{loginError}</p>}
             </div>
             
-            <button type="submit" className="w-full bg-[#26462C] hover:bg-[#1e3622] text-[#F4A217] py-3.5 rounded-xl font-black text-lg shadow-md hover:shadow-lg transition-all flex items-center justify-center gap-2">
-              تسجيل الدخول
+            <button type="submit" className="w-full bg-gradient-to-r from-emerald-800 to-[#26462C] hover:from-emerald-700 hover:to-[#1e3622] text-[#F4A217] py-3.5 rounded-xl font-black text-base shadow-md hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300 flex items-center justify-center gap-2 cursor-pointer">
+              <span>تسجيل الدخول الآمن</span>
             </button>
           </form>
         </div>
@@ -688,94 +1053,132 @@ const AdminDashboard = () => {
       <div className="max-w-[85rem] mx-auto px-4 sm:px-6 lg:px-8">
         
         {/* Top bar */}
-        <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-4 bg-white p-6 rounded-3xl border border-slate-100 shadow-sm mb-8">
+        <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-4 bg-white/80 backdrop-blur-md p-6 rounded-3xl border border-slate-100/80 shadow-soft mb-8 transition-all duration-300">
           <div>
-            <div className="flex items-center gap-3">
-              <h1 className="text-2xl md:text-3xl font-black text-[#26462C]">لوحة تحكم إدارة القمة</h1>
-              {!isSupabaseConfigured && (
-                <span className="bg-amber-100 text-amber-700 px-3 py-1 rounded-full text-xs font-bold border border-amber-200">
-                  وضع المعاينة (بيانات تجريبية)
-                </span>
+            <div className="flex items-center gap-3 flex-wrap">
+              <h1 className="text-2xl md:text-3xl font-black text-[#26462C] tracking-tight">لوحة تحكم إدارة القمة</h1>
+              
+              {isSupabaseConfigured ? (
+                <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 border border-emerald-200/60 text-emerald-700 text-xs font-bold shadow-sm">
+                  <span className="relative flex h-2 w-2">
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                    <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+                  </span>
+                  <span>متصل بالسحابة (Supabase)</span>
+                </div>
+              ) : (
+                <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-50 border border-amber-200/60 text-amber-700 text-xs font-bold shadow-sm">
+                  <span className="relative flex h-2 w-2">
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75"></span>
+                    <span className="relative inline-flex rounded-full h-2 w-2 bg-amber-500"></span>
+                  </span>
+                  <span>وضع المعاينة (محلي / تجريبي)</span>
+                </div>
               )}
             </div>
-            <p className="text-sm font-bold text-slate-500 mt-1">متابعة وفحص الطلبات، إدارة الكليات، والملفات المرفوعة للقمة</p>
+            <p className="text-xs sm:text-sm font-bold text-slate-400 mt-1.5">متابعة وفحص الطلبات، إدارة الكليات، الوظائف، والملفات المرفوعة للقمة</p>
           </div>
           <div className="flex items-center gap-3 self-end md:self-auto">
-            <button onClick={fetchData} className="p-3 bg-slate-100 text-slate-700 hover:bg-slate-200 rounded-xl transition-colors" title="تحديث البيانات">
-              <RefreshCw className={`w-5 h-5 ${loading ? 'animate-spin' : ''}`} />
+            <button onClick={fetchData} className="p-3 bg-slate-100 text-slate-500 hover:bg-slate-200 hover:text-slate-800 rounded-xl transition-all cursor-pointer shadow-sm active:scale-95" title="تحديث البيانات">
+              <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
             </button>
-            <button onClick={handleLogout} className="px-5 py-2.5 bg-red-50 hover:bg-red-100 text-red-600 rounded-xl font-bold text-sm transition-colors">
-              خروج
+            <button onClick={handleLogout} className="px-5 py-2.5 bg-red-50 hover:bg-red-100 text-red-600 rounded-xl font-bold text-xs sm:text-sm transition-all cursor-pointer shadow-sm active:scale-95 border border-red-100">
+              خروج من النظام
             </button>
           </div>
         </div>
 
         {/* Overview Stats Dashboard */}
         {activeTab === 'overview' && (
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-            <div className="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm flex items-center gap-4 hover:shadow-md transition-shadow">
-              <div className="w-12 h-12 bg-blue-50 text-blue-600 rounded-2xl flex items-center justify-center shrink-0">
-                <GraduationCap className="w-6 h-6" />
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6 mb-8">
+            <div className="bg-white p-6 rounded-3xl border border-slate-100/80 shadow-soft flex items-center gap-4 hover:shadow-lg hover:-translate-y-1 transition-all duration-300 group">
+              <div className="w-14 h-14 bg-blue-50 text-blue-600 rounded-2xl flex items-center justify-center shrink-0 group-hover:bg-blue-600 group-hover:text-white transition-all duration-300 shadow-inner">
+                <GraduationCap className="w-7 h-7 text-blue-600 group-hover:text-white" />
               </div>
               <div>
                 <span className="text-xs font-bold text-slate-400 block mb-1">مشروعات التخرج</span>
-                <span className="text-2xl md:text-3xl font-black text-slate-800">{stats.totalGP}</span>
+                <span className="text-2xl md:text-3xl font-black text-slate-800 tracking-tight">{stats.totalGP}</span>
               </div>
             </div>
-            <div className="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm flex items-center gap-4 hover:shadow-md transition-shadow">
-              <div className="w-12 h-12 bg-indigo-50 text-indigo-600 rounded-2xl flex items-center justify-center shrink-0">
-                <BookOpen className="w-6 h-6" />
+            
+            <div className="bg-white p-6 rounded-3xl border border-slate-100/80 shadow-soft flex items-center gap-4 hover:shadow-lg hover:-translate-y-1 transition-all duration-300 group">
+              <div className="w-14 h-14 bg-indigo-50 text-indigo-600 rounded-2xl flex items-center justify-center shrink-0 group-hover:bg-indigo-600 group-hover:text-white transition-all duration-300 shadow-inner">
+                <BookOpen className="w-7 h-7 text-indigo-600 group-hover:text-white" />
               </div>
               <div>
                 <span className="text-xs font-bold text-slate-400 block mb-1">البحوث التطبيقية</span>
-                <span className="text-2xl md:text-3xl font-black text-slate-800">{stats.totalAR}</span>
+                <span className="text-2xl md:text-3xl font-black text-slate-800 tracking-tight">{stats.totalAR}</span>
               </div>
             </div>
-            <div className="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm flex items-center gap-4 hover:shadow-md transition-shadow">
-              <div className="w-12 h-12 bg-emerald-50 text-emerald-600 rounded-2xl flex items-center justify-center shrink-0">
-                <Presentation className="w-6 h-6" />
+
+            <div className="bg-white p-6 rounded-3xl border border-slate-100/80 shadow-soft flex items-center gap-4 hover:shadow-lg hover:-translate-y-1 transition-all duration-300 group">
+              <div className="w-14 h-14 bg-emerald-50 text-emerald-600 rounded-2xl flex items-center justify-center shrink-0 group-hover:bg-emerald-600 group-hover:text-white transition-all duration-300 shadow-inner">
+                <Presentation className="w-7 h-7 text-emerald-600 group-hover:text-white" />
               </div>
               <div>
                 <span className="text-xs font-bold text-slate-400 block mb-1">المتحدثون والمدربون</span>
-                <span className="text-2xl md:text-3xl font-black text-slate-800">{stats.totalSpeakers + stats.totalMentors}</span>
+                <span className="text-2xl md:text-3xl font-black text-slate-800 tracking-tight">{stats.totalSpeakers + stats.totalMentors}</span>
               </div>
             </div>
-            <div className="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm flex items-center gap-4 hover:shadow-md transition-shadow">
-              <div className="w-12 h-12 bg-amber-50 text-amber-600 rounded-2xl flex items-center justify-center shrink-0">
-                <Briefcase className="w-6 h-6" />
+
+            <div className="bg-white p-6 rounded-3xl border border-slate-100/80 shadow-soft flex items-center gap-4 hover:shadow-lg hover:-translate-y-1 transition-all duration-300 group">
+              <div className="w-14 h-14 bg-amber-50 text-amber-600 rounded-2xl flex items-center justify-center shrink-0 group-hover:bg-amber-600 group-hover:text-white transition-all duration-300 shadow-inner">
+                <Briefcase className="w-7 h-7 text-amber-600 group-hover:text-white" />
               </div>
               <div>
                 <span className="text-xs font-bold text-slate-400 block mb-1">الشركات والمستثمرون</span>
-                <span className="text-2xl md:text-3xl font-black text-slate-800">{stats.totalStartups + stats.totalInvestors}</span>
+                <span className="text-2xl md:text-3xl font-black text-slate-800 tracking-tight">{stats.totalStartups + stats.totalInvestors}</span>
+              </div>
+            </div>
+
+            <div className="bg-white p-6 rounded-3xl border border-slate-100/80 shadow-soft flex items-center gap-4 hover:shadow-lg hover:-translate-y-1 transition-all duration-300 group col-span-2 md:col-span-1">
+              <div className="w-14 h-14 bg-purple-50 text-purple-600 rounded-2xl flex items-center justify-center shrink-0 group-hover:bg-purple-600 group-hover:text-white transition-all duration-300 shadow-inner">
+                <Briefcase className="w-7 h-7 text-purple-600 group-hover:text-white" />
+              </div>
+              <div>
+                <span className="text-xs font-bold text-slate-400 block mb-1">وظائف ملتقى التوظيف</span>
+                <span className="text-2xl md:text-3xl font-black text-slate-800 tracking-tight">{stats.totalJobs}</span>
               </div>
             </div>
           </div>
         )}
 
         {/* Tab Navigation */}
-        <div className="flex gap-2 overflow-x-auto pb-4 mb-6 scrollbar-none border-b border-slate-200">
+        <div className="flex gap-3 overflow-x-auto pb-4 mb-6 scrollbar-thin scrollbar-thumb-slate-200 scrollbar-track-transparent border-b border-slate-200/60">
           {[
-            { id: 'overview', label: 'نظرة عامة', icon: BarChart2 },
-            { id: 'news', label: `الأخبار (${newsList.length})`, icon: Newspaper },
-            { id: 'exhibition_innovations', label: `معرض الابتكارات (${innovations.length})`, icon: Sparkles },
-            { id: 'exhibition_products', label: `معرض الوحدات (${products.length})`, icon: ShoppingBag },
-            { id: 'graduation', label: `مشروعات التخرج (${stats.totalGP})`, icon: GraduationCap },
-            { id: 'research', label: `البحوث التطبيقية (${stats.totalAR})`, icon: BookOpen },
-            { id: 'speakers', label: `المتحدثون (${stats.totalSpeakers})`, icon: Presentation },
-            { id: 'startups', label: `الشركات الناشئة (${stats.totalStartups})`, icon: Briefcase },
-            { id: 'investors', label: `المستثمرون (${stats.totalInvestors})`, icon: Users },
-            { id: 'mentors', label: `الموجهون (${stats.totalMentors})`, icon: Users },
-            { id: 'researchers', label: `الباحثون / المبتكرون (${stats.totalResearchers})`, icon: BookOpen },
-            { id: 'partners', label: `الشركاء / الرعاة (${stats.totalPartners})`, icon: Users },
-            { id: 'volunteers', label: `المتطوعون (${stats.totalVolunteers})`, icon: Users }
+            { id: 'overview', label: 'نظرة عامة', count: null, icon: BarChart2 },
+            { id: 'news', label: 'الأخبار', count: newsList.length, icon: Newspaper },
+            { id: 'jobs', label: 'وظائف الملتقى', count: jobs.length, icon: Briefcase },
+            { id: 'exhibition_innovations', label: 'معرض الابتكارات', count: innovations.length, icon: Sparkles },
+            { id: 'exhibition_products', label: 'معرض الوحدات', count: products.length, icon: ShoppingBag },
+            { id: 'graduation', label: 'مشروعات التخرج', count: stats.totalGP, icon: GraduationCap },
+            { id: 'research', label: 'البحوث التطبيقية', count: stats.totalAR, icon: BookOpen },
+            { id: 'speakers', label: 'المتحدثون', count: stats.totalSpeakers, icon: Presentation },
+            { id: 'startups', label: 'الشركات الناشئة', count: stats.totalStartups, icon: Briefcase },
+            { id: 'investors', label: 'المستثمرون', count: stats.totalInvestors, icon: Users },
+            { id: 'mentors', label: 'الموجهون', count: stats.totalMentors, icon: Users },
+            { id: 'researchers', label: 'الباحثون / المبتكرون', count: stats.totalResearchers, icon: BookOpen },
+            { id: 'partners', label: 'الشركاء / الرعاة', count: stats.totalPartners, icon: Users },
+            { id: 'volunteers', label: 'المتطوعون', count: stats.totalVolunteers, icon: Users }
           ].map(tab => (
             <button
               key={tab.id}
               onClick={() => { setActiveTab(tab.id); setSelectedItem(null); }}
-              className={`flex items-center gap-2 px-5 py-3 rounded-full font-bold text-sm whitespace-nowrap transition-all shrink-0 ${activeTab === tab.id ? 'bg-[#26462C] text-[#F4A217] shadow-sm' : 'bg-white text-slate-600 border border-slate-200 hover:bg-slate-50'}`}
+              className={`flex items-center gap-2 px-5 py-3.5 rounded-full font-bold text-xs sm:text-sm whitespace-nowrap transition-all duration-300 shrink-0 border cursor-pointer ${
+                activeTab === tab.id 
+                  ? 'bg-gradient-to-r from-emerald-800 to-[#26462C] text-[#F4A217] border-transparent shadow-md transform scale-102 hover:shadow-lg' 
+                  : 'bg-white text-slate-600 border-slate-200/80 hover:bg-slate-50 hover:text-slate-900 hover:border-slate-300'
+              }`}
             >
-              <tab.icon className="w-4 h-4" />
-              {tab.label}
+              <tab.icon className={`w-4 h-4 ${activeTab === tab.id ? 'text-[#F4A217]' : 'text-slate-400'}`} />
+              <span>{tab.label}</span>
+              {tab.count !== null && (
+                <span className={`px-2 py-0.5 text-[10px] rounded-full font-bold transition-colors ${
+                  activeTab === tab.id ? 'bg-[#F4A217] text-[#26462C]' : 'bg-slate-100 text-slate-500 border border-slate-200'
+                }`}>
+                  {tab.count}
+                </span>
+              )}
             </button>
           ))}
         </div>
@@ -790,14 +1193,14 @@ const AdminDashboard = () => {
                 placeholder="ابحث بالاسم، الكلية، البريد..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full bg-white border border-slate-200 rounded-2xl pr-12 pl-4 py-3 text-sm focus:ring-2 focus:ring-[#26462C]"
+                className="w-full bg-white border border-slate-200/85 rounded-2xl pr-12 pl-4 py-3 text-xs sm:text-sm focus:ring-2 focus:ring-[#26462C] focus:border-[#26462C] outline-none shadow-sm transition-all duration-300"
               />
             </div>
             {(activeTab === 'graduation' || activeTab === 'research') && (
               <select
                 value={statusFilter}
                 onChange={(e) => setStatusFilter(e.target.value)}
-                className="bg-white border border-slate-200 rounded-2xl px-4 py-3 text-sm focus:ring-2 focus:ring-[#26462C] font-bold text-slate-700"
+                className="bg-white border border-slate-200/85 rounded-2xl px-4 py-3 text-xs sm:text-sm focus:ring-2 focus:ring-[#26462C] focus:border-[#26462C] font-bold text-slate-700 outline-none shadow-sm transition-all duration-300 cursor-pointer"
               >
                 <option value="الكل">كل الحالات</option>
                 <option value="تم استلام الطلب">تم استلام الطلب</option>
@@ -809,7 +1212,7 @@ const AdminDashboard = () => {
             )}
             <button
               onClick={handleExportToExcel}
-              className="bg-emerald-600 hover:bg-emerald-700 text-white px-5 py-3 rounded-2xl font-bold text-sm flex items-center justify-center gap-2 transition-all shadow-md active:scale-95 shrink-0"
+              className="bg-emerald-600 hover:bg-emerald-700 text-white px-5 py-3 rounded-2xl font-bold text-xs sm:text-sm flex items-center justify-center gap-2 transition-all duration-300 shadow-md hover:shadow-lg active:scale-95 shrink-0 cursor-pointer hover:-translate-y-0.5 border border-emerald-500"
               title="تصدير هذه القائمة إلى ملف إكسيل CSV"
             >
               <FileSpreadsheet className="w-4 h-4" />
@@ -929,6 +1332,91 @@ const AdminDashboard = () => {
                           </div>
                         </div>
                       ))}
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* --- JOBS TAB --- */}
+              {activeTab === 'jobs' && !selectedItem && (
+                <div className="space-y-6 animate-fade-in">
+                  <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-slate-50 p-6 rounded-2xl border border-slate-200">
+                    <div>
+                      <h3 className="text-xl font-black text-[#26462C] mb-1">إدارة وظائف الملتقى</h3>
+                      <p className="text-sm text-slate-500 font-bold">إضافة وتعديل وحذف الوظائف الشاغرة المعروضة للطلاب والخريجين بالملتقى.</p>
+                    </div>
+                    <button 
+                      onClick={openAddJobModal}
+                      className="bg-[#26462C] hover:bg-[#1a301e] text-[#F4A217] px-6 py-3 rounded-xl font-bold flex items-center gap-2 transition-colors shadow-sm shrink-0 cursor-pointer"
+                    >
+                      <Briefcase className="w-4 h-4" />
+                      <span>+ إضافة وظيفة جديدة</span>
+                    </button>
+                  </div>
+
+                  {jobs.length === 0 ? (
+                    <div className="py-20 text-center text-slate-500 font-bold bg-slate-50 rounded-3xl border border-slate-200 border-dashed">
+                      لا توجد وظائف مضافة حتى الآن.
+                    </div>
+                  ) : (
+                    <div className="overflow-x-auto">
+                      <table className="w-full text-right border-collapse text-sm">
+                        <thead>
+                          <tr className="bg-slate-50 border-b border-slate-200 text-slate-700 font-black">
+                            <th className="p-4">شعار الشركة</th>
+                            <th className="p-4">المسمى الوظيفي</th>
+                            <th className="p-4">الشركة</th>
+                            <th className="p-4">الموقع</th>
+                            <th className="p-4">النوع</th>
+                            <th className="p-4">الخبرة</th>
+                            <th className="p-4 text-center">الإجراءات</th>
+                          </tr>
+                        </thead>
+                        <tbody className="divide-y divide-slate-100">
+                          {jobs.filter(j => 
+                            j.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                            j.company.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                            j.location.toLowerCase().includes(searchQuery.toLowerCase())
+                          ).map(j => (
+                            <tr key={j.id} className="hover:bg-slate-50 transition-colors">
+                              <td className="p-4">
+                                <div className="w-12 h-12 rounded-xl overflow-hidden border border-slate-100 bg-slate-50">
+                                  <img src={j.logo || 'https://images.unsplash.com/photo-1560179707-f14e90ef3623?auto=format&fit=crop&q=80&w=200'} alt={j.company} className="w-full h-full object-cover" />
+                                </div>
+                              </td>
+                              <td className="p-4 font-black text-slate-800">{j.title}</td>
+                              <td className="p-4 font-bold text-slate-600">{j.company}</td>
+                              <td className="p-4 font-semibold text-slate-500">{j.location}</td>
+                              <td className="p-4">
+                                <span className="px-2.5 py-1 bg-blue-50 text-blue-700 font-bold rounded-lg text-xs">
+                                  {j.type}
+                                </span>
+                              </td>
+                              <td className="p-4">
+                                <span className="px-2.5 py-1 bg-orange-50 text-orange-700 font-bold rounded-lg text-xs">
+                                  {j.experience}
+                                </span>
+                              </td>
+                              <td className="p-4 text-center">
+                                <div className="flex items-center justify-center gap-2">
+                                  <button 
+                                    onClick={() => openEditJobModal(j)} 
+                                    className="p-2 text-blue-600 bg-blue-50 hover:bg-blue-100 rounded-lg inline-flex items-center gap-1.5 font-bold text-xs cursor-pointer"
+                                  >
+                                    تعديل
+                                  </button>
+                                  <button 
+                                    onClick={() => handleDeleteJob(j.id)} 
+                                    className="p-2 text-red-600 bg-red-50 hover:bg-red-100 rounded-lg inline-flex items-center gap-1.5 font-bold text-xs cursor-pointer"
+                                  >
+                                    حذف
+                                  </button>
+                                </div>
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
                     </div>
                   )}
                 </div>
@@ -1793,6 +2281,126 @@ const AdminDashboard = () => {
                     type="button"
                     onClick={() => setIsNewsModalOpen(false)}
                     className="px-6 py-3 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl font-bold transition-colors"
+                  >
+                    إلغاء
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Add/Edit Job Modal */}
+      {isJobModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" onClick={() => setIsJobModalOpen(false)}></div>
+          <div className="bg-white rounded-3xl w-full max-w-2xl overflow-hidden relative z-10 shadow-2xl animate-scale-up flex flex-col max-h-[90vh]">
+            <div className="bg-[#26462C] text-white p-6 flex justify-between items-center shrink-0">
+              <h2 className="text-2xl font-black text-[#F4A217]">{jobEditItem ? 'تعديل وظيفة' : 'إضافة وظيفة جديدة'}</h2>
+              <button 
+                onClick={() => setIsJobModalOpen(false)}
+                className="w-8 h-8 flex items-center justify-center bg-white/10 hover:bg-white/20 rounded-full transition-colors font-bold cursor-pointer"
+              >
+                ✕
+              </button>
+            </div>
+            
+            <div className="p-6 overflow-y-auto flex-1 text-right" dir="rtl">
+              <form onSubmit={handleSaveJob} className="space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 mb-2">المسمى الوظيفي *</label>
+                    <input 
+                      type="text" 
+                      required
+                      value={jobFormData.title}
+                      onChange={(e) => setJobFormData({...jobFormData, title: e.target.value})}
+                      className="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:border-[#26462C] focus:ring-1 focus:ring-[#26462C] outline-none font-semibold text-xs"
+                      placeholder="مثال: مهندس برمجيات واجهات أمامية"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 mb-2">اسم الشركة *</label>
+                    <input 
+                      type="text" 
+                      required
+                      value={jobFormData.company}
+                      onChange={(e) => setJobFormData({...jobFormData, company: e.target.value})}
+                      className="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:border-[#26462C] focus:ring-1 focus:ring-[#26462C] outline-none font-semibold text-xs"
+                      placeholder="مثال: TechVision Solutions"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 mb-2">الموقع الجغرافي *</label>
+                    <input 
+                      type="text" 
+                      required
+                      value={jobFormData.location}
+                      onChange={(e) => setJobFormData({...jobFormData, location: e.target.value})}
+                      className="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:border-[#26462C] focus:ring-1 focus:ring-[#26462C] outline-none font-semibold text-xs"
+                      placeholder="مثال: القرية الذكية، القاهرة"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 mb-2">رابط الشعار (اختياري)</label>
+                    <input 
+                      type="text" 
+                      value={jobFormData.logo}
+                      onChange={(e) => setJobFormData({...jobFormData, logo: e.target.value})}
+                      className="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:border-[#26462C] focus:ring-1 focus:ring-[#26462C] outline-none font-semibold text-xs"
+                      placeholder="مثال: https://example.com/logo.jpg"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 mb-2">نوع الدوام *</label>
+                    <select 
+                      value={jobFormData.type}
+                      onChange={(e) => setJobFormData({...jobFormData, type: e.target.value})}
+                      className="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:border-[#26462C] focus:ring-1 focus:ring-[#26462C] outline-none font-bold text-xs"
+                    >
+                      <option value="دوام كامل">دوام كامل</option>
+                      <option value="دوام جزئي">دوام جزئي</option>
+                      <option value="عن بُعد (Remote)">عن بُعد (Remote)</option>
+                      <option value="تدريب (Internship)">تدريب (Internship)</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 mb-2">الخبرة المطلوبة *</label>
+                    <input 
+                      type="text" 
+                      required
+                      value={jobFormData.experience}
+                      onChange={(e) => setJobFormData({...jobFormData, experience: e.target.value})}
+                      className="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:border-[#26462C] focus:ring-1 focus:ring-[#26462C] outline-none font-semibold text-xs"
+                      placeholder="مثال: حديث التخرج، 1-3 سنوات"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 mb-2">تفاصيل وشروط الوظيفة *</label>
+                  <textarea 
+                    required
+                    rows={4}
+                    value={jobFormData.details}
+                    onChange={(e) => setJobFormData({...jobFormData, details: e.target.value})}
+                    className="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:border-[#26462C] focus:ring-1 focus:ring-[#26462C] outline-none font-semibold text-xs resize-none"
+                    placeholder="اكتب متطلبات الوظيفة ووصف الدور بالتفصيل..."
+                  />
+                </div>
+                
+                <div className="pt-4 border-t border-slate-100 flex gap-3">
+                  <button 
+                    type="submit"
+                    className="flex-1 bg-[#26462C] hover:bg-[#1a301e] text-white px-6 py-3 rounded-xl font-bold transition-colors shadow-sm cursor-pointer"
+                  >
+                    {jobEditItem ? 'حفظ التعديلات' : 'إضافة الوظيفة'}
+                  </button>
+                  <button 
+                    type="button"
+                    onClick={() => setIsJobModalOpen(false)}
+                    className="px-6 py-3 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl font-bold transition-colors cursor-pointer"
                   >
                     إلغاء
                   </button>

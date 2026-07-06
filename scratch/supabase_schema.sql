@@ -75,3 +75,24 @@ ON CONFLICT (id) DO NOTHING;
 CREATE POLICY "Allow public read" ON storage.objects FOR SELECT TO public USING (bucket_id = 'project-attachments');
 CREATE POLICY "Allow public upload" ON storage.objects FOR INSERT TO public WITH CHECK (bucket_id = 'project-attachments');
 CREATE POLICY "Allow public delete" ON storage.objects FOR DELETE TO public USING (bucket_id = 'project-attachments');
+
+
+-- 5. إنشاء جدول الوظائف الشاغرة بملتقى التوظيف
+CREATE TABLE IF NOT EXISTS public.jobs (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    created_at TIMESTAMPTZ DEFAULT now(),
+    title TEXT NOT NULL,
+    company TEXT NOT NULL,
+    location TEXT NOT NULL,
+    type TEXT NOT NULL, -- دوام كامل، دوام جزئي، عن بعد
+    experience TEXT NOT NULL, -- حديث التخرج، 1-3 سنوات، إلخ
+    logo TEXT, -- رابط شعار الشركة
+    details TEXT -- تفاصيل أو شروط إضافية للوظيفة
+);
+
+ALTER TABLE public.jobs ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "Allow public select on jobs" ON public.jobs FOR SELECT TO public USING (true);
+CREATE POLICY "Allow public insert on jobs" ON public.jobs FOR INSERT TO public WITH CHECK (true);
+CREATE POLICY "Allow public update on jobs" ON public.jobs FOR UPDATE TO public USING (true);
+CREATE POLICY "Allow public delete on jobs" ON public.jobs FOR DELETE TO public USING (true);
+
