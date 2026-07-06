@@ -1488,6 +1488,128 @@ const AdminDashboard = () => {
             </div>
           ) : (
             <>
+              {/* ===== PROFILE TAB ===== */}
+              {activeTab === 'profile' && (
+                <div className="max-w-2xl mx-auto space-y-6 animate-fade-in">
+                  <div className="mb-2">
+                    <h3 className="text-2xl font-black text-slate-800">الملف الشخصي للمسؤول</h3>
+                    <p className="text-sm text-slate-500 font-semibold mt-1">تعديل بيانات حسابك الشخصية. سيظهر اسمك عند رفع الأخبار والوظائف.</p>
+                  </div>
+
+                  {profileSaved && (
+                    <div className="bg-blue-50 border border-blue-200 text-blue-800 rounded-2xl px-5 py-3 font-bold text-sm flex items-center gap-2">
+                      <span>✓</span> تم حفظ الملف الشخصي بنجاح!
+                    </div>
+                  )}
+
+                  {/* Avatar Card */}
+                  <div className="bg-white rounded-3xl border border-slate-100 shadow-sm p-6">
+                    <h4 className="font-black text-slate-800 text-sm mb-4">الصورة الشخصية</h4>
+                    <div className="flex items-center gap-6">
+                      <div className="w-20 h-20 rounded-3xl overflow-hidden bg-[#1E3A8A]/10 border-2 border-[#1E3A8A]/20 flex items-center justify-center shrink-0">
+                        {(profileForm.avatar || adminProfile.avatar) ? (
+                          <img src={profileForm.avatar || adminProfile.avatar} alt="avatar" className="w-full h-full object-cover" onError={(e) => { e.target.style.display='none'; }} />
+                        ) : (
+                          <span className="text-[#1E3A8A] font-black text-3xl">{(adminProfile.name || 'A').charAt(0).toUpperCase()}</span>
+                        )}
+                      </div>
+                      <div className="flex-1">
+                        <label className="block text-xs font-bold text-slate-500 mb-2">رابط الصورة الشخصية (URL)</label>
+                        <input
+                          type="url"
+                          placeholder="https://example.com/photo.jpg"
+                          value={profileForm.avatar}
+                          onChange={e => setProfileForm({...profileForm, avatar: e.target.value})}
+                          className="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:ring-2 focus:ring-[#1E3A8A] focus:border-[#1E3A8A] outline-none text-sm font-semibold"
+                        />
+                        <p className="text-[11px] text-slate-400 mt-1 font-semibold">أدخل رابط صورتك الشخصية من الإنترنت لتظهر في القائمة الجانبية</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Profile Info & Password Form */}
+                  <form onSubmit={handleSaveProfile} className="bg-white rounded-3xl border border-slate-100 shadow-sm p-6 space-y-5">
+                    <h4 className="font-black text-slate-800 text-sm">معلومات الحساب</h4>
+                    
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-xs font-bold text-slate-500 mb-2">الاسم الظاهر *</label>
+                        <input
+                          type="text"
+                          placeholder={adminProfile.name}
+                          value={profileForm.name}
+                          onChange={e => setProfileForm({...profileForm, name: e.target.value})}
+                          className="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:ring-2 focus:ring-[#1E3A8A] focus:border-[#1E3A8A] outline-none text-sm font-semibold"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-xs font-bold text-slate-500 mb-2">المسمى الوظيفي</label>
+                        <input
+                          type="text"
+                          placeholder={adminProfile.title}
+                          value={profileForm.title}
+                          onChange={e => setProfileForm({...profileForm, title: e.target.value})}
+                          className="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:ring-2 focus:ring-[#1E3A8A] focus:border-[#1E3A8A] outline-none text-sm font-semibold"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="pt-4 border-t border-slate-100">
+                      <h4 className="font-black text-slate-800 text-sm mb-4">تغيير كلمة المرور</h4>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                          <label className="block text-xs font-bold text-slate-500 mb-2">كلمة المرور الحالية</label>
+                          <input
+                            type="password"
+                            placeholder="••••••••"
+                            value={profileForm.currentPassword}
+                            onChange={e => setProfileForm({...profileForm, currentPassword: e.target.value})}
+                            className="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:ring-2 focus:ring-[#1E3A8A] focus:border-[#1E3A8A] outline-none font-mono"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-xs font-bold text-slate-500 mb-2">كلمة المرور الجديدة (6 أحرف+)</label>
+                          <input
+                            type="password"
+                            placeholder="••••••••"
+                            value={profileForm.newPassword}
+                            onChange={e => setProfileForm({...profileForm, newPassword: e.target.value})}
+                            className="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:ring-2 focus:ring-[#1E3A8A] focus:border-[#1E3A8A] outline-none font-mono"
+                          />
+                        </div>
+                      </div>
+                      <p className="text-[11px] text-slate-400 mt-2 font-semibold">اتركهما فارغتين إذا لم تريد تغيير كلمة المرور</p>
+                    </div>
+
+                    <div className="pt-2 flex gap-3">
+                      <button
+                        type="submit"
+                        className="flex-1 bg-gradient-to-r from-blue-900 to-[#1E3A8A] hover:from-[#1E3A8A] hover:to-blue-900 text-white py-3 rounded-xl font-black text-sm shadow-md hover:shadow-lg transition-all duration-300 cursor-pointer"
+                      >
+                        حفظ التعديلات
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setProfileForm({ name: '', title: '', avatar: '', newPassword: '', currentPassword: '' })}
+                        className="px-6 py-3 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-xl font-bold text-sm transition-all cursor-pointer"
+                      >
+                        إلغاء
+                      </button>
+                    </div>
+                  </form>
+
+                  {/* Current credentials info */}
+                  <div className="bg-blue-50 border border-blue-100 rounded-2xl p-5">
+                    <h4 className="font-black text-blue-900 text-sm mb-3">معلومات الحساب الحالية</h4>
+                    <div className="space-y-2 text-sm">
+                      <div className="flex items-center gap-2"><span className="font-bold text-slate-500 w-32">الاسم الظاهر:</span><span className="font-black text-slate-800">{adminProfile.name}</span></div>
+                      <div className="flex items-center gap-2"><span className="font-bold text-slate-500 w-32">المسمى الوظيفي:</span><span className="font-semibold text-slate-700">{adminProfile.title}</span></div>
+                      <div className="flex items-center gap-2"><span className="font-bold text-slate-500 w-32">نوع الصلاحية:</span><span className={`font-black px-2 py-0.5 rounded-lg text-xs ${adminRole === 'superAdmin' ? 'bg-[#1E3A8A]/10 text-[#1E3A8A]' : 'bg-blue-100 text-blue-700'}`}>{adminRole === 'superAdmin' ? 'مسؤول رئيسي (Super Admin)' : 'أدمن أكاديمي (Academic)'}</span></div>
+                    </div>
+                  </div>
+                </div>
+              )}
+
               {activeTab === 'overview' ? (
                 /* --- OVERVIEW GRID VIEW --- */
                 <div className="grid grid-cols-1 xl:grid-cols-12 gap-8 items-start animate-fade-in">
