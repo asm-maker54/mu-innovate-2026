@@ -868,12 +868,6 @@ const AdminDashboard = () => {
   const handleSaveProfile = (e) => {
     e.preventDefault();
     const usernameKey = sessionStorage.getItem('adminUsername') || 'admin';
-    const account = ADMIN_ACCOUNTS[usernameKey];
-    const savedPw = localStorage.getItem('admin_password_' + usernameKey) || account?.password;
-    if (profileForm.currentPassword && profileForm.currentPassword !== savedPw) {
-      alert('كلمة المرور الحالية غير صحيحة!');
-      return;
-    }
     const updated = {
       name: profileForm.name || adminProfile.name,
       title: profileForm.title || adminProfile.title,
@@ -881,12 +875,83 @@ const AdminDashboard = () => {
     };
     setAdminProfile(updated);
     localStorage.setItem('admin_profile_' + usernameKey, JSON.stringify(updated));
-    if (profileForm.newPassword && profileForm.newPassword.length >= 6) {
-      localStorage.setItem('admin_password_' + usernameKey, profileForm.newPassword);
-    }
-    setProfileForm({ name: '', title: '', avatar: '', newPassword: '', currentPassword: '' });
+    setProfileForm({ name: '', title: '', avatar: '' });
     setProfileSaved(true);
     setTimeout(() => setProfileSaved(false), 3000);
+  };
+
+  const handleChangePassword = async (e) => {
+    e.preventDefault();
+    if (!passwordForm.currentPassword || !passwordForm.newPassword) {
+      alert('يرجى ملء جميع الحقول لتغيير كلمة المرور.');
+      return;
+    }
+    if (passwordForm.newPassword.length < 6) {
+      alert('كلمة المرور الجديدة يجب أن لا تقل عن 6 أحرف.');
+      return;
+    }
+
+    const usernameKey = sessionStorage.getItem('adminUsername') || 'admin';
+    setLoading(true);
+    try {
+      if (isSupabaseConfigured) {
+        // Find the admin
+        const { data: adminData, error: err1 } = await supabase.from('admins').select('*').eq('username', usernameKey).single();
+        if (err1 || !adminData) {
+          // If not found in DB, fallback to local storage since it might be a local account
+          const customAdmins = JSON.parse(localStorage.getItem('custom_admins') || '[]');
+          const account = ADMIN_ACCOUNTS[usernameKey] || customAdmins.find(a => a.username.toLowerCase() === usernameKey);
+          if (!account) throw new Error("لم يتم العثور على حسابك");
+          
+          const savedPw = localStorage.getItem('admin_password_' + usernameKey) || account.password;
+          if (passwordForm.currentPassword !== savedPw) {
+            alert('كلمة المرور الحالية غير صحيحة!');
+            setLoading(false);
+            return;
+          }
+          localStorage.setItem('admin_password_' + usernameKey, passwordForm.newPassword);
+          if (account.role === 'custom_admin') {
+            const updated = customAdmins.map(a => a.username.toLowerCase() === usernameKey ? {...a, password: passwordForm.newPassword} : a);
+            localStorage.setItem('custom_admins', JSON.stringify(updated));
+          }
+        } else {
+          // It's a DB admin
+          if (adminData.password !== passwordForm.currentPassword) {
+            alert('كلمة المرور الحالية غير صحيحة!');
+            setLoading(false);
+            return;
+          }
+          
+          // Update password
+          const { error: err2 } = await supabase.from('admins').update({ password: passwordForm.newPassword }).eq('username', usernameKey);
+          if (err2) throw err2;
+        }
+      } else {
+        // Fallback to local
+        const customAdmins = JSON.parse(localStorage.getItem('custom_admins') || '[]');
+        const account = ADMIN_ACCOUNTS[usernameKey] || customAdmins.find(a => a.username.toLowerCase() === usernameKey);
+        const savedPw = localStorage.getItem('admin_password_' + usernameKey) || account?.password;
+        
+        if (passwordForm.currentPassword !== savedPw) {
+          alert('كلمة المرور الحالية غير صحيحة!');
+          setLoading(false);
+          return;
+        }
+        localStorage.setItem('admin_password_' + usernameKey, passwordForm.newPassword);
+        if (account?.role === 'custom_admin') {
+          const updated = customAdmins.map(a => a.username.toLowerCase() === usernameKey ? {...a, password: passwordForm.newPassword} : a);
+          localStorage.setItem('custom_admins', JSON.stringify(updated));
+        }
+      }
+      
+      alert('تم تغيير كلمة المرور بنجاح!');
+      setPasswordForm({ currentPassword: '', newPassword: '' });
+    } catch(err) {
+      console.error(err);
+      alert('حدث خطأ: ' + err.message);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const fetchData = async () => {
@@ -1960,46 +2025,57 @@ const AdminDashboard = () => {
                       </div>
                     </div>
 
-                    <div className="pt-4 border-t border-slate-100">
-                      <h4 className="font-black text-slate-800 text-sm mb-4">تغيير كلمة المرور</h4>
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                        <div>
-                          <label className="block text-xs font-bold text-slate-500 mb-2">كلمة المرور الحالية</label>
-                          <input
-                            type="password"
-                            placeholder="••••••••"
-                            value={profileForm.currentPassword}
-                            onChange={e => setProfileForm({...profileForm, currentPassword: e.target.value})}
-                            className="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:ring-2 focus:ring-[#1E3A8A] focus:border-[#1E3A8A] outline-none font-mono"
-                          />
-                        </div>
-                        <div>
-                          <label className="block text-xs font-bold text-slate-500 mb-2">كلمة المرور الجديدة (6 أحرف+)</label>
-                          <input
-                            type="password"
-                            placeholder="••••••••"
-                            value={profileForm.newPassword}
-                            onChange={e => setProfileForm({...profileForm, newPassword: e.target.value})}
-                            className="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:ring-2 focus:ring-[#1E3A8A] focus:border-[#1E3A8A] outline-none font-mono"
-                          />
-                        </div>
-                      </div>
-                      <p className="text-[11px] text-slate-400 mt-2 font-semibold">اتركهما فارغتين إذا لم تريد تغيير كلمة المرور</p>
-                    </div>
-
                     <div className="pt-2 flex gap-3">
                       <button
                         type="submit"
                         className="flex-1 bg-gradient-to-r from-blue-900 to-[#1E3A8A] hover:from-[#1E3A8A] hover:to-blue-900 text-white py-3 rounded-xl font-black text-sm shadow-md hover:shadow-lg transition-all duration-300 cursor-pointer"
                       >
-                        حفظ التعديلات
+                        حفظ بيانات الحساب
                       </button>
                       <button
                         type="button"
-                        onClick={() => setProfileForm({ name: '', title: '', avatar: '', newPassword: '', currentPassword: '' })}
+                        onClick={() => setProfileForm({ name: '', title: '', avatar: '' })}
                         className="px-6 py-3 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-xl font-bold text-sm transition-all cursor-pointer"
                       >
                         إلغاء
+                      </button>
+                    </div>
+                  </form>
+
+                  {/* Password Change Form */}
+                  <form onSubmit={handleChangePassword} className="bg-white rounded-3xl border border-slate-100 shadow-sm p-6 space-y-5">
+                    <h4 className="font-black text-slate-800 text-sm">تغيير كلمة المرور</h4>
+                    
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-xs font-bold text-slate-500 mb-2">كلمة المرور الحالية</label>
+                        <input
+                          type="password"
+                          placeholder="••••••••"
+                          value={passwordForm.currentPassword}
+                          onChange={e => setPasswordForm({...passwordForm, currentPassword: e.target.value})}
+                          className="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:ring-2 focus:ring-red-600 focus:border-red-600 outline-none font-mono"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-xs font-bold text-slate-500 mb-2">كلمة المرور الجديدة (6 أحرف+)</label>
+                        <input
+                          type="password"
+                          placeholder="••••••••"
+                          value={passwordForm.newPassword}
+                          onChange={e => setPasswordForm({...passwordForm, newPassword: e.target.value})}
+                          className="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:ring-2 focus:ring-red-600 focus:border-red-600 outline-none font-mono"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="pt-2 flex justify-end">
+                      <button
+                        type="submit"
+                        disabled={loading}
+                        className="bg-red-600 hover:bg-red-700 text-white px-8 py-3 rounded-xl font-black text-sm shadow-md hover:shadow-lg transition-all duration-300 cursor-pointer disabled:opacity-50"
+                      >
+                        {loading ? 'جاري التحقق...' : 'تغيير كلمة المرور'}
                       </button>
                     </div>
                   </form>
