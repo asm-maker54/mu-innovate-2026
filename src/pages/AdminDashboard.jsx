@@ -14,7 +14,7 @@ const isUUID = (str) => { const regexExp = /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a
 // Mock Data for Fallback
 const mockGraduationProjects = [
   {
-    id: "g1",
+    id: "g1111111-1111-1111-1111-111111111111",
     created_at: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(),
     project_name_ar: "نظام الري الذكي بالذكاء الاصطناعي",
     project_name_en: "AI-Powered Smart Irrigation System",
@@ -31,7 +31,7 @@ const mockGraduationProjects = [
     details: { projectSummary: "نظام متكامل يعتمد على مستشعرات الرطوبة والذكاء الاصطناعي لترشيد استهلاك المياه في الحقول الزراعية بصعيد مصر.", problemAddressed: "الهدر الكبير في مياه الري التقليدية.", solutionProvided: "ري ذكي تلقائي يضخ مياهًا حسب حاجة التربة الدقيقة." }
   },
   {
-    id: "g2",
+    id: "g2222222-2222-2222-2222-222222222222",
     created_at: new Date(Date.now() - 4 * 24 * 60 * 60 * 1000).toISOString(),
     project_name_ar: "كرسي متحرك ذكي لذوي الهمم",
     project_name_en: "Smart Wheelchair for Disabled",
@@ -50,7 +50,7 @@ const mockGraduationProjects = [
 
 const mockAppliedResearch = [
   {
-    id: "r1",
+    id: "r1111111-1111-1111-1111-111111111111",
     created_at: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(),
     pi_name: "د. أسامة مصطفى كامل",
     pi_faculty: "كلية العلوم (حكومية)",
@@ -66,7 +66,7 @@ const mockAppliedResearch = [
 
 const mockRegistrations = [
   {
-    id: "reg1",
+    id: "e1111111-1111-1111-1111-111111111111",
     created_at: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString(),
     full_name: "م. كريم عبد العزيز مصطفى",
     email: "karim@startup.com",
@@ -77,7 +77,7 @@ const mockRegistrations = [
     details: { startupName: "نماء تيك", industry: "الذكاء الاصطناعي والتحول الرقمي", stage: "نموذج أولي مجرب", elevatorPitch: "منصة ذكية لربط المزارعين بالأسواق مباشرة لتقليل الحلقات الوسيطة." }
   },
   {
-    id: "reg2",
+    id: "e2222222-2222-2222-2222-222222222222",
     created_at: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString(),
     full_name: "أ.د. سلوى عبد الرحمن حسن",
     email: "salwa@knowledge.com",
@@ -88,7 +88,7 @@ const mockRegistrations = [
     details: { speechTopic: "مستقبل ريادة الأعمال في الجامعات المصرية", speakerExpertise: "الابتكار الجامعي", speakerBio: "خبيرة في نقل التكنولوجيا وتأسيس الحاضنات الجامعية لأكثر من ١٥ عاماً." }
   },
   {
-    id: "reg3",
+    id: "e3333333-3333-3333-3333-333333333333",
     created_at: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString(),
     full_name: "د. طارق جلال فوزي",
     email: "tarek@angelinvest.net",
@@ -694,7 +694,7 @@ const AdminDashboard = () => {
           .from('graduation_projects')
           .select('*')
           .order('created_at', { ascending: false });
-        if (gErr) throw gErr;
+        if (gErr) console.error("Graduation projects error:", gErr);
         setGradProjects(gData || []);
 
         // Fetch Applied Research
@@ -702,7 +702,7 @@ const AdminDashboard = () => {
           .from('applied_research')
           .select('*')
           .order('created_at', { ascending: false });
-        if (rErr) throw rErr;
+        if (rErr) console.error("Applied research error:", rErr);
         setAppliedResearch(rData || []);
 
         // Fetch Registrations
@@ -710,7 +710,7 @@ const AdminDashboard = () => {
           .from('registrations')
           .select('*')
           .order('created_at', { ascending: false });
-        if (regErr) throw regErr;
+        if (regErr) console.error("Registrations error:", regErr);
         setRegistrants(regData || []);
 
         // Fetch Jobs
