@@ -1595,20 +1595,6 @@ const AdminDashboard = () => {
                   الدخول للوحة التحكم
                 </button>
               </form>
-
-              <div className="mt-8 pt-6 border-t border-slate-100 relative z-10">
-                <p className="text-xs font-bold text-slate-400 text-center mb-3">حسابات الإدارة الرئيسية المتاحة:</p>
-                <div className="flex flex-col gap-2">
-                  <div className="bg-slate-50 rounded-lg p-2.5 flex justify-between items-center text-[11px] font-bold border border-slate-100">
-                    <span className="text-slate-500">المشرف الرئيسي:</span>
-                    <span className="text-[#1E3A8A] bg-blue-100/50 px-2 py-1 rounded tracking-wide">admin / admin123</span>
-                  </div>
-                  <div className="bg-slate-50 rounded-lg p-2.5 flex justify-between items-center text-[11px] font-bold border border-slate-100">
-                    <span className="text-slate-500">الإدارة الأكاديمية:</span>
-                    <span className="text-[#1E3A8A] bg-blue-100/50 px-2 py-1 rounded tracking-wide">academic / acad123</span>
-                  </div>
-                </div>
-              </div>
             </div>
             
             <p className="text-center text-slate-400 text-xs font-bold mt-8">
