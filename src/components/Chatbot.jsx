@@ -67,7 +67,7 @@ const Chatbot = () => {
         }`}
       >
         {/* Header */}
-        <div className="bg-gradient-to-r from-[#111827] to-blue-900 p-4 text-white flex justify-between items-center relative overflow-hidden">
+        <div className="bg-gradient-to-r from-[#111827] to-[#26462C] p-4 text-white flex justify-between items-center relative overflow-hidden">
           {/* Decorative effect */}
           <div className="absolute -top-10 -right-10 w-24 h-24 bg-white/10 rounded-full blur-xl"></div>
           
@@ -80,7 +80,7 @@ const Chatbot = () => {
                 {isRtl ? 'المساعد الذكي' : 'Smart Assistant'}
                 <Sparkles className="w-3 h-3 text-yellow-400" />
               </h3>
-              <p className="text-xs text-blue-100">
+              <p className="text-xs text-emerald-100/90">
                 {isRtl ? 'متصل الآن - جاهز للرد' : 'Online - Ready to answer'}
               </p>
             </div>
@@ -103,7 +103,7 @@ const Chatbot = () => {
               <div className={`flex gap-2 max-w-[85%] ${msg.type === 'user' ? (isRtl ? 'flex-row-reverse' : 'flex-row') : ''}`}>
                 {/* Avatar */}
                 <div className={`w-8 h-8 rounded-full flex-shrink-0 flex items-center justify-center ${
-                  msg.type === 'user' ? 'bg-blue-100 text-blue-600' : 'bg-gradient-to-br from-gray-800 to-gray-600 text-white shadow-sm'
+                  msg.type === 'user' ? 'bg-[#26462C]/10 text-[#26462C]' : 'bg-gradient-to-br from-gray-800 to-gray-600 text-white shadow-sm'
                 }`}>
                   {msg.type === 'user' ? <User className="w-4 h-4" /> : <Bot className="w-4 h-4" />}
                 </div>
@@ -111,7 +111,7 @@ const Chatbot = () => {
                 {/* Bubble */}
                 <div className={`p-3 text-[14px] leading-relaxed shadow-sm ${
                   msg.type === 'user' 
-                    ? 'bg-blue-600 text-white rounded-2xl rounded-tr-sm' 
+                    ? 'bg-[#26462C] text-white rounded-2xl rounded-tr-sm' 
                     : 'bg-white text-gray-700 rounded-2xl rounded-tl-sm border border-gray-100'
                 }`}>
                   {msg.text}
@@ -129,13 +129,13 @@ const Chatbot = () => {
             value={inputValue}
             onChange={(e) => setInputValue(e.target.value)}
             placeholder={isRtl ? 'اكتب رسالتك هنا...' : 'Type your message...'}
-            className="flex-1 bg-gray-50 border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 transition-all"
+            className="flex-1 bg-gray-50 border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#26462C]/50 focus:border-[#26462C] transition-all"
             dir={isRtl ? 'rtl' : 'ltr'}
           />
           <button 
             type="submit"
             disabled={!inputValue.trim()}
-            className="w-11 h-11 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-300 text-white rounded-xl flex items-center justify-center transition-colors flex-shrink-0 shadow-sm"
+            className="w-11 h-11 bg-[#26462C] hover:bg-[#1d3521] disabled:bg-gray-300 text-white rounded-xl flex items-center justify-center transition-colors flex-shrink-0 shadow-sm"
           >
             <Send className={`w-5 h-5 ${isRtl ? 'rotate-180' : ''} ${!inputValue.trim() ? 'opacity-50' : ''}`} />
           </button>
@@ -146,7 +146,7 @@ const Chatbot = () => {
       <button
         onClick={toggleChat}
         className={`w-14 h-14 rounded-full flex items-center justify-center shadow-2xl transition-all duration-300 hover:scale-110 z-50 ${
-          isOpen ? 'bg-gray-800 text-white rotate-90' : 'bg-blue-600 text-white hover:bg-blue-700 animate-bounce-slow'
+          isOpen ? 'bg-gray-800 text-white rotate-90' : 'bg-[#26462C] text-[#F4A217] hover:bg-[#1d3521] animate-bounce-slow'
         }`}
         style={{ animationDuration: '3s' }}
       >
@@ -155,7 +155,7 @@ const Chatbot = () => {
       
       {/* Pulse effect when closed */}
       {!isOpen && (
-        <div className="absolute inset-0 rounded-full bg-blue-600 opacity-20 animate-ping pointer-events-none" style={{ animationDuration: '2s' }}></div>
+        <div className="absolute inset-0 rounded-full bg-[#26462C] opacity-20 animate-ping pointer-events-none" style={{ animationDuration: '2s' }}></div>
       )}
     </div>
   );

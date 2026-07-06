@@ -1374,10 +1374,10 @@ const AdminDashboard = () => {
                     {/* 2. Sparkline Stats Cards */}
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
                       {[
-                        { title: 'مشروعات التخرج', value: stats.totalGP, label: 'مشروع مضاف', color: 'text-blue-600', bg: 'bg-blue-50', svgColor: 'text-blue-500', path: 'M 0,20 Q 25,5 50,25 T 100,10', percent: '+14%' },
-                        { title: 'البحوث التطبيقية', value: stats.totalAR, label: 'بحث تطبيقي', color: 'text-indigo-600', bg: 'bg-indigo-50', svgColor: 'text-indigo-500', path: 'M 0,10 Q 25,25 50,5 T 100,20', percent: '+8%' },
-                        { title: 'ابتكارات المعرض', value: innovations.length, label: 'ابتكار تقني', color: 'text-purple-600', bg: 'bg-purple-50', svgColor: 'text-purple-500', path: 'M 0,25 Q 30,10 60,30 T 100,5', percent: '+22%' },
-                        { title: 'وظائف وشواغر', value: jobs.length, label: 'وظيفة شاغرة', color: 'text-emerald-600', bg: 'bg-emerald-50', svgColor: 'text-emerald-500', path: 'M 0,15 Q 25,5 50,20 T 100,8', percent: '+18%' }
+                        { title: 'مشروعات التخرج', value: stats.totalGP, label: 'مشروع مضاف', color: 'text-emerald-700', bg: 'bg-emerald-50', svgColor: 'text-emerald-600', path: 'M 0,20 Q 25,5 50,25 T 100,10', percent: '+14%' },
+                        { title: 'البحوث التطبيقية', value: stats.totalAR, label: 'بحث تطبيقي', color: 'text-[#26462C]', bg: 'bg-[#26462C]/10', svgColor: 'text-[#26462C]', path: 'M 0,10 Q 25,25 50,5 T 100,20', percent: '+8%' },
+                        { title: 'ابتكارات المعرض', value: innovations.length, label: 'ابتكار تقني', color: 'text-[#F4A217]', bg: 'bg-[#F4A217]/10', svgColor: 'text-[#F4A217]', path: 'M 0,25 Q 30,10 60,30 T 100,5', percent: '+22%' },
+                        { title: 'وظائف وشواغر', value: jobs.length, label: 'وظيفة شاغرة', color: 'text-amber-600', bg: 'bg-amber-50', svgColor: 'text-amber-500', path: 'M 0,15 Q 25,5 50,20 T 100,8', percent: '+18%' }
                       ].map((card, idx) => (
                         <div key={idx} className="bg-white p-6 rounded-[2rem] border border-slate-100 shadow-soft hover:shadow-lg hover:-translate-y-1 transition-all duration-300 flex flex-col justify-between group">
                           <div className="flex justify-between items-start mb-4">
@@ -1408,7 +1408,7 @@ const AdminDashboard = () => {
                       <div className="bg-white p-8 rounded-[2.5rem] border border-slate-100 shadow-soft flex flex-col justify-between h-[300px]">
                         <div className="flex justify-between items-center mb-6">
                           <h4 className="font-black text-slate-800 text-lg">فحص ومراجعة الطلبات</h4>
-                          <span className="text-xs font-bold text-indigo-600 bg-indigo-50 px-3 py-1 rounded-full">تحديث فوري</span>
+                          <span className="text-xs font-bold text-[#26462C] bg-[#26462C]/10 px-3 py-1 rounded-full">تحديث فوري</span>
                         </div>
                         <div className="flex items-center justify-around gap-6">
                           <div className="relative w-36 h-36 flex items-center justify-center">
@@ -1433,9 +1433,9 @@ const AdminDashboard = () => {
                             </div>
                           </div>
                           <div className="space-y-3 font-semibold text-sm text-slate-600">
-                            <div className="flex items-center gap-2"><span className="w-2.5 h-2.5 rounded-full bg-blue-500"></span> <span>المتحدثون: {stats.totalSpeakers}</span></div>
-                            <div className="flex items-center gap-2"><span className="w-2.5 h-2.5 rounded-full bg-amber-500"></span> <span>الشركات الناشئة: {stats.totalStartups}</span></div>
-                            <div className="flex items-center gap-2"><span className="w-2.5 h-2.5 rounded-full bg-emerald-500"></span> <span>المستثمرون: {stats.totalInvestors}</span></div>
+                            <div className="flex items-center gap-2"><span className="w-2.5 h-2.5 rounded-full bg-amber-500"></span> <span>المتحدثون: {stats.totalSpeakers}</span></div>
+                            <div className="flex items-center gap-2"><span className="w-2.5 h-2.5 rounded-full bg-yellow-500"></span> <span>الشركات الناشئة: {stats.totalStartups}</span></div>
+                            <div className="flex items-center gap-2"><span className="w-2.5 h-2.5 rounded-full bg-[#26462C]"></span> <span>المستثمرون: {stats.totalInvestors}</span></div>
                           </div>
                         </div>
                       </div>
@@ -1448,9 +1448,9 @@ const AdminDashboard = () => {
                         </div>
                         <div className="space-y-4 flex-1 flex flex-col justify-center">
                           {[
-                            { name: 'لجنة الاستقبال والتسجيل', percent: 84, color: 'bg-indigo-600' },
+                            { name: 'لجنة الاستقبال والتسجيل', percent: 84, color: 'bg-[#26462C]' },
                             { name: 'لجنة التقييم العلمي والفني', percent: 70, color: 'bg-amber-500' },
-                            { name: 'التواصل مع الشركات والمستثمرين', percent: 55, color: 'bg-emerald-600' }
+                            { name: 'التواصل مع الشركات والمستثمرين', percent: 55, color: 'bg-[#F4A217]' }
                           ].map((item, idx) => (
                             <div key={idx} className="space-y-1.5">
                               <div className="flex justify-between text-xs font-bold text-slate-600">
