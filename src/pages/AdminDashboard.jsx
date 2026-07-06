@@ -1991,16 +1991,34 @@ const AdminDashboard = () => {
 
                     {/* Admins List */}
                     <div className="lg:col-span-2 space-y-4">
-                      {customAdmins.length === 0 ? (
-                        <div className="bg-white rounded-3xl border border-slate-100 p-12 text-center">
-                          <div className="w-16 h-16 rounded-full bg-slate-50 flex items-center justify-center mx-auto mb-4">
-                            <KeyRound className="w-8 h-8 text-slate-300" />
-                          </div>
-                          <h4 className="text-sm font-black text-slate-500">لا يوجد حسابات فرعية حالياً</h4>
-                          <p className="text-xs font-bold text-slate-400 mt-2">استخدم النموذج لإضافة حسابات للمشرفين الآخرين.</p>
-                        </div>
-                      ) : (
-                        customAdmins.map(admin => (
+                      {(() => {
+                        const displayAdmins = [
+                          ...Object.entries(ADMIN_ACCOUNTS)
+                            .filter(([k, v]) => v.role !== 'superAdmin')
+                            .map(([k, v]) => ({
+                              id: k,
+                              username: k,
+                              displayName: v.displayName,
+                              title: v.title,
+                              permissions: v.role === 'academic' ? ['overview', 'graduation', 'research', 'researchers', 'profile'] : [],
+                              isDefault: true
+                            })),
+                          ...customAdmins
+                        ];
+
+                        if (displayAdmins.length === 0) {
+                          return (
+                            <div className="bg-white rounded-3xl border border-slate-100 p-12 text-center">
+                              <div className="w-16 h-16 rounded-full bg-slate-50 flex items-center justify-center mx-auto mb-4">
+                                <KeyRound className="w-8 h-8 text-slate-300" />
+                              </div>
+                              <h4 className="text-sm font-black text-slate-500">لا يوجد حسابات فرعية حالياً</h4>
+                              <p className="text-xs font-bold text-slate-400 mt-2">استخدم النموذج لإضافة حسابات للمشرفين الآخرين.</p>
+                            </div>
+                          );
+                        }
+
+                        return displayAdmins.map(admin => (
                           <div key={admin.id} className="bg-white rounded-2xl border border-slate-100 p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-sm hover:shadow-md transition-shadow">
                             <div className="flex items-center gap-4">
                               <div className="w-12 h-12 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center font-black text-xl shrink-0">
@@ -2025,12 +2043,18 @@ const AdminDashboard = () => {
                                 </div>
                               </div>
                             </div>
-                            <button onClick={() => handleDeleteAdmin(admin.id)} className="px-4 py-2 bg-red-50 text-red-600 hover:bg-red-100 rounded-xl font-bold text-xs transition-colors shrink-0">
-                              حذف الحساب
-                            </button>
+                            {!admin.isDefault ? (
+                              <button onClick={() => handleDeleteAdmin(admin.id)} className="px-4 py-2 bg-red-50 text-red-600 hover:bg-red-100 rounded-xl font-bold text-xs transition-colors shrink-0">
+                                حذف الحساب
+                              </button>
+                            ) : (
+                              <span className="px-3 py-1.5 bg-slate-100 text-slate-400 rounded-xl font-bold text-[10px] shrink-0 cursor-not-allowed border border-slate-200">
+                                حساب أساسي
+                              </span>
+                            )}
                           </div>
-                        ))
-                      )}
+                        ));
+                      })()}
                     </div>
                   </div>
                 </div>
