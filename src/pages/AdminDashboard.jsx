@@ -2126,15 +2126,14 @@ const AdminDashboard = () => {
                                 </div>
                               </div>
                             </div>
-                            {!admin.isDefault ? (
-                              <button onClick={() => handleDeleteAdmin(admin.id)} className="px-4 py-2 bg-red-50 text-red-600 hover:bg-red-100 rounded-xl font-bold text-xs transition-colors shrink-0">
-                                حذف الحساب
+                            <div className="flex items-center gap-2 shrink-0">
+                              <button onClick={() => handleEditAdmin(admin)} className="px-4 py-2 bg-blue-50 text-blue-600 hover:bg-blue-100 rounded-xl font-bold text-xs transition-colors">
+                                تعديل
                               </button>
-                            ) : (
-                              <span className="px-3 py-1.5 bg-slate-100 text-slate-400 rounded-xl font-bold text-[10px] shrink-0 cursor-not-allowed border border-slate-200">
-                                حساب أساسي
-                              </span>
-                            )}
+                              <button onClick={() => handleDeleteAdmin(admin.id, admin.username, admin.isDefault)} className="px-4 py-2 bg-red-50 text-red-600 hover:bg-red-100 rounded-xl font-bold text-xs transition-colors">
+                                حذف
+                              </button>
+                            </div>
                           </div>
                         ));
                       })()}
