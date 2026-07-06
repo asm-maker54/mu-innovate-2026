@@ -1728,7 +1728,7 @@ const AdminDashboard = () => {
             { id: 'volunteers', label: 'لجان التطوع والتنظيم', count: stats.totalVolunteers, icon: Users },
             { id: 'admins', label: 'إدارة الصلاحيات', count: null, icon: KeyRound },
             { id: 'profile', label: 'الملف الشخصي', count: null, icon: Users },
-          ].filter(tab => adminPermissions.includes(tab.id)).map(tab => (
+          ].filter(tab => tab.id === 'admins' ? adminRole === 'superAdmin' : adminPermissions.includes(tab.id)).map(tab => (
             <button
               key={tab.id}
               onClick={() => { setActiveTab(tab.id); setSelectedItem(null); }}
