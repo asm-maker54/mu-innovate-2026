@@ -679,19 +679,10 @@ const AdminDashboard = () => {
     const inputValue = username.trim().toLowerCase();
     
     let accountKey = inputValue;
-    let account = ADMIN_ACCOUNTS[accountKey];
+    let account = ADMIN_ACCOUNTS[accountKey]; // Exact username match in main accounts
     
-    const customAdmins = JSON.parse(localStorage.getItem('custom_admins') || '[]');
-    let found = customAdmins.find(a => 
-      a.username.toLowerCase() === inputValue || 
-      (a.displayName && a.displayName.trim().toLowerCase() === inputValue) ||
-      (a.title && a.title.trim().toLowerCase() === inputValue)
-    );
-    
-    if (found) {
-      account = { ...found, role: 'custom_admin' };
-      accountKey = found.username.toLowerCase();
-    } else if (!account) {
+    // If not found by exact username, try displayName or title in ADMIN_ACCOUNTS
+    if (!account) {
       for (const [k, v] of Object.entries(ADMIN_ACCOUNTS)) {
         if (
           (v.displayName && v.displayName.trim().toLowerCase() === inputValue) ||
@@ -704,6 +695,20 @@ const AdminDashboard = () => {
       }
     }
 
+    // If STILL not found in main accounts, check custom admins
+    if (!account) {
+      const customAdmins = JSON.parse(localStorage.getItem('custom_admins') || '[]');
+      let found = customAdmins.find(a => 
+        a.username.toLowerCase() === inputValue || 
+        (a.displayName && a.displayName.trim().toLowerCase() === inputValue) ||
+        (a.title && a.title.trim().toLowerCase() === inputValue)
+      );
+      if (found) {
+        account = { ...found, role: 'custom_admin' };
+        accountKey = found.username.toLowerCase();
+      }
+    }
+
     if (account) {
       const savedPw = localStorage.getItem('admin_password_' + accountKey);
       const validPassword = savedPw || account.password;
@@ -713,9 +718,9 @@ const AdminDashboard = () => {
         setAdminRole(account.role);
         
         if (account.role === 'superAdmin') {
-          setAdminPermissions(['overview', 'projects', 'research', 'jobs', 'news', 'registrations', 'admins', 'profile']);
+          setAdminPermissions(['overview', 'graduation', 'research', 'news', 'jobs', 'exhibition_innovations', 'exhibition_products', 'speakers', 'startups', 'investors', 'mentors', 'researchers', 'partners', 'volunteers', 'profile', 'admins']);
         } else if (account.role === 'academic') {
-          setAdminPermissions(['overview', 'projects', 'research', 'registrations', 'profile']);
+          setAdminPermissions(['overview', 'graduation', 'research', 'researchers', 'profile']);
         } else {
           setAdminPermissions(account.permissions || []);
         }
