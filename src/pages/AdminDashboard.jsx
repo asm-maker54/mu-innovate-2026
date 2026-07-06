@@ -7,47 +7,44 @@ import {
   Trash, FileSpreadsheet, Sparkles, ShoppingBag, Plus, Edit
 } from 'lucide-react';
 import { supabase, isSupabaseConfigured } from '../supabaseClient';
-import { initialMockNews } from '../data/mockNews';
 
-const isUUID = (str) => {
-  const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
-  return uuidRegex.test(String(str));
-};
+const isUUID = (str) => { const regexExp = /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/; return regexExp.test(str); };
+import { initialMockNews } from '../data/mockNews';
 
 // Mock Data for Fallback
 const mockGraduationProjects = [
   {
     id: "g1",
     created_at: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(),
-    project_name_ar: "Ù†Ø¸Ø§Ù… Ø§Ù„Ø±ÙŠ Ø§Ù„Ø°ÙƒÙŠ Ø¨Ø§Ù„Ø°Ùƒاء Ø§Ù„Ø§ØµØ·Ù†Ø§Ø¹ÙŠ",
+    project_name_ar: "نظام الري الذكي بالذكاء الاصطناعي",
     project_name_en: "AI-Powered Smart Irrigation System",
-    college: "ÙƒÙ„ÙŠة Ø§Ù„حاسبات ÙˆØ§Ù„Ù…Ø¹Ù„ÙˆÙ…ات (Ø­ÙƒÙˆÙ…ÙŠة)",
-    department: "Ø¹Ù„ÙˆÙ… Ø§Ù„حاسب",
+    college: "كلية الحاسبات والمعلومات (حكومية)",
+    department: "علوم الحاسب",
     year: "2025/2026",
-    project_type: "Ø¬Ù…Ø§Ø¹ÙŠ",
-    status: "ØªÙ… Ø§Ø³ØªÙ„Ø§Ù… Ø§Ù„Ø·Ù„ب",
+    project_type: "جماعي",
+    status: "تم استلام الطلب",
     team_members: [
-      { name: "Ø£Ø­Ù…د Ù…Ø­Ù…د Ø¹Ù„ÙŠ", id: "202201", college: "Ø§Ù„حاسبات", email: "ahmed@example.com", phone: "01000000001", role: "Ù‚ائد Ø§Ù„ÙØ±ÙŠÙ‚" },
-      { name: "سارة Ù…Ø­Ù…Ùˆد Ø­Ø³Ù†", id: "202202", college: "Ø§Ù„حاسبات", email: "sara@example.com", phone: "01000000002", role: "Ù…Ø·Ùˆر Ø¨Ø±Ù…Ø¬ÙŠات" }
+      { name: "أحمد محمد علي", id: "202201", college: "الحاسبات", email: "ahmed@example.com", phone: "01000000001", role: "قائد الفريق" },
+      { name: "سارة محمود حسن", id: "202202", college: "الحاسبات", email: "sara@example.com", phone: "01000000002", role: "مطور برمجيات" }
     ],
     files: { summaryPdf: "#", pitchDeck: "#", screenshot: "#" },
-    details: { projectSummary: "Ù†Ø¸Ø§Ù… Ù…ØªÙƒØ§Ù…Ù„ ÙŠØ¹ØªÙ…د Ø¹Ù„Ù‰ Ù…ستشعرات Ø§Ù„Ø±Ø·Ùˆبة ÙˆØ§Ù„Ø°Ùƒاء Ø§Ù„Ø§ØµØ·Ù†Ø§Ø¹ÙŠ Ù„ØªØ±Ø´ÙŠد Ø§Ø³ØªÙ‡Ù„Ø§Ùƒ Ø§Ù„Ù…ÙŠØ§Ù‡ ÙÙŠ Ø§Ù„Ø­Ù‚ÙˆÙ„ Ø§Ù„Ø²Ø±Ø§Ø¹ÙŠة Ø¨ØµØ¹ÙŠد Ù…صر.", problemAddressed: "Ø§Ù„Ù‡در Ø§Ù„ÙƒØ¨ÙŠر ÙÙŠ Ù…ÙŠØ§Ù‡ Ø§Ù„Ø±ÙŠ Ø§Ù„ØªÙ‚Ù„ÙŠØ¯ÙŠة.", solutionProvided: "Ø±ÙŠ Ø°ÙƒÙŠ ØªÙ„Ù‚Ø§Ø¦ÙŠ ÙŠضخ Ù…ÙŠØ§Ù‡Ù‹ا حسب حاجة Ø§Ù„تربة Ø§Ù„Ø¯Ù‚ÙŠÙ‚ة." }
+    details: { projectSummary: "نظام متكامل يعتمد على مستشعرات الرطوبة والذكاء الاصطناعي لترشيد استهلاك المياه في الحقول الزراعية بصعيد مصر.", problemAddressed: "الهدر الكبير في مياه الري التقليدية.", solutionProvided: "ري ذكي تلقائي يضخ مياهًا حسب حاجة التربة الدقيقة." }
   },
   {
     id: "g2",
     created_at: new Date(Date.now() - 4 * 24 * 60 * 60 * 1000).toISOString(),
-    project_name_ar: "ÙƒØ±Ø³ÙŠ Ù…ØªØ­Ø±Ùƒ Ø°ÙƒÙŠ Ù„Ø°ÙˆÙŠ Ø§Ù„Ù‡Ù…Ù…",
+    project_name_ar: "كرسي متحرك ذكي لذوي الهمم",
     project_name_en: "Smart Wheelchair for Disabled",
-    college: "ÙƒÙ„ÙŠة Ø§Ù„Ù‡Ù†دسة (Ø¨Ø±Ù†Ø§Ù…ج Ù‡Ù†دسة Ø§Ù„Ù…ÙŠÙƒØ§ØªØ±ÙˆÙ†ÙŠات ÙˆØ§Ù„Ø±ÙˆØ¨Ùˆتات Ø§Ù„ØµÙ†Ø§Ø¹ÙŠة) (Ø£Ù‡Ù„ÙŠة)",
-    department: "Ù…ÙŠÙƒØ§ØªØ±ÙˆÙ†ÙŠات",
+    college: "كلية الهندسة (برنامج هندسة الميكاترونيات والروبوتات الصناعية) (أهلية)",
+    department: "ميكاترونيات",
     year: "2025/2026",
-    project_type: "Ø¬Ù…Ø§Ø¹ÙŠ",
-    status: "تحت Ø§Ù„فحص Ø§Ù„Ø¥Ø¯Ø§Ø±ÙŠ",
+    project_type: "جماعي",
+    status: "تحت الفحص الإداري",
     team_members: [
-      { name: "Ù…Ø­Ù…Ùˆد Ø®Ø§Ù„د Ø³Ø¹ÙŠد", id: "302201", college: "Ø§Ù„Ù‡Ù†دسة Ø§Ù„Ø£Ù‡Ù„ÙŠة", email: "mahmoud@example.com", phone: "01100000001", role: "Ù…Ù‡Ù†دس Ù…ÙŠÙƒØ§Ù†ÙŠÙƒا" }
+      { name: "محمود خالد سعيد", id: "302201", college: "الهندسة الأهلية", email: "mahmoud@example.com", phone: "01100000001", role: "مهندس ميكانيكا" }
     ],
     files: { summaryPdf: "#", pitchDeck: "#" },
-    details: { projectSummary: "ÙƒØ±Ø³ÙŠ Ø°ÙƒÙŠ ÙŠØªØ­Ø±Ùƒ بإشارات Ø§Ù„رأس ÙˆØ­Ø±Ùƒات Ø§Ù„Ø¹ÙŠÙ† Ù„Ù…ساعدة Ø°ÙˆÙŠ Ø§Ù„Ù‡Ù…Ù… Ø¹Ù„Ù‰ Ø§Ù„Ø­Ø±Ùƒة Ø¨ÙŠسر ÙˆØ£Ù…Ø§Ù†.", problemAddressed: "ØµØ¹Ùˆبة Ø§Ù„ØªØ­ÙƒÙ… ÙÙŠ Ø§Ù„ÙƒØ±Ø§Ø³ÙŠ Ø§Ù„ØªÙ‚Ù„ÙŠØ¯ÙŠة.", solutionProvided: "Ø§Ù„ØªØ­ÙƒÙ… بإشارات Ø§Ù„Ø¯Ù…اغ Ø£Ùˆ Ø­Ø±Ùƒات Ø§Ù„Ø¹ÙŠÙ†." }
+    details: { projectSummary: "كرسي ذكي يتحرك بإشارات الرأس وحركات العين لمساعدة ذوي الهمم على الحركة بيسر وأمان.", problemAddressed: "صعوبة التحكم في الكراسي التقليدية.", solutionProvided: "التحكم بإشارات الدماغ أو حركات العين." }
   }
 ];
 
@@ -55,15 +52,15 @@ const mockAppliedResearch = [
   {
     id: "r1",
     created_at: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(),
-    pi_name: "د. Ø£Ø³Ø§Ù…ة Ù…ØµØ·ÙÙ‰ ÙƒØ§Ù…Ù„",
-    pi_faculty: "ÙƒÙ„ÙŠة Ø§Ù„Ø¹Ù„ÙˆÙ… (Ø­ÙƒÙˆÙ…ÙŠة)",
-    pi_dept: "Ø§Ù„ÙƒÙŠÙ…ÙŠاء",
-    pi_rank: "أستاذ Ù…Ø´Ø§Ø±Ùƒ",
+    pi_name: "د. أسامة مصطفى كامل",
+    pi_faculty: "كلية العلوم (حكومية)",
+    pi_dept: "الكيمياء",
+    pi_rank: "أستاذ مشارك",
     pi_email: "osama@minia.edu.eg",
     pi_phone: "01200000001",
-    status: "تحت Ø§Ù„ØªÙ‚ÙŠÙŠÙ… Ø§Ù„ÙÙ†ÙŠ",
+    status: "تحت التقييم الفني",
     files: { researchPdf: "#", marketSummaryPdf: "#" },
-    details: { problem: "ØªÙ„Ùˆث Ø§Ù„Ù…ÙŠØ§Ù‡ Ø§Ù„Ø¬ÙˆÙÙŠة ببعض Ø§Ù„Ù…Ø±Ùƒبات Ø§Ù„Ø¹Ø¶ÙˆÙŠة.", solution: "Ù…Ø±Ùƒب Ù†Ø§Ù†Ùˆ ÙƒØ±Ø¨ÙˆÙ†ÙŠ Ø¬Ø¯ÙŠد Ø±Ø®ÙŠص Ø§Ù„Ø«Ù…Ù† ÙŠÙ…تص Ø§Ù„Ù…Ù„Ùˆثات Ø¨Ùƒفاءة 99%." }
+    details: { problem: "تلوث المياه الجوفية ببعض المركبات العضوية.", solution: "مركب نانو كربوني جديد رخيص الثمن يمتص الملوثات بكفاءة 99%." }
   }
 ];
 
@@ -71,60 +68,44 @@ const mockRegistrations = [
   {
     id: "reg1",
     created_at: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString(),
-    full_name: "Ù…. ÙƒØ±ÙŠÙ… عبد Ø§Ù„Ø¹Ø²ÙŠز Ù…ØµØ·ÙÙ‰",
+    full_name: "م. كريم عبد العزيز مصطفى",
     email: "karim@startup.com",
     phone: "01020304050",
-    organization: "Ø´Ø±Ùƒة Ù†Ù…اء Ù„Ù„ØªÙƒÙ†ÙˆÙ„ÙˆØ¬ÙŠا",
+    organization: "شركة نماء للتكنولوجيا",
     role: "startup",
     cv_url: "#",
-    details: { startupName: "Ù†Ù…اء ØªÙŠÙƒ", industry: "Ø§Ù„Ø°Ùƒاء Ø§Ù„Ø§ØµØ·Ù†Ø§Ø¹ÙŠ ÙˆØ§Ù„ØªØ­ÙˆÙ„ Ø§Ù„Ø±Ù‚Ù…ÙŠ", stage: "Ù†Ù…Ùˆذج Ø£ÙˆÙ„ÙŠ Ù…جرب", elevatorPitch: "Ù…Ù†صة Ø°ÙƒÙŠة Ù„ربط Ø§Ù„Ù…Ø²Ø§Ø±Ø¹ÙŠÙ† Ø¨Ø§Ù„Ø£Ø³ÙˆØ§Ù‚ Ù…باشرة Ù„ØªÙ‚Ù„ÙŠÙ„ Ø§Ù„Ø­Ù„Ù‚ات Ø§Ù„ÙˆØ³ÙŠطة." }
+    details: { startupName: "نماء تيك", industry: "الذكاء الاصطناعي والتحول الرقمي", stage: "نموذج أولي مجرب", elevatorPitch: "منصة ذكية لربط المزارعين بالأسواق مباشرة لتقليل الحلقات الوسيطة." }
   },
   {
     id: "reg2",
     created_at: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString(),
-    full_name: "أ.د. Ø³Ù„ÙˆÙ‰ عبد Ø§Ù„Ø±Ø­Ù…Ù† Ø­Ø³Ù†",
+    full_name: "أ.د. سلوى عبد الرحمن حسن",
     email: "salwa@knowledge.com",
     phone: "01122334455",
-    organization: "Ø¬Ø§Ù…عة Ø§Ù„Ù‚Ø§Ù‡رة",
+    organization: "جامعة القاهرة",
     role: "speaker",
     cv_url: "#",
-    details: { speechTopic: "Ù…Ø³ØªÙ‚Ø¨Ù„ Ø±ÙŠادة Ø§Ù„Ø£Ø¹Ù…Ø§Ù„ ÙÙŠ Ø§Ù„Ø¬Ø§Ù…عات Ø§Ù„Ù…ØµØ±ÙŠة", speakerExpertise: "Ø§Ù„Ø§Ø¨ØªÙƒار Ø§Ù„Ø¬Ø§Ù…Ø¹ÙŠ", speakerBio: "Ø®Ø¨ÙŠرة ÙÙŠ Ù†Ù‚Ù„ Ø§Ù„ØªÙƒÙ†ÙˆÙ„ÙˆØ¬ÙŠا ÙˆØªØ£Ø³ÙŠس Ø§Ù„Ø­Ø§Ø¶Ù†ات Ø§Ù„Ø¬Ø§Ù…Ø¹ÙŠة Ù„Ø£Ùƒثر Ù…Ù† ١٥ Ø¹Ø§Ù…Ø§Ù‹." }
+    details: { speechTopic: "مستقبل ريادة الأعمال في الجامعات المصرية", speakerExpertise: "الابتكار الجامعي", speakerBio: "خبيرة في نقل التكنولوجيا وتأسيس الحاضنات الجامعية لأكثر من ١٥ عاماً." }
   },
   {
     id: "reg3",
     created_at: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString(),
-    full_name: "د. Ø·Ø§Ø±Ù‚ Ø¬Ù„Ø§Ù„ ÙÙˆØ²ÙŠ",
+    full_name: "د. طارق جلال فوزي",
     email: "tarek@angelinvest.net",
     phone: "01599887766",
-    organization: "ØµÙ†Ø¯ÙˆÙ‚ Ù…صر Ù„Ù„Ø§Ø³ØªØ«Ù…ار Ø§Ù„Ù…Ù„Ø§Ø¦ÙƒÙŠ",
+    organization: "صندوق مصر للاستثمار الملائكي",
     role: "investor",
     cv_url: null,
-    details: { investorEntity: "Ù…Ø³ØªØ«Ù…ر ÙØ±Ø¯ÙŠ", investmentType: "ØªÙ…ÙˆÙŠÙ„ Ø£ÙˆÙ„ÙŠ / Seed Capital" }
+    details: { investorEntity: "مستثمر فردي", investmentType: "تمويل أولي / Seed Capital" }
   }
 ];
 
-// Default admin accounts
-const ADMIN_ACCOUNTS = {
-  admin: { password: 'admin123', role: 'superAdmin', displayName: 'أدمن القمة الرئيسي', title: 'رئيس لجنة الإشراف العام' },
-  academic: { password: 'acad123', role: 'academic', displayName: 'أدمن المشروعات والبحوث', title: 'مسؤول الأكاديمية العلمية' },
-};
-
 const AdminDashboard = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [loginError, setLoginError] = useState('');
-  const [adminRole, setAdminRole] = useState('superAdmin'); // 'superAdmin' | 'academic'
+  
   const [activeTab, setActiveTab] = useState('overview');
-
-  // Admin profile (persisted in localStorage)
-  const defaultProfile = { name: 'أدمن القمة الرئيسي', title: 'رئيس لجنة الإشراف العام', avatar: '' };
-  const [adminProfile, setAdminProfile] = useState(() => {
-    try { return JSON.parse(localStorage.getItem('admin_profile')) || defaultProfile; }
-    catch { return defaultProfile; }
-  });
-  const [profileForm, setProfileForm] = useState({ name: '', title: '', avatar: '', newPassword: '', currentPassword: '' });
-  const [profileSaved, setProfileSaved] = useState(false);
   
   // Database state
   const [gradProjects, setGradProjects] = useState([]);
@@ -138,11 +119,11 @@ const AdminDashboard = () => {
   
   // News modal state
   const [isNewsModalOpen, setIsNewsModalOpen] = useState(false);
-  const [newNewsData, setNewNewsData] = useState({ title: '', content: '', image_url: '', uploader_name: 'Ø£Ø¯Ù…Ù† Ø§Ù„Ù†Ø¸Ø§Ù…' });
+  const [newNewsData, setNewNewsData] = useState({ title: '', content: '', image_url: '', uploader_name: 'أدمن النظام' });
   const [selectedType, setSelectedType] = useState(null); // 'graduation', 'research', 'registration'
   
   const [searchQuery, setSearchQuery] = useState('');
-  const [statusFilter, setStatusFilter] = useState('Ø§Ù„ÙƒÙ„');
+  const [statusFilter, setStatusFilter] = useState('الكل');
 
   const [editingNewsId, setEditingNewsId] = useState(null);
 
@@ -163,8 +144,8 @@ const AdminDashboard = () => {
     title: '',
     company: '',
     location: '',
-    type: 'Ø¯ÙˆØ§Ù… ÙƒØ§Ù…Ù„',
-    experience: 'Ø­Ø¯ÙŠث Ø§Ù„تخرج',
+    type: 'دوام كامل',
+    experience: 'حديث التخرج',
     logo: '',
     details: ''
   });
@@ -173,20 +154,20 @@ const AdminDashboard = () => {
     name: '',
     category: 'ai',
     level: 'prototype',
-    levelName: 'Ù†Ù…Ùˆذج Ø£ÙˆÙ„ÙŠ',
+    levelName: 'نموذج أولي',
     team: '',
     desc: '',
     image: '',
     tech: 'Python',
-    speed: 'ÙÙˆØ±ÙŠ',
+    speed: 'فوري',
     accuracy: '95%',
     icon: 'Cpu'
   });
 
   const [productFormData, setProductFormData] = useState({
     name: '',
-    category: 'Ù…Ù†تجات Ø²Ø±Ø§Ø¹ÙŠة',
-    faculty: 'ÙƒÙ„ÙŠة Ø§Ù„زراعة',
+    category: 'منتجات زراعية',
+    faculty: 'كلية الزراعة',
     facultyId: 'agriculture',
     price: '',
     image: '',
@@ -216,7 +197,7 @@ const AdminDashboard = () => {
   };
 
   const handleDeleteInnovation = (id) => {
-    if (window.confirm('Ù‡Ù„ Ø£Ù†ت Ù…ØªØ£Ùƒد Ù…Ù† حذف Ù‡ذا Ø§Ù„Ø§Ø¨ØªÙƒØ§Ø±ØŸ')) {
+    if (window.confirm('هل أنت متأكد من حذف هذا الابتكار؟')) {
       const updated = innovations.filter(item => item.id !== id);
       setInnovations(updated);
       localStorage.setItem('exhibition_innovations', JSON.stringify(updated));
@@ -242,7 +223,7 @@ const AdminDashboard = () => {
   };
 
   const handleDeleteProduct = (id) => {
-    if (window.confirm('Ù‡Ù„ Ø£Ù†ت Ù…ØªØ£Ùƒد Ù…Ù† حذف Ù‡ذا Ø§Ù„Ù…Ù†ØªØ¬ØŸ')) {
+    if (window.confirm('هل أنت متأكد من حذف هذا المنتج؟')) {
       const updated = products.filter(item => item.id !== id);
       setProducts(updated);
       localStorage.setItem('exhibition_products', JSON.stringify(updated));
@@ -255,7 +236,7 @@ const AdminDashboard = () => {
     setLoading(true);
     try {
       if (isSupabaseConfigured) {
-        if (jobEditItem && isUUID(jobEditItem.id)) {
+        if (jobEditItem) {
           const { error } = await supabase
             .from('jobs')
             .update({
@@ -316,15 +297,15 @@ const AdminDashboard = () => {
         title: '',
         company: '',
         location: '',
-        type: 'Ø¯ÙˆØ§Ù… ÙƒØ§Ù…Ù„',
-        experience: 'Ø­Ø¯ÙŠث Ø§Ù„تخرج',
+        type: 'دوام كامل',
+        experience: 'حديث التخرج',
         logo: '',
         details: ''
       });
     } catch (err) {
       console.error("Error saving job:", err);
       if (err.message && (err.message.includes('jobs') || err.message.includes('schema cache') || err.message.includes('relation'))) {
-        alert("ØªÙ†Ø¨ÙŠÙ‡ Ù‡Ø§Ù…: Ø¬Ø¯ÙˆÙ„ Ø§Ù„Ùˆظائف (jobs) ØºÙŠر Ù…ÙˆØ¬Ùˆد Ø­Ø§Ù„ÙŠØ§Ù‹ ÙÙŠ Ù‚اعدة Ø¨ÙŠØ§Ù†ات Supabase Ø§Ù„خاصة Ø¨Ùƒ.\n\nÙ„Ù‚د Ù‚Ù…Ù†ا بحفظ Ø§Ù„ØªØ¹Ø¯ÙŠÙ„ات Ù…Ø­Ù„ÙŠØ§Ù‹ ÙÙŠ Ø§Ù„Ù…تصفح Ø¨Ù†جاح Ù„ØªØªÙ…ÙƒÙ† Ù…Ù† Ù…Ø¹Ø§ÙŠÙ†ة ÙˆØªØ¹Ø¯ÙŠÙ„ Ø§Ù„Ùˆظائف ÙÙˆØ±Ø§Ù‹!\n\nÙ„ØªÙØ¹ÙŠÙ„ Ø§Ù„حفظ Ø§Ù„Ø¯Ø§Ø¦Ù… Ø³Ø­Ø§Ø¨ÙŠØ§Ù‹ØŒ ÙŠØ±Ø¬Ù‰ Ù†سخ ÙƒÙˆد SQL Ø§Ù„خاص Ø¨Ø§Ù„Ùˆظائف Ù…Ù† Ø§Ù„Ù…Ù„ف:\nscratch/supabase_schema.sql\nÙˆØªØ´ØºÙŠÙ„Ù‡ ÙÙŠ Ù„Ùˆحة ØªØ­ÙƒÙ… Supabase (Ù‚Ø³Ù… SQL Editor).");
+        alert("تنبيه هام: جدول الوظائف (jobs) غير موجود حالياً في قاعدة بيانات Supabase الخاصة بك.\n\nلقد قمنا بحفظ التعديلات محلياً في المتصفح بنجاح لتتمكن من معاينة وتعديل الوظائف فوراً!\n\nلتفعيل الحفظ الدائم سحابياً، يرجى نسخ كود SQL الخاص بالوظائف من الملف:\nscratch/supabase_schema.sql\nوتشغيله في لوحة تحكم Supabase (قسم SQL Editor).");
         
         let updated;
         if (jobEditItem) {
@@ -346,13 +327,13 @@ const AdminDashboard = () => {
           title: '',
           company: '',
           location: '',
-          type: 'Ø¯ÙˆØ§Ù… ÙƒØ§Ù…Ù„',
-          experience: 'Ø­Ø¯ÙŠث Ø§Ù„تخرج',
+          type: 'دوام كامل',
+          experience: 'حديث التخرج',
           logo: '',
           details: ''
         });
       } else {
-        alert("حدث خطأ Ø£Ø«Ù†اء حفظ Ø§Ù„ÙˆØ¸ÙŠفة: " + err.message);
+        alert("حدث خطأ أثناء حفظ الوظيفة: " + err.message);
       }
     } finally {
       setLoading(false);
@@ -360,7 +341,7 @@ const AdminDashboard = () => {
   };
 
   const handleDeleteJob = async (id) => {
-    if (window.confirm('Ù‡Ù„ Ø£Ù†ت Ù…ØªØ£Ùƒد Ù…Ù† حذف Ù‡Ø°Ù‡ Ø§Ù„ÙˆØ¸ÙŠفة Ù†Ù‡Ø§Ø¦ÙŠØ§Ù‹ØŸ')) {
+    if (window.confirm('هل أنت متأكد من حذف هذه الوظيفة نهائياً؟')) {
       setLoading(true);
       try {
         if (isSupabaseConfigured) {
@@ -384,7 +365,7 @@ const AdminDashboard = () => {
           if (!error) setJobs(data || []);
         }
       } catch (err) {
-        alert("حدث خطأ Ø£Ø«Ù†اء حذف Ø§Ù„ÙˆØ¸ÙŠفة: " + err.message);
+        alert("حدث خطأ أثناء حذف الوظيفة: " + err.message);
       } finally {
         setLoading(false);
       }
@@ -397,8 +378,8 @@ const AdminDashboard = () => {
       title: '',
       company: '',
       location: '',
-      type: 'Ø¯ÙˆØ§Ù… ÙƒØ§Ù…Ù„',
-      experience: 'Ø­Ø¯ÙŠث Ø§Ù„تخرج',
+      type: 'دوام كامل',
+      experience: 'حديث التخرج',
       logo: 'https://images.unsplash.com/photo-1560179707-f14e90ef3623?auto=format&fit=crop&q=80&w=200',
       details: ''
     });
@@ -411,8 +392,8 @@ const AdminDashboard = () => {
       title: item.title || '',
       company: item.company || '',
       location: item.location || '',
-      type: item.type || 'Ø¯ÙˆØ§Ù… ÙƒØ§Ù…Ù„',
-      experience: item.experience || 'Ø­Ø¯ÙŠث Ø§Ù„تخرج',
+      type: item.type || 'دوام كامل',
+      experience: item.experience || 'حديث التخرج',
       logo: item.logo || 'https://images.unsplash.com/photo-1560179707-f14e90ef3623?auto=format&fit=crop&q=80&w=200',
       details: item.details || ''
     });
@@ -426,12 +407,12 @@ const AdminDashboard = () => {
       name: '',
       category: 'ai',
       level: 'prototype',
-      levelName: 'Ù†Ù…Ùˆذج Ø£ÙˆÙ„ÙŠ',
+      levelName: 'نموذج أولي',
       team: '',
       desc: '',
       image: '',
       tech: 'Python',
-      speed: 'ÙÙˆØ±ÙŠ',
+      speed: 'فوري',
       accuracy: '95%',
       icon: 'Cpu'
     });
@@ -445,12 +426,12 @@ const AdminDashboard = () => {
       name: item.name || '',
       category: item.category || 'ai',
       level: item.level || 'prototype',
-      levelName: item.levelName || 'Ù†Ù…Ùˆذج Ø£ÙˆÙ„ÙŠ',
+      levelName: item.levelName || 'نموذج أولي',
       team: item.team || '',
       desc: item.desc || '',
       image: item.image || '',
       tech: item.stats?.tech || item.tech || 'Python',
-      speed: item.stats?.speed || item.speed || 'ÙÙˆØ±ÙŠ',
+      speed: item.stats?.speed || item.speed || 'فوري',
       accuracy: item.stats?.accuracy || item.accuracy || '95%',
       icon: item.icon || 'Cpu'
     });
@@ -462,8 +443,8 @@ const AdminDashboard = () => {
     setExhibitionEditItem(null);
     setProductFormData({
       name: '',
-      category: 'Ù…Ù†تجات Ø²Ø±Ø§Ø¹ÙŠة',
-      faculty: 'ÙƒÙ„ÙŠة Ø§Ù„زراعة',
+      category: 'منتجات زراعية',
+      faculty: 'كلية الزراعة',
       facultyId: 'agriculture',
       price: '',
       image: '',
@@ -480,8 +461,8 @@ const AdminDashboard = () => {
     setExhibitionEditItem(item);
     setProductFormData({
       name: item.name || '',
-      category: item.category || 'Ù…Ù†تجات Ø²Ø±Ø§Ø¹ÙŠة',
-      faculty: item.faculty || 'ÙƒÙ„ÙŠة Ø§Ù„زراعة',
+      category: item.category || 'منتجات زراعية',
+      faculty: item.faculty || 'كلية الزراعة',
       facultyId: item.facultyId || 'agriculture',
       price: item.price || '',
       image: item.image || '',
@@ -499,7 +480,7 @@ const AdminDashboard = () => {
     setLoading(true);
     try {
       if (isSupabaseConfigured) {
-        if (editingNewsId && isUUID(editingNewsId)) {
+        if (editingNewsId) {
           const { error } = await supabase
             .from('news')
             .update({
@@ -508,7 +489,7 @@ const AdminDashboard = () => {
               image_url: newNewsData.image_url,
               uploader_name: newNewsData.uploader_name
             })
-            .eq('id', editingNewsId);
+            .eq('id', isUUID(editingNewsId) ? editingNewsId : Number(editingNewsId));
           if (error) throw error;
         } else {
           const { error } = await supabase
@@ -554,7 +535,7 @@ const AdminDashboard = () => {
     } catch (err) {
       console.error("Error saving news:", err);
       if (err.message && (err.message.includes('news') || err.message.includes('schema cache') || err.message.includes('relation'))) {
-        alert("ØªÙ†Ø¨ÙŠÙ‡ Ù‡Ø§Ù…: Ø¬Ø¯ÙˆÙ„ Ø§Ù„أخبار (news) ØºÙŠر Ù…ÙˆØ¬Ùˆد Ø­Ø§Ù„ÙŠØ§Ù‹ Ù ÙŠ Ù‚اعدة Ø¨ÙŠØ§Ù†ات Supabase Ø§Ù„خاصة Ø¨Ùƒ.\n\nÙ„Ù‚د Ù‚Ù…Ù†ا Ø¨Ø­Ù ظ Ø§Ù„ØªØ¹Ø¯ÙŠÙ„ات Ù…Ø­Ù„ÙŠØ§Ù‹ Ù ÙŠ Ø§Ù„Ù…ØªØµÙ ح Ø¨Ù†جاح Ù„ØªØªÙ…ÙƒÙ† Ù…Ù† Ù…Ø¹Ø§ÙŠÙ†ة ÙˆØªØ¹Ø¯ÙŠÙ„ Ø§Ù„أخبار Ù ÙˆØ±Ø§Ù‹!\n\nÙ„ØªÙ Ø¹ÙŠÙ„ Ø§Ù„Ø­Ù ظ Ø§Ù„Ø¯Ø§Ø¦Ù… Ø³Ø­Ø§Ø¨ÙŠØ§Ù‹ØŒ ÙŠØ±Ø¬Ù‰ Ù†سخ ÙƒÙˆد SQL Ø§Ù„Ù…ÙˆØ¬Ùˆد Ù ÙŠ Ø§Ù„Ù…Ù„Ù :\nscratch/supabase_news_schema.sql\nÙˆØªØ´ØºÙŠÙ„Ù‡ Ù ÙŠ Ù„Ùˆحة ØªØ­ÙƒÙ… Supabase (Ù‚Ø³Ù… SQL Editor).");
+        alert("تنبيه هام: جدول الأخبار (news) غير موجود حالياً في قاعدة بيانات Supabase الخاصة بك.\n\nلقد قمنا بحفظ التعديلات محلياً في المتصفح بنجاح لتتمكن من معاينة وتعديل الأخبار فوراً!\n\nلتفعيل الحفظ الدائم سحابياً، يرجى نسخ كود SQL الموجود في الملف:\nscratch/supabase_news_schema.sql\nوتشغيله في لوحة تحكم Supabase (قسم SQL Editor).");
         
         let updated;
         if (editingNewsId) {
@@ -572,9 +553,9 @@ const AdminDashboard = () => {
         
         setIsNewsModalOpen(false);
         setEditingNewsId(null);
-        setNewNewsData({ title: '', content: '', image_url: '', uploader_name: 'Ø£Ø¯Ù…Ù† Ø§Ù„Ù†Ø¸Ø§Ù…' });
+        setNewNewsData({ title: '', content: '', image_url: '', uploader_name: 'أدمن النظام' });
       } else {
-        alert("حدث خطأ Ø£Ø«Ù†اء حفظ Ø§Ù„خبر: " + err.message);
+        alert("حدث خطأ أثناء حفظ الخبر: " + err.message);
       }
     } finally {
       setLoading(false);
@@ -593,7 +574,7 @@ const AdminDashboard = () => {
   };
 
   const handleDeleteNews = async (id) => {
-    if (window.confirm('Ù‡Ù„ Ø£Ù†ت Ù…ØªØ£Ùƒد Ù…Ù† Ø±ØºØ¨ØªÙƒ ÙÙŠ حذف Ù‡ذا Ø§Ù„خبر Ù†Ù‡Ø§Ø¦ÙŠØ§Ù‹ØŸ')) {
+    if (window.confirm('هل أنت متأكد من رغبتك في حذف هذا الخبر نهائياً؟')) {
       setLoading(true);
       try {
         if (isSupabaseConfigured) {
@@ -617,7 +598,7 @@ const AdminDashboard = () => {
           if (!error) setNewsList(data || []);
         }
       } catch (err) {
-        alert("حدث خطأ Ø£Ø«Ù†اء حذف Ø§Ù„خبر: " + err.message);
+        alert("حدث خطأ أثناء حذف الخبر: " + err.message);
       } finally {
         setLoading(false);
       }
@@ -645,7 +626,7 @@ const AdminDashboard = () => {
       sessionStorage.setItem('isAdminAuthenticated', 'true');
       setLoginError('');
     } else {
-      setLoginError('ÙƒÙ„Ù…ة Ø§Ù„Ù…Ø±Ùˆر ØºÙŠر ØµØ­ÙŠحة!');
+      setLoginError('كلمة المرور غير صحيحة!');
     }
   };
 
@@ -695,40 +676,40 @@ const AdminDashboard = () => {
             // Seed default jobs
             const defaultJobsToSeed = [
               {
-                title: 'Ù…Ù‡Ù†دس Ø¨Ø±Ù…Ø¬ÙŠات ÙˆØ§Ø¬Ù‡ات Ø£Ù…Ø§Ù…ÙŠة (Frontend)',
+                title: 'مهندس برمجيات واجهات أمامية (Frontend)',
                 company: 'TechVision Solutions',
-                location: 'Ø§Ù„Ù‚Ø±ÙŠة Ø§Ù„Ø°ÙƒÙŠØ©ØŒ Ø§Ù„Ù‚Ø§Ù‡رة',
-                type: 'Ø¯ÙˆØ§Ù… ÙƒØ§Ù…Ù„',
-                experience: '1-3 Ø³Ù†Ùˆات',
+                location: 'القرية الذكية، القاهرة',
+                type: 'دوام كامل',
+                experience: '1-3 سنوات',
                 logo: 'https://images.unsplash.com/photo-1560179707-f14e90ef3623?auto=format&fit=crop&q=80&w=200',
-                details: 'ØªØ·ÙˆÙŠر ÙˆØªØµÙ…ÙŠÙ… ÙˆØ§Ø¬Ù‡ات ÙˆØªØ·Ø¨ÙŠÙ‚ات Ø§Ù„ÙˆÙŠب Ø¨Ø§Ø³ØªØ®Ø¯Ø§Ù… React.js Ùˆ TailwindCSS.'
+                details: 'تطوير وتصميم واجهات وتطبيقات الويب باستخدام React.js و TailwindCSS.'
               },
               {
-                title: 'Ø£Ø®ØµØ§Ø¦ÙŠ ØªØ³ÙˆÙŠÙ‚ Ø¥Ù„ÙƒØªØ±ÙˆÙ†ÙŠ',
+                title: 'أخصائي تسويق إلكتروني',
                 company: 'Global Media',
-                location: 'Ø¹Ù† بُعد (Remote)',
-                type: 'Ø¯ÙˆØ§Ù… ÙƒØ§Ù…Ù„',
-                experience: 'Ø­Ø¯ÙŠث Ø§Ù„تخرج',
+                location: 'عن بُعد (Remote)',
+                type: 'دوام كامل',
+                experience: 'حديث التخرج',
                 logo: 'https://images.unsplash.com/photo-1572044162444-ad60f128bdea?auto=format&fit=crop&q=80&w=200',
-                details: 'إدارة Ø­Ù…Ù„ات Ø§Ù„ØªÙˆØ§ØµÙ„ Ø§Ù„Ø§Ø¬ØªÙ…Ø§Ø¹ÙŠ ÙˆØ¬ÙˆØ¬Ù„ أدز ÙˆØªÙ‡ÙŠئة Ù…Ø­Ø±Ùƒات Ø§Ù„بحث.'
+                details: 'إدارة حملات التواصل الاجتماعي وجوجل أدز وتهيئة محركات البحث.'
               },
               {
-                title: 'Ù…Ø­Ù„Ù„ Ø¨ÙŠØ§Ù†ات',
+                title: 'محلل بيانات',
                 company: 'Data Insights',
-                location: 'Ø§Ù„Ù…Ø¹Ø§Ø¯ÙŠØŒ Ø§Ù„Ù‚Ø§Ù‡رة',
-                type: 'Ø¯ÙˆØ§Ù… Ø¬Ø²Ø¦ÙŠ',
-                experience: '0-2 Ø³Ù†Ùˆات',
+                location: 'المعادي، القاهرة',
+                type: 'دوام جزئي',
+                experience: '0-2 سنوات',
                 logo: 'https://images.unsplash.com/photo-1551434678-e076c223a692?auto=format&fit=crop&q=80&w=200',
-                details: 'ØªØ­Ù„ÙŠÙ„ Ø§Ù„Ø¨ÙŠØ§Ù†ات Ùˆاستخراج Ø§Ù„ØªÙ‚Ø§Ø±ÙŠر ÙˆØªØµÙ…ÙŠÙ… Ù„Ùˆحات عرض Ø§Ù„Ø¨ÙŠØ§Ù†ات Power BI.'
+                details: 'تحليل البيانات واستخراج التقارير وتصميم لوحات عرض البيانات Power BI.'
               },
               {
-                title: 'Ù…Ù‡Ù†دس Ø¬Ùˆدة Ø¨Ø±Ù…Ø¬ÙŠات (QA)',
+                title: 'مهندس جودة برمجيات (QA)',
                 company: 'SoftCore',
-                location: 'Ø§Ù„Ù…Ù†ÙŠا Ø§Ù„Ø¬Ø¯ÙŠدة',
-                type: 'Ø¯ÙˆØ§Ù… ÙƒØ§Ù…Ù„',
-                experience: '2+ Ø³Ù†Ùˆات',
+                location: 'المنيا الجديدة',
+                type: 'دوام كامل',
+                experience: '2+ سنوات',
                 logo: 'https://images.unsplash.com/photo-1496200502058-a73099b244ce?auto=format&fit=crop&q=80&w=200',
-                details: 'اختبار Ø§Ù„Ø¨Ø±Ù…Ø¬ÙŠات ÙˆØªØ­Ø¯ÙŠد Ø§Ù„أخطاء Ùˆإعداد Ø§Ù„ØªÙ‚Ø§Ø±ÙŠر Ø§Ù„ÙÙ†ÙŠة ÙˆØ¹Ù…Ù„ Ø£ØªÙ…تة Ù„Ù„اختبارات.'
+                details: 'اختبار البرمجيات وتحديد الأخطاء وإعداد التقارير الفنية وعمل أتمتة للاختبارات.'
               }
             ];
             const { data: seededJobs, error: seedJobsErr } = await supabase
@@ -795,43 +776,43 @@ const AdminDashboard = () => {
         const defaultJobs = [
           {
             id: 1,
-            title: 'Ù…Ù‡Ù†دس Ø¨Ø±Ù…Ø¬ÙŠات ÙˆØ§Ø¬Ù‡ات Ø£Ù…Ø§Ù…ÙŠة (Frontend)',
+            title: 'مهندس برمجيات واجهات أمامية (Frontend)',
             company: 'TechVision Solutions',
-            location: 'Ø§Ù„Ù‚Ø±ÙŠة Ø§Ù„Ø°ÙƒÙŠØ©ØŒ Ø§Ù„Ù‚Ø§Ù‡رة',
-            type: 'Ø¯ÙˆØ§Ù… ÙƒØ§Ù…Ù„',
-            experience: '1-3 Ø³Ù†Ùˆات',
+            location: 'القرية الذكية، القاهرة',
+            type: 'دوام كامل',
+            experience: '1-3 سنوات',
             logo: 'https://images.unsplash.com/photo-1560179707-f14e90ef3623?auto=format&fit=crop&q=80&w=200',
-            details: 'ØªØ·ÙˆÙŠر ÙˆØªØµÙ…ÙŠÙ… ÙˆØ§Ø¬Ù‡ات ÙˆØªØ·Ø¨ÙŠÙ‚ات Ø§Ù„ÙˆÙŠب Ø¨Ø§Ø³ØªØ®Ø¯Ø§Ù… React.js Ùˆ TailwindCSS.'
+            details: 'تطوير وتصميم واجهات وتطبيقات الويب باستخدام React.js و TailwindCSS.'
           },
           {
             id: 2,
-            title: 'Ø£Ø®ØµØ§Ø¦ÙŠ ØªØ³ÙˆÙŠÙ‚ Ø¥Ù„ÙƒØªØ±ÙˆÙ†ÙŠ',
+            title: 'أخصائي تسويق إلكتروني',
             company: 'Global Media',
-            location: 'Ø¹Ù† بُعد (Remote)',
-            type: 'Ø¯ÙˆØ§Ù… ÙƒØ§Ù…Ù„',
-            experience: 'Ø­Ø¯ÙŠث Ø§Ù„تخرج',
+            location: 'عن بُعد (Remote)',
+            type: 'دوام كامل',
+            experience: 'حديث التخرج',
             logo: 'https://images.unsplash.com/photo-1572044162444-ad60f128bdea?auto=format&fit=crop&q=80&w=200',
-            details: 'إدارة Ø­Ù…Ù„ات Ø§Ù„ØªÙˆØ§ØµÙ„ Ø§Ù„Ø§Ø¬ØªÙ…Ø§Ø¹ÙŠ ÙˆØ¬ÙˆØ¬Ù„ أدز ÙˆØªÙ‡ÙŠئة Ù…Ø­Ø±Ùƒات Ø§Ù„بحث.'
+            details: 'إدارة حملات التواصل الاجتماعي وجوجل أدز وتهيئة محركات البحث.'
           },
           {
             id: 3,
-            title: 'Ù…Ø­Ù„Ù„ Ø¨ÙŠØ§Ù†ات',
+            title: 'محلل بيانات',
             company: 'Data Insights',
-            location: 'Ø§Ù„Ù…Ø¹Ø§Ø¯ÙŠØŒ Ø§Ù„Ù‚Ø§Ù‡رة',
-            type: 'Ø¯ÙˆØ§Ù… Ø¬Ø²Ø¦ÙŠ',
-            experience: '0-2 Ø³Ù†Ùˆات',
+            location: 'المعادي، القاهرة',
+            type: 'دوام جزئي',
+            experience: '0-2 سنوات',
             logo: 'https://images.unsplash.com/photo-1551434678-e076c223a692?auto=format&fit=crop&q=80&w=200',
-            details: 'ØªØ­Ù„ÙŠÙ„ Ø§Ù„Ø¨ÙŠØ§Ù†ات Ùˆاستخراج Ø§Ù„ØªÙ‚Ø§Ø±ÙŠر ÙˆØªØµÙ…ÙŠÙ… Ù„Ùˆحات عرض Ø§Ù„Ø¨ÙŠØ§Ù†ات Power BI.'
+            details: 'تحليل البيانات واستخراج التقارير وتصميم لوحات عرض البيانات Power BI.'
           },
           {
             id: 4,
-            title: 'Ù…Ù‡Ù†دس Ø¬Ùˆدة Ø¨Ø±Ù…Ø¬ÙŠات (QA)',
+            title: 'مهندس جودة برمجيات (QA)',
             company: 'SoftCore',
-            location: 'Ø§Ù„Ù…Ù†ÙŠا Ø§Ù„Ø¬Ø¯ÙŠدة',
-            type: 'Ø¯ÙˆØ§Ù… ÙƒØ§Ù…Ù„',
-            experience: '2+ Ø³Ù†Ùˆات',
+            location: 'المنيا الجديدة',
+            type: 'دوام كامل',
+            experience: '2+ سنوات',
             logo: 'https://images.unsplash.com/photo-1496200502058-a73099b244ce?auto=format&fit=crop&q=80&w=200',
-            details: 'اختبار Ø§Ù„Ø¨Ø±Ù…Ø¬ÙŠات ÙˆØªØ­Ø¯ÙŠد Ø§Ù„أخطاء Ùˆإعداد Ø§Ù„ØªÙ‚Ø§Ø±ÙŠر Ø§Ù„ÙÙ†ÙŠة ÙˆØ¹Ù…Ù„ Ø£ØªÙ…تة Ù„Ù„اختبارات.'
+            details: 'اختبار البرمجيات وتحديد الأخطاء وإعداد التقارير الفنية وعمل أتمتة للاختبارات.'
           }
         ];
         if (!localStorage.getItem('local_jobs')) {
@@ -859,69 +840,69 @@ const AdminDashboard = () => {
         const defaultInnovations = [
           {
             id: 1,
-            name: 'Ù†Ø¸Ø§Ù… ØªØ´Ø®ÙŠص Ø§Ù„Ø£ÙˆØ±Ø§Ù… Ø§Ù„Ø°ÙƒÙŠ Ø¨Ø§Ù„Ø±Ù†ÙŠÙ† Ø§Ù„Ù…ØºÙ†Ø§Ø·ÙŠØ³ÙŠ',
+            name: 'نظام تشخيص الأورام الذكي بالرنين المغناطيسي',
             category: 'ai',
             level: 'advanced',
-            levelName: 'Ù…Ø³ØªÙˆÙ‰ Ù…ØªÙ‚Ø¯Ù…',
-            team: 'ÙØ±ÙŠÙ‚ Ø³ÙŠØ¬Ù…ا Ø§Ù„Ø·Ø¨ÙŠ',
-            desc: 'Ø¨Ø±Ù…Ø¬ÙŠات Ø°Ùƒاء Ø§ØµØ·Ù†Ø§Ø¹ÙŠ ØªÙ‚ÙˆÙ… Ø¨ØªØ­Ù„ÙŠÙ„ ØµÙˆر Ø§Ù„Ø±Ù†ÙŠÙ† Ù„سرعة رصد Ø§Ù„Ø£ÙˆØ±Ø§Ù… Ø¨Ù†سبة Ø¯Ù‚ة ØªÙÙˆÙ‚ 98% ÙˆØªÙˆÙÙŠر Ø§Ù„ÙˆÙ‚ت Ù„Ù„أطباء.',
+            levelName: 'مستوى متقدم',
+            team: 'فريق سيجما الطبي',
+            desc: 'برمجيات ذكاء اصطناعي تقوم بتحليل صور الرنين لسرعة رصد الأورام بنسبة دقة تفوق 98% وتوفير الوقت للأطباء.',
             image: 'https://images.unsplash.com/photo-1576091160550-2173dba999ef?w=600&auto=format&fit=crop&q=80',
-            tech: 'Python / PyTorch', speed: '3 Ø«ÙˆØ§Ù†ٍ', accuracy: '98%', icon: 'Cpu'
+            tech: 'Python / PyTorch', speed: '3 ثوانٍ', accuracy: '98%', icon: 'Cpu'
           },
           {
             id: 2,
-            name: 'جدار Ø§Ù„Ø­Ù…Ø§ÙŠة Ø§Ù„ÙØ§Ø¦Ù‚ Ù„Ù„Ø£Ø¬Ù‡زة Ø§Ù„Ø·Ø¨ÙŠة Ø§Ù„Ø°ÙƒÙŠة',
+            name: 'جدار الحماية الفائق للأجهزة الطبية الذكية',
             category: 'cyber',
             level: 'ready',
-            levelName: 'Ø¬Ø§Ù‡ز Ù„Ù„ØªØ¨Ù†ÙŠ Ø§Ù„ØªØ¬Ø§Ø±ÙŠ',
-            team: 'Ø­ØµÙ† Ø§Ù„Ù…Ù†ÙŠا Ø§Ù„Ø±Ù‚Ù…ÙŠ',
-            desc: 'Ø¨Ø±ÙˆØªÙˆÙƒÙˆÙ„ Ø­Ù…Ø§ÙŠة Ø´Ø¨ÙƒÙŠة ÙŠÙ…Ù†ع Ø§Ø®ØªØ±Ø§Ù‚ات Ø£Ø¬Ù‡زة Ø¥Ù†عاش Ø§Ù„Ù‚Ù„ب ÙˆØ§Ù„Ø£Ø³Ø±Ù‘ة Ø§Ù„Ù…ØªØµÙ„ة Ø¨Ø§Ù„Ø¥Ù†ØªØ±Ù†ت Ø¯Ø§Ø®Ù„ Ø§Ù„Ù…Ø³ØªØ´ÙÙŠات ÙˆØ§Ù„Ù…Ø±Ø§Ùƒز.',
+            levelName: 'جاهز للتبني التجاري',
+            team: 'حصن المنيا الرقمي',
+            desc: 'بروتوكول حماية شبكية يمنع اختراقات أجهزة إنعاش القلب والأسرّة المتصلة بالإنترنت داخل المستشفيات والمراكز.',
             image: 'https://images.unsplash.com/photo-1550751827-4bd374c3f58b?w=600&auto=format&fit=crop&q=80',
-            tech: 'Rust / C++', speed: 'ÙÙˆØ±ÙŠ', accuracy: '99.9%', icon: 'Lock'
+            tech: 'Rust / C++', speed: 'فوري', accuracy: '99.9%', icon: 'Lock'
           },
           {
             id: 3,
-            name: 'Ø­Ø§ÙˆÙŠة Ø§Ù„Ù†ÙØ§ÙŠات Ø§Ù„Ø°ÙƒÙŠة Ù„حسابات Ø§Ù„Ø¨ÙŠئة Ø§Ù„Ù…Ø³ØªØ¯Ø§Ù…ة',
+            name: 'حاوية النفايات الذكية لحسابات البيئة المستدامة',
             category: 'iot',
             level: 'prototype',
-            levelName: 'Ù†Ù…Ùˆذج Ø£ÙˆÙ„ÙŠ',
-            team: 'Ù…Ø¨ØªÙƒØ±Ùˆ Ø§Ù„غد Ø§Ù„Ø¨ÙŠØ¦ÙŠ',
-            desc: 'Ø¬Ù‡از رصد ÙŠستشعر Ø§Ù…ØªÙ„اء Ø§Ù„Ø­Ø§ÙˆÙŠات ÙˆÙŠفرز Ø§Ù„Ù†ÙØ§ÙŠات ØªÙ„Ù‚Ø§Ø¦ÙŠØ§Ù‹ Ø¨Ø§Ø³ØªØ®Ø¯Ø§Ù… حساسات Ø§Ù„Ù…سافة ÙˆÙ…Ø¹Ø§Ù„جة Ø§Ù„ØµÙˆر Ø§Ù„Ù…ØªÙ‚Ø¯Ù…ة.',
+            levelName: 'نموذج أولي',
+            team: 'مبتكرو الغد البيئي',
+            desc: 'جهاز رصد يستشعر امتلاء الحاويات ويفرز النفايات تلقائياً باستخدام حساسات المسافة ومعالجة الصور المتقدمة.',
             image: 'https://images.unsplash.com/photo-1532996122724-e3c354a0b15b?w=600&auto=format&fit=crop&q=80',
-            tech: 'Arduino / ESP32', speed: 'ØªÙ„Ù‚Ø§Ø¦ÙŠ', accuracy: '90%', icon: 'Sprout'
+            tech: 'Arduino / ESP32', speed: 'تلقائي', accuracy: '90%', icon: 'Sprout'
           },
           {
             id: 4,
-            name: 'Ù…Ù†صة ØªØ³ÙˆÙŠÙ‚ ÙˆØªÙˆØ¬ÙŠÙ‡ Ø§Ù„Ù…Ø´Ø±Ùˆعات Ø§Ù„ØªØ¹Ù„ÙŠÙ…ÙŠة Ù„Ù„شباب',
+            name: 'منصة تسويق وتوجيه المشروعات التعليمية للشباب',
             category: 'apps',
             level: 'ready',
-            levelName: 'Ø¬Ø§Ù‡ز Ù„Ù„ØªØ¨Ù†ÙŠ Ø§Ù„ØªØ¬Ø§Ø±ÙŠ',
-            team: 'ÙØ±ÙŠÙ‚ Ø¥Ù†جاز Ù„Ù„Ø¨Ø±Ù…Ø¬ÙŠات',
-            desc: 'Ø¨Ùˆابة Ø¥Ù„ÙƒØªØ±ÙˆÙ†ÙŠة تربط Ø£ÙÙƒار Ø§Ù„Ø®Ø±ÙŠØ¬ÙŠÙ† ÙˆØ§Ù„Ù…Ø¨ØªÙƒØ±ÙŠÙ† Ø¨Ø§Ù„Ù…Ø´Ø±ÙÙŠÙ† ÙˆØ§Ù„Ù…Ø³ØªØ«Ù…Ø±ÙŠÙ† Ù„ØªÙ…ÙˆÙŠÙ„ دراسات Ø§Ù„Ø¬Ø¯ÙˆÙ‰ ÙˆØ§Ù„ØªØ¯Ø±ÙŠب Ø§Ù„ÙØ¹Ù„ÙŠ.',
+            levelName: 'جاهز للتبني التجاري',
+            team: 'فريق إنجاز للبرمجيات',
+            desc: 'بوابة إلكترونية تربط أفكار الخريجين والمبتكرين بالمشرفين والمستثمرين لتمويل دراسات الجدوى والتدريب الفعلي.',
             image: 'https://images.unsplash.com/photo-1522202176988-66273c2fd55f?w=600&auto=format&fit=crop&q=80',
-            tech: 'React / Node.js', speed: 'Ø³Ø­Ø§Ø¨ÙŠ', accuracy: '100%', icon: 'Globe'
+            tech: 'React / Node.js', speed: 'سحابي', accuracy: '100%', icon: 'Globe'
           },
           {
             id: 5,
-            name: 'ذراع Ø¢Ù„ÙŠة Ù„إجراء Ø§Ù„جراحات Ø§Ù„Ø¯Ù‚ÙŠÙ‚ة Ø¹Ù† بعد',
+            name: 'ذراع آلية لإجراء الجراحات الدقيقة عن بعد',
             category: 'ai',
             level: 'prototype',
-            levelName: 'Ù†Ù…Ùˆذج Ø£ÙˆÙ„ÙŠ',
-            team: 'Ù†بض Ù…ÙŠÙƒØ§ØªØ±ÙˆÙ†Ùƒس',
-            desc: 'Ù†Ù…Ùˆذج Ø£ÙˆÙ„ÙŠ Ù„ذراع Ø±ÙˆØ¨ÙˆØªÙŠة ØªØ­Ø§ÙƒÙŠ Ø­Ø±Ùƒة ÙŠد Ø§Ù„Ø·Ø¨ÙŠب Ø¨Ø¥Ø­Ø¯Ø§Ø«ÙŠات Ø¯Ù‚ÙŠÙ‚ة Ø¬Ø¯Ø§Ù‹ عبر Ø§Ù„ÙˆÙŠب ÙˆØ§Ù„Ø£ÙˆØ§Ù…ر Ø§Ù„ØµÙˆØªÙŠة Ø§Ù„ÙÙˆØ±ÙŠة.',
+            levelName: 'نموذج أولي',
+            team: 'نبض ميكاترونكس',
+            desc: 'نموذج أولي لذراع روبوتية تحاكي حركة يد الطبيب بإحداثيات دقيقة جداً عبر الويب والأوامر الصوتية الفورية.',
             image: 'https://images.unsplash.com/photo-1485827404703-89b55fcc595e?w=600&auto=format&fit=crop&q=80',
-            tech: 'Python / ROS', speed: 'Ù„Ø­Ø¸ÙŠ', accuracy: '95%', icon: 'Cpu'
+            tech: 'Python / ROS', speed: 'لحظي', accuracy: '95%', icon: 'Cpu'
           },
           {
             id: 6,
-            name: 'Ø¨Ø±ÙˆØªÙˆÙƒÙˆÙ„ ØªØ£Ù…ÙŠÙ† Ø§Ù„Ù…Ø¹Ø§Ù…Ù„ات Ø§Ù„Ø²Ø±Ø§Ø¹ÙŠة Ø¨Ø³Ù„Ø§Ø³Ù„ Ø§Ù„ÙƒØªÙ„',
+            name: 'بروتوكول تأمين المعاملات الزراعية بسلاسل الكتل',
             category: 'cyber',
             level: 'advanced',
-            levelName: 'Ù…Ø³ØªÙˆÙ‰ Ù…ØªÙ‚Ø¯Ù…',
-            team: 'Ø³Ù†Ø§Ø¨Ù„ Ø§Ù„ØªØ´ÙÙŠر',
-            desc: 'Ù†Ø¸Ø§Ù… ØªØ´ÙÙŠر ØºÙŠر Ù…Ø±ÙƒØ²ÙŠ Ù„ØªØ£Ù…ÙŠÙ† Ù…Ø¨ÙŠعات Ø§Ù„Ù…Ø­Ø§ØµÙŠÙ„ ÙˆØ§Ù„Ùˆحدات Ø§Ù„Ø¥Ù†ØªØ§Ø¬ÙŠة Ù„Ù…Ù†ع Ø§Ù„ØªÙ„اعب Ø¨Ø§Ù„أسعار ÙˆØ³Ø¬Ù„ات Ø§Ù„Ù…Ø²Ø§Ø±Ø¹ÙŠÙ†.',
+            levelName: 'مستوى متقدم',
+            team: 'سنابل التشفير',
+            desc: 'نظام تشفير غير مركزي لتأمين مبيعات المحاصيل والوحدات الإنتاجية لمنع التلاعب بالأسعار وسجلات المزارعين.',
             image: 'https://images.unsplash.com/photo-1639762681485-074b7f938ba0?w=600&auto=format&fit=crop&q=80',
-            tech: 'Solidity / JS', speed: 'Ø«Ø§Ù†ÙŠØªØ§Ù†', accuracy: '100%', icon: 'Database'
+            tech: 'Solidity / JS', speed: 'ثانيتان', accuracy: '100%', icon: 'Database'
           }
         ];
         localStorage.setItem('exhibition_innovations', JSON.stringify(defaultInnovations));
@@ -936,45 +917,45 @@ const AdminDashboard = () => {
         const defaultProducts = [
           {
             id: 1,
-            name: 'Ø¹Ø³Ù„ Ù†Ø­Ù„ Ø·Ø¨ÙŠØ¹ÙŠ Ù…ØµÙÙ‰ Ù†Ù‚ÙŠ', category: 'Ù…Ù†تجات Ø²Ø±Ø§Ø¹ÙŠة', faculty: 'ÙƒÙ„ÙŠة Ø§Ù„زراعة', facultyId: 'agriculture',
-            price: '150 ج.Ù…', image: 'https://images.unsplash.com/photo-1587049352846-4a222e784d38?auto=format&fit=crop&q=80&w=500',
-            rating: '4.9 (1.2K)', tag: 'Ø§Ù„Ø£Ùƒثر Ù…Ø¨ÙŠØ¹Ø§Ù‹', tagColor: 'bg-amber-500 text-white',
-            details: 'Ø¹Ø¨Ùˆة 1 ÙƒØ¬Ù… Ø¹Ø³Ù„ Ù…ØµÙÙ‰ Ù†Ù‚ÙŠ Ø®Ø§Ù„ÙŠ ØªÙ…Ø§Ù…Ø§Ù‹ Ù…Ù† Ø§Ù„Ø³Ùƒر Ø§Ù„Ù…ضاف Ø£Ùˆ Ø§Ù„Ù…Ùˆاد Ø§Ù„Ø­Ø§ÙØ¸Ø©ØŒ Ù…Ù† Ø¥Ù†تاج Ù…Ù†Ø§Ø­Ù„ ÙƒÙ„ÙŠة Ø§Ù„زراعة.'
+            name: 'عسل نحل طبيعي مصفى نقي', category: 'منتجات زراعية', faculty: 'كلية الزراعة', facultyId: 'agriculture',
+            price: '150 ج.م', image: 'https://images.unsplash.com/photo-1587049352846-4a222e784d38?auto=format&fit=crop&q=80&w=500',
+            rating: '4.9 (1.2K)', tag: 'الأكثر مبيعاً', tagColor: 'bg-amber-500 text-white',
+            details: 'عبوة 1 كجم عسل مصفى نقي خالي تماماً من السكر المضاف أو المواد الحافظة، من إنتاج مناحل كلية الزراعة.'
           },
           {
             id: 2,
-            name: 'Ø²ÙŠت Ø²ÙŠØªÙˆÙ† Ø¨Ùƒر Ù…Ù…تاز Ù…Ø¹ØµÙˆر بارد', category: 'Ù…Ù†تجات Ø²Ø±Ø§Ø¹ÙŠة', faculty: 'ÙƒÙ„ÙŠة Ø§Ù„زراعة', facultyId: 'agriculture',
-            price: '180 ج.Ù…', image: 'https://images.unsplash.com/photo-1474979266404-7eaacbcd87c5?auto=format&fit=crop&q=80&w=500',
-            rating: '4.8 (850)', tag: 'عصر بارد Ø·Ø¨ÙŠØ¹ÙŠ', tagColor: 'bg-amber-600 text-white',
-            details: 'Ø²ÙŠت Ø²ÙŠØªÙˆÙ† Ø¨Ùƒر Ù…Ù…تاز درجة Ø£ÙˆÙ„Ù‰ØŒ Ù†سبة Ø­Ù…Ùˆضة Ù…Ù†خفضة Ø¬Ø¯Ø§Ù‹ØŒ Ù…Ø¹ØµÙˆر Ù…ÙŠÙƒØ§Ù†ÙŠÙƒÙŠØ§Ù‹ Ø¹Ù„Ù‰ Ø§Ù„بارد Ù„ÙÙˆائد ÙƒØ§Ù…Ù„ة.'
+            name: 'زيت زيتون بكر ممتاز معصور بارد', category: 'منتجات زراعية', faculty: 'كلية الزراعة', facultyId: 'agriculture',
+            price: '180 ج.م', image: 'https://images.unsplash.com/photo-1474979266404-7eaacbcd87c5?auto=format&fit=crop&q=80&w=500',
+            rating: '4.8 (850)', tag: 'عصر بارد طبيعي', tagColor: 'bg-amber-600 text-white',
+            details: 'زيت زيتون بكر ممتاز درجة أولى، نسبة حموضة منخفضة جداً، معصور ميكانيكياً على البارد لفوائد كاملة.'
           },
           {
             id: 3,
-            name: 'Ù†باتات Ø²ÙŠÙ†ة ÙˆØ´ØªÙ„ات Ø²Ù‡Ùˆر Ù…Ù†Ø²Ù„ÙŠة', category: 'Ù…Ù†تجات Ø²Ø±Ø§Ø¹ÙŠة', faculty: 'ÙƒÙ„ÙŠة Ø§Ù„زراعة', facultyId: 'agriculture',
-            price: '35 ج.Ù…', image: 'https://images.unsplash.com/photo-1463936575829-25148e1db1b8?auto=format&fit=crop&q=80&w=500',
-            rating: '4.7 (310)', tag: 'Ø´ØªÙ„ات Ø²Ù‡Ùˆر', tagColor: 'bg-green-600 text-white',
-            details: 'Ù…Ø¬Ù…Ùˆعة Ù…ØªÙ…ÙŠزة Ù…Ù† Ù†باتات Ø§Ù„Ø¸Ù„ ÙˆØ§Ù„Ø²ÙŠÙ†ة Ø§Ù„Ù…Ù†Ø²Ù„ÙŠة Ø§Ù„Ù…Ø¬Ù‡زة Ù„Ù„زراعة ÙˆØªØ¬Ù…ÙŠÙ„ Ø§Ù„Ù…Ùƒاتب ÙˆØ§Ù„Ø¨Ù„ÙƒÙˆÙ†ات.'
+            name: 'نباتات زينة وشتلات زهور منزلية', category: 'منتجات زراعية', faculty: 'كلية الزراعة', facultyId: 'agriculture',
+            price: '35 ج.م', image: 'https://images.unsplash.com/photo-1463936575829-25148e1db1b8?auto=format&fit=crop&q=80&w=500',
+            rating: '4.7 (310)', tag: 'شتلات زهور', tagColor: 'bg-green-600 text-white',
+            details: 'مجموعة متميزة من نباتات الظل والزينة المنزلية المجهزة للزراعة وتجميل المكاتب والبلكونات.'
           },
           {
             id: 4,
-            name: 'Ù…Ù†ظفات ÙˆÙ…Ø·Ù‡ر Ø£Ø±Ø¶ÙŠات Ø¹Ø§Ù„ÙŠ Ø§Ù„Ø¬Ùˆدة', category: 'Ù…Ù†ظفات ØµÙ†Ø§Ø¹ÙŠة', faculty: 'ÙƒÙ„ÙŠة Ø§Ù„Ø¹Ù„ÙˆÙ…', facultyId: 'science',
-            price: '45 ج.Ù…', image: 'https://images.unsplash.com/photo-1584820927498-cfe5211fd8bf?auto=format&fit=crop&q=80&w=500',
-            rating: '4.7 (2.1K)', tag: 'Ø§Ù„Ø£Ø¹Ù„Ù‰ Ù…Ø¨ÙŠØ¹Ø§Ù‹', tagColor: 'bg-emerald-600 text-white',
-            details: 'Ù…Ø·Ù‡رات ÙˆÙ…Ù†ظفات Ø¢Ù…Ù†ة Ø¹Ø§Ù„ÙŠة Ø§Ù„ØªØ±ÙƒÙŠز Ù„Ù„Ø¥Ù†تاج Ø§Ù„Ù…Ù†Ø²Ù„ÙŠ ÙˆØ§Ù„ØªØ¬Ø§Ø±ÙŠØŒ Ù…ØµÙ†عة ÙˆÙÙ‚ Ø§Ù„Ù…Ø¹Ø§ÙŠÙŠر Ø§Ù„Ø·Ø¨ÙŠة Ø¨Ù‚Ø³Ù… Ø§Ù„ÙƒÙŠÙ…ÙŠاء.'
+            name: 'منظفات ومطهر أرضيات عالي الجودة', category: 'منظفات صناعية', faculty: 'كلية العلوم', facultyId: 'science',
+            price: '45 ج.م', image: 'https://images.unsplash.com/photo-1584820927498-cfe5211fd8bf?auto=format&fit=crop&q=80&w=500',
+            rating: '4.7 (2.1K)', tag: 'الأعلى مبيعاً', tagColor: 'bg-emerald-600 text-white',
+            details: 'مطهرات ومنظفات آمنة عالية التركيز للإنتاج المنزلي والتجاري، مصنعة وفق المعايير الطبية بقسم الكيمياء.'
           },
           {
             id: 5,
-            name: 'ØµØ§Ø¨ÙˆÙ† Ø³Ø§Ø¦Ù„ Ù…Ø¹Ù‚Ù… Ù…ضاد Ù„Ù„Ø¨ÙƒØªÙŠØ±ÙŠا', category: 'Ù…Ù†ظفات ØµÙ†Ø§Ø¹ÙŠة', faculty: 'ÙƒÙ„ÙŠة Ø§Ù„Ø¹Ù„ÙˆÙ…', facultyId: 'science',
-            price: '60 ج.Ù…', image: 'https://images.unsplash.com/photo-1607006342411-101a4e101155?auto=format&fit=crop&q=80&w=500',
-            rating: '4.6 (950)', tag: 'Ù…Ø·Ù‡ر Ø¢Ù…Ù†', tagColor: 'bg-blue-700 text-white',
-            details: 'Ø¹Ø¨Ùˆة Ø¹Ø§Ø¦Ù„ÙŠة 3 Ù„تر Ù…Ù† Ø§Ù„ØµØ§Ø¨ÙˆÙ† Ø§Ù„Ø³Ø§Ø¦Ù„ Ø§Ù„Ù…عزز Ø¨Ù…رطبات Ø§Ù„Ø¬Ù„Ø³Ø±ÙŠÙ† Ù„Ø­Ù…Ø§ÙŠة Ø§Ù„Ø£ÙŠØ¯ÙŠ ÙˆØªØ±Ø·ÙŠØ¨Ù‡ا Ø¨ÙØ§Ø¹Ù„ÙŠة ØªØ§Ù…ة.'
+            name: 'صابون سائل معقم مضاد للبكتيريا', category: 'منظفات صناعية', faculty: 'كلية العلوم', facultyId: 'science',
+            price: '60 ج.م', image: 'https://images.unsplash.com/photo-1607006342411-101a4e101155?auto=format&fit=crop&q=80&w=500',
+            rating: '4.6 (950)', tag: 'مطهر آمن', tagColor: 'bg-blue-700 text-white',
+            details: 'عبوة عائلية 3 لتر من الصابون السائل المعزز بمرطبات الجلسرين لحماية الأيدي وترطيبها بفاعلية تامة.'
           },
           {
             id: 6,
-            name: 'Ù…Ø¹Ù‚Ù… ÙƒØ­ÙˆÙ„ÙŠ Ø·Ø¨ÙŠ Ø¨ØªØ±ÙƒÙŠز 70%', category: 'Ù…Ù†ظفات ØµÙ†Ø§Ø¹ÙŠة', faculty: 'ÙƒÙ„ÙŠة Ø§Ù„Ø¹Ù„ÙˆÙ…', facultyId: 'science',
-            price: '50 ج.Ù…', image: 'https://images.unsplash.com/photo-1584622650111-993a426fbf0a?auto=format&fit=crop&q=80&w=500',
-            rating: '4.9 (1.4K)', tag: 'Ø·Ø¨ÙŠ Ù…Ø¹ØªÙ…د', tagColor: 'bg-cyan-600 text-white',
-            details: 'بخاخ ÙƒØ­ÙˆÙ„ Ø¥ÙŠØ«ÙŠÙ„ÙŠ Ù†Ù‚ÙŠ ØªØ±ÙƒÙŠز 70% Ù„Ù„ØªØ¹Ù‚ÙŠÙ… Ø§Ù„Ù…باشر ÙˆØ­Ù…Ø§ÙŠة Ø§Ù„أسطح ÙˆØ§Ù„Ø£ÙŠØ¯ÙŠ Ø¨ÙØ§Ø¹Ù„ÙŠة ØªØ§Ù…ة Ù…ØµÙ†ع Ø¨Ù…Ø¹Ø§Ù…Ù„ Ø§Ù„ÙƒÙ„ÙŠة.'
+            name: 'معقم كحولي طبي بتركيز 70%', category: 'منظفات صناعية', faculty: 'كلية العلوم', facultyId: 'science',
+            price: '50 ج.م', image: 'https://images.unsplash.com/photo-1584622650111-993a426fbf0a?auto=format&fit=crop&q=80&w=500',
+            rating: '4.9 (1.4K)', tag: 'طبي معتمد', tagColor: 'bg-cyan-600 text-white',
+            details: 'بخاخ كحول إيثيلي نقي تركيز 70% للتعقيم المباشر وحماية الأسطح والأيدي بفاعلية تامة مصنع بمعامل الكلية.'
           }
         ];
         localStorage.setItem('exhibition_products', JSON.stringify(defaultProducts));
@@ -1028,14 +1009,14 @@ const AdminDashboard = () => {
         setSelectedItem(prev => ({ ...prev, status: newStatus }));
       }
     } catch (err) {
-      alert("حدث خطأ Ø£Ø«Ù†اء ØªØ­Ø¯ÙŠث Ø§Ù„Ø­Ø§Ù„ة: " + err.message);
+      alert("حدث خطأ أثناء تحديث الحالة: " + err.message);
     }
   };
 
   const handleDeleteItem = async (itemId, type) => {
     const isConfirm = window.confirm(
       isRtl 
-        ? "Ù‡Ù„ Ø£Ù†ت Ù…ØªØ£Ùƒد Ù…Ù† Ø±ØºØ¨ØªÙƒ ÙÙŠ حذف Ù‡ذا Ø§Ù„Ø³Ø¬Ù„ Ù†Ù‡Ø§Ø¦ÙŠØ§Ù‹ØŸ Ù„ا ÙŠÙ…ÙƒÙ† Ø§Ù„تراجع Ø¹Ù† Ù‡ذا Ø§Ù„إجراء." 
+        ? "هل أنت متأكد من رغبتك في حذف هذا السجل نهائياً؟ لا يمكن التراجع عن هذا الإجراء." 
         : "Are you sure you want to delete this record permanently? This action cannot be undone."
     );
     if (!isConfirm) return;
@@ -1079,9 +1060,9 @@ const AdminDashboard = () => {
       if (selectedItem && selectedItem.id === itemId) {
         setSelectedItem(null);
       }
-      alert(isRtl ? "ØªÙ… حذف Ø§Ù„Ø³Ø¬Ù„ Ø¨Ù†جاح." : "Record deleted successfully.");
+      alert(isRtl ? "تم حذف السجل بنجاح." : "Record deleted successfully.");
     } catch (err) {
-      alert((isRtl ? "حدث خطأ Ø£Ø«Ù†اء Ø§Ù„حذف: " : "Error deleting record: ") + err.message);
+      alert((isRtl ? "حدث خطأ أثناء الحذف: " : "Error deleting record: ") + err.message);
     }
   };
 
@@ -1092,7 +1073,7 @@ const AdminDashboard = () => {
 
     if (activeTab === 'graduation') {
       const items = getFilteredGradProjects();
-      headers = ['ØªØ§Ø±ÙŠخ Ø§Ù„ØªÙ‚Ø¯ÙŠÙ…', 'Ø§Ø³Ù… Ø§Ù„Ù…Ø´Ø±Ùˆع Ø¨Ø§Ù„Ø¹Ø±Ø¨ÙŠة', 'Ø§Ø³Ù… Ø§Ù„Ù…Ø´Ø±Ùˆع Ø¨Ø§Ù„Ø¥Ù†Ø¬Ù„ÙŠØ²ÙŠة', 'Ø§Ù„ÙƒÙ„ÙŠة ÙˆØ§Ù„Ø¬Ø§Ù…عة', 'Ø§Ù„Ù†Ùˆع', 'Ø§Ù„Ø­Ø§Ù„ة', 'Ø§Ù„Ø¨Ø±ÙŠد Ø§Ù„Ø¥Ù„ÙƒØªØ±ÙˆÙ†ÙŠ Ù„Ù„رائد', 'Ø§Ù„Ù‡اتف', 'Ø§Ù„Ù…Ù„خص'];
+      headers = ['تاريخ التقديم', 'اسم المشروع بالعربية', 'اسم المشروع بالإنجليزية', 'الكلية والجامعة', 'النوع', 'الحالة', 'البريد الإلكتروني للرائد', 'الهاتف', 'الملخص'];
       dataToExport = items.map(p => [
         new Date(p.created_at).toLocaleDateString('ar-EG'),
         p.project_name_ar,
@@ -1104,10 +1085,10 @@ const AdminDashboard = () => {
         p.leader_phone || '',
         p.abstract || ''
       ]);
-      filename = 'Ù…Ø´Ø±Ùˆعات_Ø§Ù„تخرج.csv';
+      filename = 'مشروعات_التخرج.csv';
     } else if (activeTab === 'research') {
       const items = getFilteredResearch();
-      headers = ['ØªØ§Ø±ÙŠخ Ø§Ù„ØªÙ‚Ø¯ÙŠÙ…', 'Ø§Ù„باحث Ø§Ù„Ø±Ø¦ÙŠØ³ÙŠ', 'Ø§Ù„درجة Ø§Ù„Ø¹Ù„Ù…ÙŠة', 'Ø§Ù„ÙƒÙ„ÙŠة ÙˆØ§Ù„Ø¬Ø§Ù…عة', 'Ø§Ù„Ø¨Ø±ÙŠد Ø§Ù„Ø¥Ù„ÙƒØªØ±ÙˆÙ†ÙŠ', 'Ø§Ù„Ù‡اتف', 'Ø§Ù„Ø­Ø§Ù„ة', 'Ø¹Ù†ÙˆØ§Ù† Ø§Ù„بحث', 'Ø§Ù„Ù…Ù„خص'];
+      headers = ['تاريخ التقديم', 'الباحث الرئيسي', 'الدرجة العلمية', 'الكلية والجامعة', 'البريد الإلكتروني', 'الهاتف', 'الحالة', 'عنوان البحث', 'الملخص'];
       dataToExport = items.map(r => [
         new Date(r.created_at).toLocaleDateString('ar-EG'),
         r.pi_name,
@@ -1119,11 +1100,11 @@ const AdminDashboard = () => {
         r.research_title || '',
         r.research_abstract || ''
       ]);
-      filename = 'Ø§Ù„Ø¨Ø­Ùˆث_Ø§Ù„ØªØ·Ø¨ÙŠÙ‚ÙŠة.csv';
+      filename = 'البحوث_التطبيقية.csv';
     } else if (['speakers', 'startups', 'investors', 'mentors', 'researchers', 'partners', 'volunteers'].includes(activeTab)) {
       const role = activeTab.slice(0, -1);
       const items = getFilteredRegistrants(role);
-      headers = ['Ø§Ù„ØªØ§Ø±ÙŠخ', 'Ø§Ù„Ø§Ø³Ù… Ø§Ù„ÙƒØ§Ù…Ù„', 'Ø§Ù„Ø¬Ù‡ة / Ø§Ù„Ù…ؤسسة', 'Ø§Ù„Ø¨Ø±ÙŠد Ø§Ù„Ø¥Ù„ÙƒØªØ±ÙˆÙ†ÙŠ', 'Ø±Ù‚Ù… Ø§Ù„Ù‡اتف', 'Ø§Ù„Ø±Ù‚Ù… Ø§Ù„Ù‚ÙˆÙ…ÙŠ', 'Ø§Ù„Ø­Ø§Ù„ة', 'رابط Ø§Ù„Ø³ÙŠرة Ø§Ù„Ø°Ø§ØªÙŠة'];
+      headers = ['التاريخ', 'الاسم الكامل', 'الجهة / المؤسسة', 'البريد الإلكتروني', 'رقم الهاتف', 'الرقم القومي', 'الحالة', 'رابط السيرة الذاتية'];
       dataToExport = items.map(r => [
         new Date(r.created_at).toLocaleDateString('ar-EG'),
         r.full_name,
@@ -1131,31 +1112,31 @@ const AdminDashboard = () => {
         r.email,
         r.phone,
         r.details?.nationalId || '',
-        r.status || 'تحت Ø§Ù„فحص Ø§Ù„Ø¥Ø¯Ø§Ø±ÙŠ',
+        r.status || 'تحت الفحص الإداري',
         r.cv_url || ''
       ]);
       
       const roleNamesAr = {
-        speaker: 'Ø§Ù„Ù…ØªØ­Ø¯Ø«ÙˆÙ†',
-        startup: 'Ø§Ù„Ø´Ø±Ùƒات_Ø§Ù„Ù†اشئة',
-        investor: 'Ø§Ù„Ù…Ø³ØªØ«Ù…Ø±ÙˆÙ†',
-        mentor: 'Ø§Ù„Ù…ÙˆØ¬Ù‡ÙˆÙ†',
-        researcher: 'Ø§Ù„Ø¨Ø§Ø­Ø«ÙˆÙ†_ÙˆØ§Ù„Ù…Ø¨ØªÙƒØ±ÙˆÙ†',
-        partner: 'Ø§Ù„Ø´Ø±Ùƒاء_ÙˆØ§Ù„رعاة',
-        volunteer: 'Ø§Ù„Ù…ØªØ·ÙˆØ¹ÙˆÙ†'
+        speaker: 'المتحدثون',
+        startup: 'الشركات_الناشئة',
+        investor: 'المستثمرون',
+        mentor: 'الموجهون',
+        researcher: 'الباحثون_والمبتكرون',
+        partner: 'الشركاء_والرعاة',
+        volunteer: 'المتطوعون'
       };
-      filename = `${roleNamesAr[role] || 'Ø§Ù„Ù…Ø³Ø¬Ù„ÙˆÙ†'}.csv`;
+      filename = `${roleNamesAr[role] || 'المسجلون'}.csv`;
     } else if (activeTab === 'news') {
-      headers = ['Ø§Ù„ØªØ§Ø±ÙŠخ', 'Ø§Ù„Ø¹Ù†ÙˆØ§Ù†', 'Ø§Ù„Ùƒاتب / Ø§Ù„Ù†اشر', 'Ø§Ù„Ù…Ø­ØªÙˆÙ‰'];
+      headers = ['التاريخ', 'العنوان', 'الكاتب / الناشر', 'المحتوى'];
       dataToExport = newsList.map(n => [
         new Date(n.created_at).toLocaleDateString('ar-EG'),
         n.title,
         n.uploader_name,
         n.content
       ]);
-      filename = 'Ø§Ù„أخبار.csv';
+      filename = 'الأخبار.csv';
     } else if (activeTab === 'jobs') {
-      headers = ['Ø§Ù„ØªØ§Ø±ÙŠخ', 'Ø§Ù„Ù…Ø³Ù…Ù‰ Ø§Ù„ÙˆØ¸ÙŠÙÙŠ', 'Ø§Ù„Ø´Ø±Ùƒة', 'Ø§Ù„Ù…ÙˆÙ‚ع', 'Ø§Ù„Ù†Ùˆع', 'Ø§Ù„خبرة', 'ØªÙØ§ØµÙŠÙ„ Ø§Ù„ÙˆØ¸ÙŠفة'];
+      headers = ['التاريخ', 'المسمى الوظيفي', 'الشركة', 'الموقع', 'النوع', 'الخبرة', 'تفاصيل الوظيفة'];
       dataToExport = jobs.map(j => [
         j.created_at ? new Date(j.created_at).toLocaleDateString('ar-EG') : '',
         j.title,
@@ -1165,7 +1146,7 @@ const AdminDashboard = () => {
         j.experience,
         j.details || ''
       ]);
-      filename = 'Ø´Ùˆاغر_Ø§Ù„Ùˆظائف.csv';
+      filename = 'شواغر_الوظائف.csv';
     } else {
       return;
     }
@@ -1202,7 +1183,7 @@ const AdminDashboard = () => {
       const matchesSearch = p.project_name_ar.toLowerCase().includes(searchQuery.toLowerCase()) || 
                             p.project_name_en.toLowerCase().includes(searchQuery.toLowerCase()) || 
                             p.college.toLowerCase().includes(searchQuery.toLowerCase());
-      const matchesStatus = statusFilter === 'Ø§Ù„ÙƒÙ„' || p.status === statusFilter;
+      const matchesStatus = statusFilter === 'الكل' || p.status === statusFilter;
       return matchesSearch && matchesStatus;
     });
   };
@@ -1212,7 +1193,7 @@ const AdminDashboard = () => {
       const matchesSearch = r.pi_name.toLowerCase().includes(searchQuery.toLowerCase()) || 
                             r.pi_faculty.toLowerCase().includes(searchQuery.toLowerCase()) || 
                             r.pi_email.toLowerCase().includes(searchQuery.toLowerCase());
-      const matchesStatus = statusFilter === 'Ø§Ù„ÙƒÙ„' || r.status === statusFilter;
+      const matchesStatus = statusFilter === 'الكل' || r.status === statusFilter;
       return matchesSearch && matchesStatus;
     });
   };
@@ -1258,7 +1239,6 @@ const AdminDashboard = () => {
   if (!isAuthenticated) {
     return (
       <div className="min-h-screen pt-20 pb-20 flex items-center justify-center bg-gradient-to-br from-[#0F172A] via-[#1E3A8A]/80 to-[#0F172A] px-4 relative overflow-hidden" dir="rtl" style={{ fontFamily: "'Cairo', sans-serif" }}>
-        {/* Decorative background glows */}
         <div className="absolute top-20 right-10 w-[400px] h-[400px] bg-blue-500/10 rounded-full blur-[120px] pointer-events-none" />
         <div className="absolute bottom-10 left-10 w-[400px] h-[400px] bg-[#F4A217]/5 rounded-full blur-[120px] pointer-events-none" />
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-blue-700/5 rounded-full blur-[160px] pointer-events-none" />
@@ -1346,7 +1326,6 @@ const AdminDashboard = () => {
           </div>
         </div>
 
-
         {/* Sidebar Menu Items */}
         <nav className="flex-1 p-4 space-y-1 overflow-y-auto">
           {[
@@ -1369,20 +1348,14 @@ const AdminDashboard = () => {
             <button
               key={tab.id}
               onClick={() => { setActiveTab(tab.id); setSelectedItem(null); }}
-              className={`w-full flex items-center justify-between px-4 py-2.5 rounded-xl font-bold text-xs sm:text-sm whitespace-nowrap transition-all duration-200 group cursor-pointer ${
-                activeTab === tab.id
-                  ? 'bg-gradient-to-r from-[#F4A217] to-amber-500 text-[#1E3A8A] shadow-lg shadow-amber-500/20'
-                  : 'text-blue-100/70 hover:bg-white/10 hover:text-white'
-              }`}
+              className={`w-full flex items-center justify-between px-4 py-2.5 rounded-xl font-bold text-xs sm:text-sm whitespace-nowrap transition-all duration-200 group cursor-pointer ${activeTab === tab.id ? 'bg-gradient-to-r from-[#F4A217] to-amber-500 text-[#1E3A8A] shadow-lg shadow-amber-500/20' : 'text-blue-100/70 hover:bg-white/10 hover:text-white'}`}
             >
               <div className="flex items-center gap-2.5">
                 <tab.icon className={`w-4 h-4 shrink-0 transition-colors ${activeTab === tab.id ? 'text-[#1E3A8A]' : 'text-blue-300/60 group-hover:text-white'}`} />
                 <span>{tab.label}</span>
               </div>
               {tab.count !== null && (
-                <span className={`px-2 py-0.5 text-[10px] rounded-full font-black ${
-                  activeTab === tab.id ? 'bg-[#1E3A8A] text-white' : 'bg-white/10 text-slate-300'
-                }`}>
+                <span className={`px-2 py-0.5 text-[10px] rounded-full font-black ${activeTab === tab.id ? 'bg-[#1E3A8A] text-white' : 'bg-white/10 text-slate-300'}`}>
                   {tab.count}
                 </span>
               )}
@@ -1418,7 +1391,7 @@ const AdminDashboard = () => {
             <Search className="w-4 h-4 text-slate-400 absolute right-4.5 top-1/2 -translate-y-1/2" />
             <input
               type="text"
-              placeholder="Ø§Ù„بحث Ø§Ù„ÙÙˆØ±ÙŠ Ø¨Ø§Ù„Ø§Ø³Ù…ØŒ Ø§Ù„ÙƒÙ„ÙŠØ©ØŒ Ø§Ù„Ø¨Ø±ÙŠد Ø§Ù„Ø¥Ù„ÙƒØªØ±ÙˆÙ†ÙŠ..."
+              placeholder="البحث الفوري بالاسم، الكلية، البريد الإلكتروني..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="w-full bg-slate-50 border border-slate-200/80 rounded-2xl pr-11 pl-4 py-2.5 text-xs sm:text-sm focus:bg-white focus:ring-2 focus:ring-[#1E3A8A] focus:border-[#1E3A8A] outline-none shadow-inner transition-all duration-300"
@@ -1433,7 +1406,7 @@ const AdminDashboard = () => {
                   <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
                   <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
                 </span>
-                <span>Ù‚اعدة Ø§Ù„Ø¨ÙŠØ§Ù†ات Ù†شطة</span>
+                <span>قاعدة البيانات نشطة</span>
               </div>
             ) : (
               <div className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-amber-50 border border-amber-200/60 text-amber-700 text-xs font-bold shadow-sm">
@@ -1441,16 +1414,16 @@ const AdminDashboard = () => {
                   <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75"></span>
                   <span className="relative inline-flex rounded-full h-2 w-2 bg-amber-500"></span>
                 </span>
-                <span>Ùˆضع Ø§Ù„Ù…Ø¹Ø§ÙŠÙ†ة Ø§Ù„Ù…Ø­Ù„ÙŠة</span>
+                <span>وضع المعاينة المحلية</span>
               </div>
             )}
 
-            <button onClick={fetchData} className="p-2.5 bg-slate-100 text-slate-500 hover:bg-slate-200 hover:text-slate-800 rounded-xl transition-all cursor-pointer shadow-sm active:scale-95" title="ØªØ­Ø¯ÙŠث Ø§Ù„Ø¨ÙŠØ§Ù†ات">
+            <button onClick={fetchData} className="p-2.5 bg-slate-100 text-slate-500 hover:bg-slate-200 hover:text-slate-800 rounded-xl transition-all cursor-pointer shadow-sm active:scale-95" title="تحديث البيانات">
               <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
             </button>
 
             <button onClick={handleLogout} className="px-4 py-2 bg-red-50 hover:bg-red-100 text-red-600 rounded-xl font-bold text-xs sm:text-sm transition-all cursor-pointer shadow-sm active:scale-95 border border-red-100">
-              Ø®Ø±Ùˆج
+              خروج
             </button>
           </div>
         </header>
@@ -1461,7 +1434,7 @@ const AdminDashboard = () => {
           {loading ? (
             <div className="py-20 text-center text-slate-500 font-bold flex flex-col items-center gap-3">
               <RefreshCw className="w-8 h-8 animate-spin text-[#1E3A8A]" />
-              <span>Ø¬Ø§Ø±ÙŠ ØªØ­Ù…ÙŠÙ„ Ø§Ù„Ø¨ÙŠØ§Ù†ات...</span>
+              <span>جاري تحميل البيانات...</span>
             </div>
           ) : (
             <>
@@ -1480,10 +1453,10 @@ const AdminDashboard = () => {
                       
                       <div className="space-y-4 relative z-10 text-center md:text-right">
                         <span className="inline-block bg-[#F4A217]/25 text-[#F4A217] border border-[#F4A217]/20 px-4 py-1.5 rounded-full text-xs font-black">
-                          Ù‚Ù…ة Ø¬Ø§Ù…عة Ø§Ù„Ù…Ù†ÙŠا Ù„Ù„Ø§Ø¨ØªÙƒار ÙˆØ±ÙŠادة Ø§Ù„Ø£Ø¹Ù…Ø§Ù„ 2026
+                          قمة جامعة المنيا للابتكار وريادة الأعمال 2026
                         </span>
-                        <h2 className="text-3xl md:text-4xl font-black tracking-tight leading-tight">ÙŠÙˆÙ…Ùƒ Ø³Ø¹ÙŠØ¯ØŒ ÙŠا Ù…Ø³Ø¤ÙˆÙ„ Ø§Ù„Ù‚Ù…ة!</h2>
-                        <p className="text-slate-200 text-sm max-w-lg leading-relaxed font-semibold">Ù…تابعة Ùƒافة Ø·Ù„بات Ø§Ù„Ù…Ø¨ØªÙƒØ±ÙŠÙ† ÙˆØ§Ù„Ø¨Ø§Ø­Ø«ÙŠÙ†ØŒ Ùˆإدارة Ù…عارض Ø§Ù„Ø§Ø¨ØªÙƒار ÙˆØ¬Ø¯ÙˆÙ„ Ø§Ù„ÙØ¹Ø§Ù„ÙŠات Ø¨Ù†جاح.</p>
+                        <h2 className="text-3xl md:text-4xl font-black tracking-tight leading-tight">يومك سعيد، يا مسؤول القمة!</h2>
+                        <p className="text-slate-200 text-sm max-w-lg leading-relaxed font-semibold">متابعة كافة طلبات المبتكرين والباحثين، وإدارة معارض الابتكار وجدول الفعاليات بنجاح.</p>
                       </div>
                       
                       {/* Illustration/Icon Container */}
@@ -1496,10 +1469,10 @@ const AdminDashboard = () => {
                     {/* 2. Sparkline Stats Cards */}
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
                       {[
-                        { title: 'Ù…Ø´Ø±Ùˆعات Ø§Ù„تخرج', value: stats.totalGP, label: 'Ù…Ø´Ø±Ùˆع Ù…ضاف', color: 'text-blue-700', bg: 'bg-emerald-50', svgColor: 'text-emerald-600', percent: '+14%' },
-                        { title: 'Ø§Ù„Ø¨Ø­Ùˆث Ø§Ù„ØªØ·Ø¨ÙŠÙ‚ÙŠة', value: stats.totalAR, label: 'بحث ØªØ·Ø¨ÙŠÙ‚ÙŠ', color: 'text-[#1E3A8A]', bg: 'bg-[#1E3A8A]/10', svgColor: 'text-[#1E3A8A]', percent: '+8%' },
-                        { title: 'Ø§Ø¨ØªÙƒارات Ø§Ù„Ù…عرض', value: innovations.length, label: 'Ø§Ø¨ØªÙƒار ØªÙ‚Ù†ÙŠ', color: 'text-[#F4A217]', bg: 'bg-[#F4A217]/10', svgColor: 'text-[#F4A217]', percent: '+22%' },
-                        { title: 'Ùˆظائف ÙˆØ´Ùˆاغر', value: jobs.length, label: 'ÙˆØ¸ÙŠفة شاغرة', color: 'text-amber-600', bg: 'bg-amber-50', svgColor: 'text-amber-500', percent: '+18%' }
+                        { title: 'مشروعات التخرج', value: stats.totalGP, label: 'مشروع مضاف', color: 'text-blue-700', bg: 'bg-emerald-50', svgColor: 'text-emerald-600', percent: '+14%' },
+                        { title: 'البحوث التطبيقية', value: stats.totalAR, label: 'بحث تطبيقي', color: 'text-[#1E3A8A]', bg: 'bg-[#1E3A8A]/10', svgColor: 'text-[#1E3A8A]', percent: '+8%' },
+                        { title: 'ابتكارات المعرض', value: innovations.length, label: 'ابتكار تقني', color: 'text-[#F4A217]', bg: 'bg-[#F4A217]/10', svgColor: 'text-[#F4A217]', percent: '+22%' },
+                        { title: 'وظائف وشواغر', value: jobs.length, label: 'وظيفة شاغرة', color: 'text-amber-600', bg: 'bg-amber-50', svgColor: 'text-amber-500', percent: '+18%' }
                       ].map((card, idx) => {
                         const cardVal = card.value || 0;
                         const p1 = Math.round(cardVal * 0.2);
@@ -1530,9 +1503,9 @@ const AdminDashboard = () => {
                               <span className="text-[10px] font-bold text-slate-400">
                                 {hoveredDot && hoveredDot.startsWith(`${idx}-`) ? (
                                   <span className="text-slate-600 font-bold transition-all">
-                                    {hoveredDot.split('-')[1] === '0' ? 'Ø§Ù„Ø£Ø³Ø¨Ùˆع 1: ' :
-                                     hoveredDot.split('-')[1] === '1' ? 'Ø§Ù„Ø£Ø³Ø¨Ùˆع 2: ' :
-                                     hoveredDot.split('-')[1] === '2' ? 'Ø§Ù„Ø£Ø³Ø¨Ùˆع 3: ' : 'Ø§Ù„Ø­Ø§Ù„ÙŠ: '}
+                                    {hoveredDot.split('-')[1] === '0' ? 'الأسبوع 1: ' :
+                                     hoveredDot.split('-')[1] === '1' ? 'الأسبوع 2: ' :
+                                     hoveredDot.split('-')[1] === '2' ? 'الأسبوع 3: ' : 'الحالي: '}
                                     <strong className="text-[#1E3A8A] font-black">{pts[parseInt(hoveredDot.split('-')[1])].val}</strong>
                                   </span>
                                 ) : (
@@ -1574,8 +1547,8 @@ const AdminDashboard = () => {
                       {/* Chart Left: Circular progress check */}
                       <div className="bg-white p-8 rounded-[2.5rem] border border-slate-100 shadow-soft flex flex-col justify-between h-[300px]">
                         <div className="flex justify-between items-center mb-6">
-                          <h4 className="font-black text-slate-800 text-lg">فحص ÙˆÙ…راجعة Ø§Ù„Ø·Ù„بات</h4>
-                          <span className="text-xs font-bold text-[#1E3A8A] bg-[#1E3A8A]/10 px-3 py-1 rounded-full">ØªØ­Ø¯ÙŠث ÙÙˆØ±ÙŠ</span>
+                          <h4 className="font-black text-slate-800 text-lg">فحص ومراجعة الطلبات</h4>
+                          <span className="text-xs font-bold text-[#1E3A8A] bg-[#1E3A8A]/10 px-3 py-1 rounded-full">تحديث فوري</span>
                         </div>
                         <div className="flex items-center justify-around gap-6">
                           <div className="relative w-36 h-36 flex items-center justify-center">
@@ -1608,9 +1581,9 @@ const AdminDashboard = () => {
                                  hoveredLegendIdx === 2 ? '60%' : '92%'}
                               </span>
                               <span className="text-[10px] font-bold text-slate-400 transition-all duration-300">
-                                {hoveredLegendIdx === 0 ? 'Ù…تحدث Ù…Ù‚Ø¨ÙˆÙ„' :
-                                 hoveredLegendIdx === 1 ? 'Ø´Ø±Ùƒة Ù…Ù‚Ø¨ÙˆÙ„ة' :
-                                 hoveredLegendIdx === 2 ? 'Ù…Ø³ØªØ«Ù…ر Ù…Ù‚Ø¨ÙˆÙ„' : 'تحت Ø§Ù„فحص'}
+                                {hoveredLegendIdx === 0 ? 'متحدث مقبول' :
+                                 hoveredLegendIdx === 1 ? 'شركة مقبولة' :
+                                 hoveredLegendIdx === 2 ? 'مستثمر مقبول' : 'تحت الفحص'}
                               </span>
                             </div>
                           </div>
@@ -1621,7 +1594,7 @@ const AdminDashboard = () => {
                               onMouseLeave={() => setHoveredLegendIdx(null)}
                             >
                               <span className="w-2.5 h-2.5 rounded-full bg-amber-500 group-hover:scale-125 transition-transform"></span> 
-                              <span>Ø§Ù„Ù…ØªØ­Ø¯Ø«ÙˆÙ†: {stats.totalSpeakers}</span>
+                              <span>المتحدثون: {stats.totalSpeakers}</span>
                             </div>
                             <div 
                               className="flex items-center gap-2 cursor-pointer hover:text-slate-900 transition-colors group"
@@ -1629,7 +1602,7 @@ const AdminDashboard = () => {
                               onMouseLeave={() => setHoveredLegendIdx(null)}
                             >
                               <span className="w-2.5 h-2.5 rounded-full bg-yellow-500 group-hover:scale-125 transition-transform"></span> 
-                              <span>Ø§Ù„Ø´Ø±Ùƒات Ø§Ù„Ù†اشئة: {stats.totalStartups}</span>
+                              <span>الشركات الناشئة: {stats.totalStartups}</span>
                             </div>
                             <div 
                               className="flex items-center gap-2 cursor-pointer hover:text-slate-900 transition-colors group"
@@ -1637,7 +1610,7 @@ const AdminDashboard = () => {
                               onMouseLeave={() => setHoveredLegendIdx(null)}
                             >
                               <span className="w-2.5 h-2.5 rounded-full bg-[#1E3A8A] group-hover:scale-125 transition-transform"></span> 
-                              <span>Ø§Ù„Ù…Ø³ØªØ«Ù…Ø±ÙˆÙ†: {stats.totalInvestors}</span>
+                              <span>المستثمرون: {stats.totalInvestors}</span>
                             </div>
                           </div>
                         </div>
@@ -1646,14 +1619,14 @@ const AdminDashboard = () => {
                       {/* Chart Right: Plans progress bars */}
                       <div className="bg-white p-8 rounded-[2.5rem] border border-slate-100 shadow-soft flex flex-col justify-between h-[300px]">
                         <div className="flex justify-between items-center mb-4">
-                          <h4 className="font-black text-slate-800 text-lg">Ù†سب Ø§ÙƒØªÙ…Ø§Ù„ Ù„Ø¬Ø§Ù† Ø§Ù„ØªÙ†Ø¸ÙŠÙ…</h4>
-                          <span className="text-xs font-bold text-emerald-600 bg-emerald-50 px-3 py-1 rounded-full">Ø£Ø¹Ù…Ø§Ù„ Ø§Ù„Ù„Ø¬Ø§Ù†</span>
+                          <h4 className="font-black text-slate-800 text-lg">نسب اكتمال لجان التنظيم</h4>
+                          <span className="text-xs font-bold text-emerald-600 bg-emerald-50 px-3 py-1 rounded-full">أعمال اللجان</span>
                         </div>
                         <div className="space-y-4 flex-1 flex flex-col justify-center">
                           {[
-                            { name: 'Ù„Ø¬Ù†ة Ø§Ù„Ø§Ø³ØªÙ‚Ø¨Ø§Ù„ ÙˆØ§Ù„ØªØ³Ø¬ÙŠÙ„', percent: 84, color: 'bg-[#1E3A8A]' },
-                            { name: 'Ù„Ø¬Ù†ة Ø§Ù„ØªÙ‚ÙŠÙŠÙ… Ø§Ù„Ø¹Ù„Ù…ÙŠ ÙˆØ§Ù„ÙÙ†ÙŠ', percent: 70, color: 'bg-amber-500' },
-                            { name: 'Ø§Ù„ØªÙˆØ§ØµÙ„ Ù…ع Ø§Ù„Ø´Ø±Ùƒات ÙˆØ§Ù„Ù…Ø³ØªØ«Ù…Ø±ÙŠÙ†', percent: 55, color: 'bg-[#F4A217]' }
+                            { name: 'لجنة الاستقبال والتسجيل', percent: 84, color: 'bg-[#1E3A8A]' },
+                            { name: 'لجنة التقييم العلمي والفني', percent: 70, color: 'bg-amber-500' },
+                            { name: 'التواصل مع الشركات والمستثمرين', percent: 55, color: 'bg-[#F4A217]' }
                           ].map((item, idx) => (
                             <div key={idx} className="space-y-1.5">
                               <div className="flex justify-between text-xs font-bold text-slate-600">
@@ -1683,21 +1656,21 @@ const AdminDashboard = () => {
                         AD
                       </div>
 
-                      <h3 className="font-black text-slate-800 text-lg">Ø£Ø¯Ù…Ù† Ø§Ù„Ù‚Ù…ة Ø§Ù„Ø±Ø¦ÙŠØ³ÙŠ</h3>
-                      <span className="text-xs text-slate-400 font-bold mb-6">Ø±Ø¦ÙŠس Ù„Ø¬Ù†ة Ø§Ù„إشراف Ø§Ù„Ø¹Ø§Ù…</span>
+                      <h3 className="font-black text-slate-800 text-lg">أدمن القمة الرئيسي</h3>
+                      <span className="text-xs text-slate-400 font-bold mb-6">رئيس لجنة الإشراف العام</span>
                       
                       <div className="w-full border-t border-slate-100 pt-6 space-y-4 text-right">
                         <div className="flex justify-between text-xs font-bold">
-                          <span className="text-slate-400">Ø­Ø§Ù„ة Ø§Ù„Ø®Ø§Ø¯Ù…:</span>
-                          <span className="text-emerald-600">Ù†شط ÙˆØµØ­ÙŠ</span>
+                          <span className="text-slate-400">حالة الخادم:</span>
+                          <span className="text-emerald-600">نشط وصحي</span>
                         </div>
                         <div className="flex justify-between text-xs font-bold">
-                          <span className="text-slate-400">Ù†Ùˆع Ø§Ù„Ø§ØªØµØ§Ù„:</span>
+                          <span className="text-slate-400">نوع الاتصال:</span>
                           <span className="text-slate-700">{isSupabaseConfigured ? 'Supabase SDK' : 'LocalStorage fallback'}</span>
                         </div>
                         <div className="flex justify-between text-xs font-bold">
-                          <span className="text-slate-400">ØªØ§Ø±ÙŠخ ØªØ³Ø¬ÙŠÙ„ Ø§Ù„Ø¯Ø®ÙˆÙ„:</span>
-                          <span className="text-slate-700">Ø§Ù„ÙŠÙˆÙ… 11:00 ص</span>
+                          <span className="text-slate-400">تاريخ تسجيل الدخول:</span>
+                          <span className="text-slate-700">اليوم 11:00 ص</span>
                         </div>
                       </div>
                     </div>
@@ -1705,15 +1678,15 @@ const AdminDashboard = () => {
                     {/* Summit Milestones Calendar */}
                     <div className="bg-white p-6 rounded-[2.5rem] border border-slate-100 shadow-soft space-y-6">
                       <div>
-                        <h4 className="font-black text-slate-800 text-base mb-1">Ø¬Ø¯ÙˆÙ„ ÙØ¹Ø§Ù„ÙŠات Ø§Ù„Ù‚Ù…ة</h4>
-                        <p className="text-[10px] text-slate-400 font-semibold">Ù…تابعة Ø§Ù„فترات Ø§Ù„Ø²Ù…Ù†ÙŠة Ù„Ù„ÙØ¹Ø§Ù„ÙŠات</p>
+                        <h4 className="font-black text-slate-800 text-base mb-1">جدول فعاليات القمة</h4>
+                        <p className="text-[10px] text-slate-400 font-semibold">متابعة الفترات الزمنية للفعاليات</p>
                       </div>
                       
                       <div className="grid grid-cols-3 gap-2 bg-slate-50 p-1.5 rounded-xl border border-slate-200/50">
                         {[
-                          { day: 'Ø§Ù„ÙŠÙˆÙ… Ø§Ù„Ø£ÙˆÙ„', label: 'افتتاح ÙˆÙ‚Ø¨ÙˆÙ„', active: true },
-                          { day: 'Ø§Ù„ÙŠÙˆÙ… Ø§Ù„Ø«Ø§Ù†ÙŠ', label: 'Ùˆرش ÙˆØªÙ‚ÙŠÙŠÙ…', active: false },
-                          { day: 'Ø§Ù„ÙŠÙˆÙ… Ø§Ù„Ø«Ø§Ù„ث', label: 'Ø­ÙÙ„ Ø§Ù„Ø®ØªØ§Ù…', active: false }
+                          { day: 'اليوم الأول', label: 'افتتاح وقبول', active: true },
+                          { day: 'اليوم الثاني', label: 'ورش وتقييم', active: false },
+                          { day: 'اليوم الثالث', label: 'حفل الختام', active: false }
                         ].map((item, idx) => (
                           <div key={idx} className={`p-2 rounded-lg text-center cursor-pointer transition-all ${
                             item.active 
@@ -1729,10 +1702,10 @@ const AdminDashboard = () => {
                       {/* Activity List */}
                       <div className="space-y-4 pt-2">
                         {[
-                          { time: '02:00 Ù…', task: 'Ø§Ø³ØªÙ‚Ø¨Ø§Ù„ Ùˆفحص Ø·Ù„بات Ù…Ø´Ø±Ùˆعات Ø§Ù„حاسبات', type: 'Ø±Ø¦ÙŠØ³ÙŠ' },
-                          { time: '02:30 Ù…', task: 'ØªÙ‚ÙŠÙŠÙ… Ø§Ù„Ø¨Ø­Ùˆث Ø§Ù„ØªØ·Ø¨ÙŠÙ‚ÙŠة Ù„Ù‚Ø³Ù… Ø§Ù„Ù‡Ù†دسة', type: 'ÙØ±Ø¹ÙŠ' },
-                          { time: '03:00 Ù…', task: 'ØªØ³Ø¬ÙŠÙ„ Ø§Ù„Ù…ØªØ­Ø¯Ø«ÙŠÙ† ÙˆØ§Ù„Ù…Ø¯Ø±Ø¨ÙŠÙ† Ø§Ù„Ø£Ø¬Ø§Ù†ب', type: 'Ø±Ø¦ÙŠØ³ÙŠ' },
-                          { time: '03:50 Ù…', task: 'حصر أعداد Ø§Ù„Ù…Ø³Ø¬Ù„ÙŠÙ† Ø¨Ù…Ù„ØªÙ‚Ù‰ Ø§Ù„ØªÙˆØ¸ÙŠف', type: 'رصد' }
+                          { time: '02:00 م', task: 'استقبال وفحص طلبات مشروعات الحاسبات', type: 'رئيسي' },
+                          { time: '02:30 م', task: 'تقييم البحوث التطبيقية لقسم الهندسة', type: 'فرعي' },
+                          { time: '03:00 م', task: 'تسجيل المتحدثين والمدربين الأجانب', type: 'رئيسي' },
+                          { time: '03:50 م', task: 'حصر أعداد المسجلين بملتقى التوظيف', type: 'رصد' }
                         ].map((item, idx) => (
                           <div key={idx} className="flex gap-3 text-right">
                             <span className="text-[10px] font-black text-indigo-600 bg-indigo-50 px-2 py-1 rounded-lg shrink-0 self-start">{item.time}</span>
@@ -1757,7 +1730,7 @@ const AdminDashboard = () => {
                       <Search className="w-5 h-5 text-slate-400 absolute right-4 top-1/2 -translate-y-1/2" />
                       <input
                         type="text"
-                        placeholder="ابحث Ø¨Ø§Ù„Ø§Ø³Ù…ØŒ Ø§Ù„ÙƒÙ„ÙŠØ©ØŒ Ø§Ù„Ø¨Ø±ÙŠد..."
+                        placeholder="ابحث بالاسم، الكلية، البريد..."
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
                         className="w-full bg-white border border-slate-200/85 rounded-2xl pr-12 pl-4 py-3 text-xs sm:text-sm focus:ring-2 focus:ring-[#1E3A8A] focus:border-[#1E3A8A] outline-none shadow-sm transition-all duration-300"
@@ -1769,21 +1742,21 @@ const AdminDashboard = () => {
                         onChange={(e) => setStatusFilter(e.target.value)}
                         className="bg-white border border-slate-200/85 rounded-2xl px-4 py-3 text-xs sm:text-sm focus:ring-2 focus:ring-[#1E3A8A] focus:border-[#1E3A8A] font-bold text-slate-700 outline-none shadow-sm transition-all duration-300 cursor-pointer"
                       >
-                        <option value="Ø§Ù„ÙƒÙ„">ÙƒÙ„ Ø§Ù„Ø­Ø§Ù„ات</option>
-                        <option value="ØªÙ… Ø§Ø³ØªÙ„Ø§Ù… Ø§Ù„Ø·Ù„ب">ØªÙ… Ø§Ø³ØªÙ„Ø§Ù… Ø§Ù„Ø·Ù„ب</option>
-                        <option value="تحت Ø§Ù„فحص Ø§Ù„Ø¥Ø¯Ø§Ø±ÙŠ">تحت Ø§Ù„فحص Ø§Ù„Ø¥Ø¯Ø§Ø±ÙŠ</option>
-                        <option value="تحت Ø§Ù„ØªÙ‚ÙŠÙŠÙ… Ø§Ù„ÙÙ†ÙŠ">تحت Ø§Ù„ØªÙ‚ÙŠÙŠÙ… Ø§Ù„ÙÙ†ÙŠ</option>
-                        <option value="تحت Ù…راجعة Ø§Ù„Ù…Ù„ÙƒÙŠة Ø§Ù„ÙÙƒØ±ÙŠة">تحت Ù…راجعة Ø§Ù„Ù…Ù„ÙƒÙŠة Ø§Ù„ÙÙƒØ±ÙŠة</option>
-                        <option value="Ù…Ù‚Ø¨ÙˆÙ„ Ù„Ù„عرض ÙÙŠ Ø§Ù„Ù‚Ù…ة">Ù…Ù‚Ø¨ÙˆÙ„ Ù„Ù„عرض ÙÙŠ Ø§Ù„Ù‚Ù…ة</option>
+                        <option value="الكل">كل الحالات</option>
+                        <option value="تم استلام الطلب">تم استلام الطلب</option>
+                        <option value="تحت الفحص الإداري">تحت الفحص الإداري</option>
+                        <option value="تحت التقييم الفني">تحت التقييم الفني</option>
+                        <option value="تحت مراجعة الملكية الفكرية">تحت مراجعة الملكية الفكرية</option>
+                        <option value="مقبول للعرض في القمة">مقبول للعرض في القمة</option>
                       </select>
                     )}
                     <button
                       onClick={handleExportToExcel}
                       className="bg-emerald-600 hover:bg-blue-700 text-white px-5 py-3 rounded-2xl font-bold text-xs sm:text-sm flex items-center justify-center gap-2 transition-all duration-300 shadow-md hover:shadow-lg active:scale-95 shrink-0 cursor-pointer hover:-translate-y-0.5 border border-blue-500"
-                      title="ØªØµØ¯ÙŠر Ù‡Ø°Ù‡ Ø§Ù„Ù‚Ø§Ø¦Ù…ة Ø¥Ù„Ù‰ Ù…Ù„ف Ø¥ÙƒØ³ÙŠÙ„ CSV"
+                      title="تصدير هذه القائمة إلى ملف إكسيل CSV"
                     >
                       <FileSpreadsheet className="w-4 h-4" />
-                      <span>ØªØµØ¯ÙŠر Ø¥Ù„Ù‰ Ø¥ÙƒØ³ÙŠÙ„</span>
+                      <span>تصدير إلى إكسيل</span>
                     </button>
                   </div>
 
@@ -1795,20 +1768,20 @@ const AdminDashboard = () => {
                 <div className="space-y-6 animate-fade-in">
                   <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-slate-50 p-6 rounded-2xl border border-slate-200">
                     <div>
-                      <h3 className="text-xl font-black text-[#1E3A8A] mb-1">إدارة Ø§Ù„أخبار</h3>
-                      <p className="text-sm text-slate-500 font-bold">إضافة ÙˆØªØ¹Ø¯ÙŠÙ„ Ùˆحذف Ø§Ù„أخبار Ø§Ù„Ù…Ø¹Ø±Ùˆضة ÙÙŠ Ø§Ù„صفحة Ø§Ù„Ø±Ø¦ÙŠØ³ÙŠة.</p>
+                      <h3 className="text-xl font-black text-[#1E3A8A] mb-1">إدارة الأخبار</h3>
+                      <p className="text-sm text-slate-500 font-bold">إضافة وتعديل وحذف الأخبار المعروضة في الصفحة الرئيسية.</p>
                     </div>
                     <button 
                       onClick={() => setIsNewsModalOpen(true)}
                       className="bg-[#1E3A8A] hover:bg-[#1e3a8a] text-[#F4A217] px-6 py-3 rounded-xl font-bold flex items-center gap-2 transition-colors shadow-sm shrink-0"
                     >
-                      + إضافة خبر Ø¬Ø¯ÙŠد
+                      + إضافة خبر جديد
                     </button>
                   </div>
 
                   {newsList.length === 0 ? (
                     <div className="py-20 text-center text-slate-500 font-bold bg-slate-50 rounded-3xl border border-slate-200 border-dashed">
-                      Ù„ا ØªÙˆجد أخبار Ù…ضافة Ø­ØªÙ‰ Ø§Ù„Ø¢Ù†.
+                      لا توجد أخبار مضافة حتى الآن.
                     </div>
                   ) : (
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -1820,7 +1793,7 @@ const AdminDashboard = () => {
                             ) : (
                               <div className="flex flex-col items-center justify-center w-full h-full text-slate-400 bg-slate-100">
                                 <Newspaper className="w-10 h-10 mb-2 opacity-50" />
-                                <span className="text-xs font-bold">Ù„ا ØªÙˆجد ØµÙˆرة</span>
+                                <span className="text-xs font-bold">لا توجد صورة</span>
                               </div>
                             )}
                           </div>
@@ -1832,7 +1805,7 @@ const AdminDashboard = () => {
                               <div className="flex items-center gap-1"><Users className="w-3.5 h-3.5"/> {newsItem.uploader_name}</div>
                             </div>
                             <div className="flex gap-2 mt-4 pt-4 border-t border-slate-100">
-                               <button onClick={() => openEditNewsModal(newsItem)} className="flex-1 py-2 bg-blue-50 text-blue-600 rounded-lg font-bold text-xs hover:bg-blue-100 transition-colors">ØªØ¹Ø¯ÙŠÙ„</button>
+                               <button onClick={() => openEditNewsModal(newsItem)} className="flex-1 py-2 bg-blue-50 text-blue-600 rounded-lg font-bold text-xs hover:bg-blue-100 transition-colors">تعديل</button>
                                <button onClick={() => handleDeleteNews(newsItem.id)} className="flex-1 py-2 bg-red-50 text-red-600 rounded-lg font-bold text-xs hover:bg-red-100 transition-colors">حذف</button>
                             </div>
                           </div>
@@ -1848,34 +1821,34 @@ const AdminDashboard = () => {
                 <div className="space-y-6 animate-fade-in">
                   <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-slate-50 p-6 rounded-2xl border border-slate-200">
                     <div>
-                      <h3 className="text-xl font-black text-[#1E3A8A] mb-1">إدارة Ùˆظائف Ø§Ù„Ù…Ù„ØªÙ‚Ù‰</h3>
-                      <p className="text-sm text-slate-500 font-bold">إضافة ÙˆØªØ¹Ø¯ÙŠÙ„ Ùˆحذف Ø§Ù„Ùˆظائف Ø§Ù„شاغرة Ø§Ù„Ù…Ø¹Ø±Ùˆضة Ù„Ù„Ø·Ù„اب ÙˆØ§Ù„Ø®Ø±ÙŠØ¬ÙŠÙ† Ø¨Ø§Ù„Ù…Ù„ØªÙ‚Ù‰.</p>
+                      <h3 className="text-xl font-black text-[#1E3A8A] mb-1">إدارة وظائف الملتقى</h3>
+                      <p className="text-sm text-slate-500 font-bold">إضافة وتعديل وحذف الوظائف الشاغرة المعروضة للطلاب والخريجين بالملتقى.</p>
                     </div>
                     <button 
                       onClick={openAddJobModal}
                       className="bg-[#1E3A8A] hover:bg-[#1e3a8a] text-[#F4A217] px-6 py-3 rounded-xl font-bold flex items-center gap-2 transition-colors shadow-sm shrink-0 cursor-pointer"
                     >
                       <Briefcase className="w-4 h-4" />
-                      <span>+ إضافة ÙˆØ¸ÙŠفة Ø¬Ø¯ÙŠدة</span>
+                      <span>+ إضافة وظيفة جديدة</span>
                     </button>
                   </div>
 
                   {jobs.length === 0 ? (
                     <div className="py-20 text-center text-slate-500 font-bold bg-slate-50 rounded-3xl border border-slate-200 border-dashed">
-                      Ù„ا ØªÙˆجد Ùˆظائف Ù…ضافة Ø­ØªÙ‰ Ø§Ù„Ø¢Ù†.
+                      لا توجد وظائف مضافة حتى الآن.
                     </div>
                   ) : (
                     <div className="overflow-x-auto">
                       <table className="w-full text-right border-collapse text-sm">
                         <thead>
                           <tr className="bg-slate-50 border-b border-slate-200 text-slate-700 font-black">
-                            <th className="p-4">شعار Ø§Ù„Ø´Ø±Ùƒة</th>
-                            <th className="p-4">Ø§Ù„Ù…Ø³Ù…Ù‰ Ø§Ù„ÙˆØ¸ÙŠÙÙŠ</th>
-                            <th className="p-4">Ø§Ù„Ø´Ø±Ùƒة</th>
-                            <th className="p-4">Ø§Ù„Ù…ÙˆÙ‚ع</th>
-                            <th className="p-4">Ø§Ù„Ù†Ùˆع</th>
-                            <th className="p-4">Ø§Ù„خبرة</th>
-                            <th className="p-4 text-center">Ø§Ù„إجراءات</th>
+                            <th className="p-4">شعار الشركة</th>
+                            <th className="p-4">المسمى الوظيفي</th>
+                            <th className="p-4">الشركة</th>
+                            <th className="p-4">الموقع</th>
+                            <th className="p-4">النوع</th>
+                            <th className="p-4">الخبرة</th>
+                            <th className="p-4 text-center">الإجراءات</th>
                           </tr>
                         </thead>
                         <tbody className="divide-y divide-slate-100">
@@ -1909,7 +1882,7 @@ const AdminDashboard = () => {
                                     onClick={() => openEditJobModal(j)} 
                                     className="p-2 text-blue-600 bg-blue-50 hover:bg-blue-100 rounded-lg inline-flex items-center gap-1.5 font-bold text-xs cursor-pointer"
                                   >
-                                    ØªØ¹Ø¯ÙŠÙ„
+                                    تعديل
                                   </button>
                                   <button 
                                     onClick={() => handleDeleteJob(j.id)} 
@@ -1934,17 +1907,17 @@ const AdminDashboard = () => {
                   <table className="w-full text-right border-collapse text-sm">
                     <thead>
                       <tr className="bg-slate-50 border-b border-slate-200 text-slate-700 font-black">
-                        <th className="p-4">ØªØ§Ø±ÙŠخ Ø§Ù„ØªÙ‚Ø¯ÙŠÙ…</th>
-                        <th className="p-4">Ø§Ø³Ù… Ø§Ù„Ù…Ø´Ø±Ùˆع</th>
-                        <th className="p-4">Ø§Ù„ÙƒÙ„ÙŠة ÙˆØ§Ù„Ø¬Ø§Ù…عة</th>
-                        <th className="p-4">Ø§Ù„Ù†Ùˆع</th>
-                        <th className="p-4">Ø§Ù„Ø­Ø§Ù„ة</th>
-                        <th className="p-4 text-center">Ø§Ù„إجراءات</th>
+                        <th className="p-4">تاريخ التقديم</th>
+                        <th className="p-4">اسم المشروع</th>
+                        <th className="p-4">الكلية والجامعة</th>
+                        <th className="p-4">النوع</th>
+                        <th className="p-4">الحالة</th>
+                        <th className="p-4 text-center">الإجراءات</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-slate-100">
                       {getFilteredGradProjects().length === 0 ? (
-                        <tr><td colSpan="6" className="p-8 text-center text-slate-400 font-bold">Ù„ا ØªÙˆجد Ù…Ø´Ø±Ùˆعات تخرج Ù…Ø·Ø§Ø¨Ù‚ة Ù„Ù„بحث</td></tr>
+                        <tr><td colSpan="6" className="p-8 text-center text-slate-400 font-bold">لا توجد مشروعات تخرج مطابقة للبحث</td></tr>
                       ) : (
                         getFilteredGradProjects().map(p => (
                           <tr key={p.id} className="hover:bg-slate-50 transition-colors">
@@ -1957,14 +1930,14 @@ const AdminDashboard = () => {
                             <td className="p-4 font-bold text-slate-500">{p.project_type}</td>
                             <td className="p-4">
                               <span className={`px-3 py-1 rounded-full text-xs font-black ${
-                                p.status === 'Ù…Ù‚Ø¨ÙˆÙ„ Ù„Ù„عرض ÙÙŠ Ø§Ù„Ù‚Ù…ة' ? 'bg-green-100 text-green-700' :
+                                p.status === 'مقبول للعرض في القمة' ? 'bg-green-100 text-green-700' :
                                 p.status.includes('تحت') ? 'bg-amber-100 text-amber-700' : 'bg-slate-100 text-slate-700'
                               }`}>{p.status}</span>
                             </td>
                             <td className="p-4 text-center">
                               <div className="flex items-center justify-center gap-2">
                                 <button onClick={() => { setSelectedItem(p); setSelectedType('graduation'); }} className="p-2 text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-lg inline-flex items-center gap-1.5 font-bold text-xs">
-                                  <Eye className="w-4 h-4" /> فحص Ø§Ù„ØªÙØ§ØµÙŠÙ„
+                                  <Eye className="w-4 h-4" /> فحص التفاصيل
                                 </button>
                                 <button onClick={() => handleDeleteItem(p.id, 'graduation')} className="p-2 text-red-600 bg-red-50 hover:bg-red-100 rounded-lg inline-flex items-center gap-1.5 font-bold text-xs" title="حذف">
                                   <Trash className="w-3.5 h-3.5" /> حذف
@@ -1985,17 +1958,17 @@ const AdminDashboard = () => {
                   <table className="w-full text-right border-collapse text-sm">
                     <thead>
                       <tr className="bg-slate-50 border-b border-slate-200 text-slate-700 font-black">
-                        <th className="p-4">ØªØ§Ø±ÙŠخ Ø§Ù„ØªÙ‚Ø¯ÙŠÙ…</th>
-                        <th className="p-4">Ø§Ù„باحث Ø§Ù„Ø±Ø¦ÙŠØ³ÙŠ</th>
-                        <th className="p-4">Ø§Ù„ÙƒÙ„ÙŠة ÙˆØ§Ù„Ø¬Ø§Ù…عة</th>
-                        <th className="p-4">Ø§Ù„Ø¨Ø±ÙŠد Ø§Ù„Ø¥Ù„ÙƒØªØ±ÙˆÙ†ÙŠ</th>
-                        <th className="p-4">Ø§Ù„Ø­Ø§Ù„ة</th>
-                        <th className="p-4 text-center">Ø§Ù„إجراءات</th>
+                        <th className="p-4">تاريخ التقديم</th>
+                        <th className="p-4">الباحث الرئيسي</th>
+                        <th className="p-4">الكلية والجامعة</th>
+                        <th className="p-4">البريد الإلكتروني</th>
+                        <th className="p-4">الحالة</th>
+                        <th className="p-4 text-center">الإجراءات</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-slate-100">
                       {getFilteredResearch().length === 0 ? (
-                        <tr><td colSpan="6" className="p-8 text-center text-slate-400 font-bold">Ù„ا ØªÙˆجد Ø¨Ø­Ùˆث ØªØ·Ø¨ÙŠÙ‚ÙŠة Ù…Ø·Ø§Ø¨Ù‚ة Ù„Ù„بحث</td></tr>
+                        <tr><td colSpan="6" className="p-8 text-center text-slate-400 font-bold">لا توجد بحوث تطبيقية مطابقة للبحث</td></tr>
                       ) : (
                         getFilteredResearch().map(r => (
                           <tr key={r.id} className="hover:bg-slate-50 transition-colors">
@@ -2008,14 +1981,14 @@ const AdminDashboard = () => {
                             <td className="p-4 font-bold text-slate-500">{r.pi_email}</td>
                             <td className="p-4">
                               <span className={`px-3 py-1 rounded-full text-xs font-black ${
-                                r.status === 'Ù…Ù‚Ø¨ÙˆÙ„ Ù„Ù„عرض ÙÙŠ Ø§Ù„Ù‚Ù…ة' ? 'bg-green-100 text-green-700' :
+                                r.status === 'مقبول للعرض في القمة' ? 'bg-green-100 text-green-700' :
                                 r.status.includes('تحت') ? 'bg-amber-100 text-amber-700' : 'bg-slate-100 text-slate-700'
                               }`}>{r.status}</span>
                             </td>
                             <td className="p-4 text-center">
                               <div className="flex items-center justify-center gap-2">
                                 <button onClick={() => { setSelectedItem(r); setSelectedType('research'); }} className="p-2 text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-lg inline-flex items-center gap-1.5 font-bold text-xs">
-                                  <Eye className="w-4 h-4" /> فحص Ø§Ù„ØªÙØ§ØµÙŠÙ„
+                                  <Eye className="w-4 h-4" /> فحص التفاصيل
                                 </button>
                                 <button onClick={() => handleDeleteItem(r.id, 'research')} className="p-2 text-red-600 bg-red-50 hover:bg-red-100 rounded-lg inline-flex items-center gap-1.5 font-bold text-xs" title="حذف">
                                   <Trash className="w-3.5 h-3.5" /> حذف
@@ -2036,31 +2009,31 @@ const AdminDashboard = () => {
                   <table className="w-full text-right border-collapse text-sm">
                     <thead>
                       <tr className="bg-slate-50 border-b border-slate-200 text-slate-700 font-black">
-                        <th className="p-4">Ø§Ù„ØªØ§Ø±ÙŠخ</th>
-                        <th className="p-4">Ø§Ù„Ø§Ø³Ù… Ø§Ù„ÙƒØ§Ù…Ù„</th>
-                        <th className="p-4">Ø§Ù„Ø¬Ù‡ة / Ø§Ù„Ù…ؤسسة</th>
-                        <th className="p-4">Ø§Ù„Ø¨Ø±ÙŠد Ø§Ù„Ø¥Ù„ÙƒØªØ±ÙˆÙ†ÙŠ</th>
-                        <th className="p-4">Ø±Ù‚Ù… Ø§Ù„Ù‡اتف</th>
-                        <th className="p-4 text-center">Ø§Ù„Ù…Ù„ف / Ø§Ù„Ø³ÙŠرة Ø§Ù„Ø°Ø§ØªÙŠة</th>
-                        <th className="p-4">Ø§Ù„Ø­Ø§Ù„ة</th>
-                        <th className="p-4 text-center">Ø§Ù„إجراءات</th>
+                        <th className="p-4">التاريخ</th>
+                        <th className="p-4">الاسم الكامل</th>
+                        <th className="p-4">الجهة / المؤسسة</th>
+                        <th className="p-4">البريد الإلكتروني</th>
+                        <th className="p-4">رقم الهاتف</th>
+                        <th className="p-4 text-center">الملف / السيرة الذاتية</th>
+                        <th className="p-4">الحالة</th>
+                        <th className="p-4 text-center">الإجراءات</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-slate-100">
                       {getFilteredRegistrants(activeTab.slice(0, -1)).length === 0 ? (
-                        <tr><td colSpan="8" className="p-8 text-center text-slate-400 font-bold">Ù„ا ÙŠÙˆجد Ù…Ø³Ø¬Ù„ÙˆÙ† ÙÙŠ Ù‡ذا Ø§Ù„Ù‚Ø³Ù…</td></tr>
+                        <tr><td colSpan="8" className="p-8 text-center text-slate-400 font-bold">لا يوجد مسجلون في هذا القسم</td></tr>
                       ) : (
                         getFilteredRegistrants(activeTab.slice(0, -1)).map(r => (
                           <tr key={r.id} className="hover:bg-slate-50 transition-colors">
                             <td className="p-4 font-semibold text-slate-500">{new Date(r.created_at).toLocaleDateString('ar-EG')}</td>
                             <td className="p-4 font-black text-slate-800">
                               <div>{r.full_name}</div>
-                              {r.details.nationalId && <div className="text-xs text-purple-700 font-bold mt-1">Ø§Ù„Ø±Ù‚Ù… Ø§Ù„Ù‚ÙˆÙ…ÙŠ: {r.details.nationalId}</div>}
-                              {r.details.speechTopic && <div className="text-xs text-[#1E3A8A] font-bold mt-1">Ø§Ù„Ù…ÙˆØ¶Ùˆع: {r.details.speechTopic}</div>}
-                              {r.details.startupName && <div className="text-xs text-[#F4A217] font-bold mt-1">Ø§Ù„Ø´Ø±Ùƒة Ø§Ù„Ù†اشئة: {r.details.startupName}</div>}
-                              {r.details.researchTitle && <div className="text-xs text-blue-600 font-bold mt-1">Ø¹Ù†ÙˆØ§Ù† Ø§Ù„بحث: {r.details.researchTitle}</div>}
-                              {r.details.companyName && <div className="text-xs text-indigo-600 font-bold mt-1">Ø§Ù„Ù…ؤسسة: {r.details.companyName} ({r.details.partnerType})</div>}
-                              {r.details.volunteerCommittee && <div className="text-xs text-emerald-600 font-bold mt-1">Ù„Ø¬Ù†ة Ø§Ù„ØªØ·Ùˆع: {r.details.volunteerCommittee}</div>}
+                              {r.details.nationalId && <div className="text-xs text-purple-700 font-bold mt-1">الرقم القومي: {r.details.nationalId}</div>}
+                              {r.details.speechTopic && <div className="text-xs text-[#1E3A8A] font-bold mt-1">الموضوع: {r.details.speechTopic}</div>}
+                              {r.details.startupName && <div className="text-xs text-[#F4A217] font-bold mt-1">الشركة الناشئة: {r.details.startupName}</div>}
+                              {r.details.researchTitle && <div className="text-xs text-blue-600 font-bold mt-1">عنوان البحث: {r.details.researchTitle}</div>}
+                              {r.details.companyName && <div className="text-xs text-indigo-600 font-bold mt-1">المؤسسة: {r.details.companyName} ({r.details.partnerType})</div>}
+                              {r.details.volunteerCommittee && <div className="text-xs text-emerald-600 font-bold mt-1">لجنة التطوع: {r.details.volunteerCommittee}</div>}
                             </td>
                             <td className="p-4 font-bold text-slate-600">{r.organization}</td>
                             <td className="p-4 font-semibold text-slate-500">{r.email}</td>
@@ -2068,50 +2041,50 @@ const AdminDashboard = () => {
                             <td className="p-4 text-center">
                               {r.cv_url && r.cv_url !== '#' ? (
                                 <a href={r.cv_url} target="_blank" className="p-2 text-blue-600 bg-blue-50 hover:bg-blue-100 rounded-lg inline-flex items-center gap-1 font-bold text-xs">
-                                  <Download className="w-3.5 h-3.5" /> ØªØ­Ù…ÙŠÙ„ Ø§Ù„Ù…Ù„ف
+                                  <Download className="w-3.5 h-3.5" /> تحميل الملف
                                 </a>
                               ) : (
-                                <span className="text-slate-400 font-bold text-xs">Ù„ا ÙŠÙˆجد Ù…Ø±ÙÙ‚</span>
+                                <span className="text-slate-400 font-bold text-xs">لا يوجد مرفق</span>
                               )}
                             </td>
                             <td className="p-4">
                               <span className={`px-3 py-1 rounded-full text-xs font-black ${
-                                r.status === 'Ù…Ù‚Ø¨ÙˆÙ„ Ù„Ù„عرض ÙÙŠ Ø§Ù„Ù‚Ù…ة' ? 'bg-green-100 text-green-700' :
+                                r.status === 'مقبول للعرض في القمة' ? 'bg-green-100 text-green-700' :
                                 (r.status || '').includes('تحت') ? 'bg-amber-100 text-amber-700' : 'bg-slate-100 text-slate-700'
-                              }`}>{r.status || 'تحت Ø§Ù„فحص Ø§Ù„Ø¥Ø¯Ø§Ø±ÙŠ'}</span>
+                              }`}>{r.status || 'تحت الفحص الإداري'}</span>
                             </td>
                             <td className="p-4 text-center">
                               <div className="flex flex-col sm:flex-row items-center justify-center gap-2">
-                                {r.status === 'Ù…Ù‚Ø¨ÙˆÙ„ Ù„Ù„عرض ÙÙŠ Ø§Ù„Ù‚Ù…ة' ? (
+                                {r.status === 'مقبول للعرض في القمة' ? (
                                   <button 
-                                    onClick={() => handleStatusChange(r.id, 'registration', 'تحت Ø§Ù„فحص Ø§Ù„Ø¥Ø¯Ø§Ø±ÙŠ')}
+                                    onClick={() => handleStatusChange(r.id, 'registration', 'تحت الفحص الإداري')}
                                     className="px-3 py-1.5 bg-amber-50 hover:bg-amber-100 text-amber-700 rounded-lg font-bold text-xs transition-colors whitespace-nowrap"
                                   >
-                                    Ø¥Ù„غاء Ø§Ù„Ù‚Ø¨ÙˆÙ„
+                                    إلغاء القبول
                                   </button>
                                 ) : (
                                   <div className="flex flex-col items-center gap-1">
                                     <button 
-                                      onClick={() => handleStatusChange(r.id, 'registration', 'Ù…Ù‚Ø¨ÙˆÙ„ Ù„Ù„عرض ÙÙŠ Ø§Ù„Ù‚Ù…ة')}
+                                      onClick={() => handleStatusChange(r.id, 'registration', 'مقبول للعرض في القمة')}
                                       disabled={!r.cv_url || r.cv_url === '#'}
                                       className={`px-3 py-1.5 rounded-lg font-bold text-xs transition-all shadow-sm whitespace-nowrap ${
                                         (!r.cv_url || r.cv_url === '#') 
                                           ? 'bg-slate-100 text-slate-400 cursor-not-allowed border border-slate-200' 
                                           : 'bg-green-600 hover:bg-green-700 text-white'
                                       }`}
-                                      title={(!r.cv_url || r.cv_url === '#') ? 'ÙŠØ±Ø¬Ù‰ رفع Ø§Ù„Ø³ÙŠرة Ø§Ù„Ø°Ø§ØªÙŠة Ø£ÙˆÙ„Ø§Ù‹ Ù„ØªØªÙ…ÙƒÙ† Ù…Ù† Ø§Ù„Ù‚Ø¨ÙˆÙ„' : ''}
+                                      title={(!r.cv_url || r.cv_url === '#') ? 'يرجى رفع السيرة الذاتية أولاً لتتمكن من القبول' : ''}
                                     >
-                                      Ù…ÙˆØ§ÙÙ‚ة ÙˆÙ‚Ø¨ÙˆÙ„
+                                      موافقة وقبول
                                     </button>
                                     {(!r.cv_url || r.cv_url === '#') && (
-                                      <span className="text-[9px] text-red-500 font-bold whitespace-nowrap">ÙŠجب رفع Ø§Ù„Ù€ CV Ø£ÙˆÙ„Ø§Ù‹</span>
+                                      <span className="text-[9px] text-red-500 font-bold whitespace-nowrap">يجب رفع الـ CV أولاً</span>
                                     )}
                                   </div>
                                 )}
                                 <button 
                                   onClick={() => handleDeleteItem(r.id, 'registration')} 
                                   className="p-1.5 text-red-600 bg-red-50 hover:bg-red-100 rounded-lg inline-flex items-center gap-1 font-bold text-xs" 
-                                  title="حذف Ø§Ù„حساب"
+                                  title="حذف الحساب"
                                 >
                                   <Trash className="w-3.5 h-3.5" />
                                 </button>
@@ -2129,19 +2102,19 @@ const AdminDashboard = () => {
               {activeTab === 'exhibition_innovations' && (
                 <div className="space-y-6">
                   <div className="flex justify-between items-center bg-white p-4 rounded-2xl border border-slate-200 shadow-sm">
-                    <h3 className="text-lg font-black text-slate-800">إدارة Ù…Ø¹Ø±Ùˆضات Ù…عرض Ø§Ù„Ø§Ø¨ØªÙƒارات Ø§Ù„Ø±Ù‚Ù…ÙŠة ÙˆØ§Ù„Ø°Ùƒاء Ø§Ù„Ø§ØµØ·Ù†Ø§Ø¹ÙŠ</h3>
+                    <h3 className="text-lg font-black text-slate-800">إدارة معروضات معرض الابتكارات الرقمية والذكاء الاصطناعي</h3>
                     <button 
                       onClick={openAddInnovationModal}
                       className="px-5 py-2.5 bg-[#1E3A8A] hover:bg-[#1e3a8a] text-[#F4A217] rounded-xl font-bold text-sm inline-flex items-center gap-2 transition-all shadow-md shadow-green-900/10"
                     >
-                      <Plus className="w-4 h-4" /> إضافة Ø§Ø¨ØªÙƒار Ø¬Ø¯ÙŠد
+                      <Plus className="w-4 h-4" /> إضافة ابتكار جديد
                     </button>
                   </div>
 
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     {innovations.length === 0 ? (
                       <div className="col-span-full py-16 text-center text-slate-400 font-bold bg-white rounded-3xl border border-slate-200">
-                        Ù„ا ØªÙˆجد Ø§Ø¨ØªÙƒارات Ù…ضافة Ø­Ø§Ù„ÙŠØ§Ù‹. اضغط Ø¹Ù„Ù‰ Ø§Ù„زر Ø¨Ø§Ù„Ø£Ø¹Ù„Ù‰ Ù„إضافة Ø£ÙˆÙ„ Ø§Ø¨ØªÙƒار.
+                        لا توجد ابتكارات مضافة حالياً. اضغط على الزر بالأعلى لإضافة أول ابتكار.
                       </div>
                     ) : (
                       innovations.filter(item => 
@@ -2158,9 +2131,9 @@ const AdminDashboard = () => {
                                 className="w-full h-full object-cover" 
                               />
                               <span className="absolute top-4 right-4 bg-teal-600 text-white text-[10px] font-black px-3 py-1 rounded-full uppercase">
-                                {item.category === 'ai' ? 'Ø°Ùƒاء Ø§ØµØ·Ù†Ø§Ø¹ÙŠ' : 
-                                 item.category === 'cyber' ? 'Ø£Ù…Ù† Ø³ÙŠØ¨Ø±Ø§Ù†ÙŠ' :
-                                 item.category === 'iot' ? 'Ø¥Ù†ØªØ±Ù†ت Ø£Ø´ÙŠاء' : 'ØªØ·Ø¨ÙŠÙ‚ات ÙˆÙŠب/Ø¬ÙˆØ§Ù„'}
+                                {item.category === 'ai' ? 'ذكاء اصطناعي' : 
+                                 item.category === 'cyber' ? 'أمن سيبراني' :
+                                 item.category === 'iot' ? 'إنترنت أشياء' : 'تطبيقات ويب/جوال'}
                               </span>
                             </div>
                             <div className="p-6 space-y-3">
@@ -2169,8 +2142,8 @@ const AdminDashboard = () => {
                               <p className="text-xs font-bold text-slate-400 leading-relaxed line-clamp-2">{item.desc}</p>
                               
                               <div className="pt-3 border-t border-slate-100 flex items-center justify-between text-[11px] font-bold text-slate-500">
-                                <span>Ø§Ù„Ù…Ø³ØªÙˆÙ‰: <strong className="text-blue-600">{item.levelName || item.level}</strong></span>
-                                <span>Ø§Ù„ØªÙ‚Ù†ÙŠة: <strong>{item.stats?.tech || item.tech || 'Python'}</strong></span>
+                                <span>المستوى: <strong className="text-blue-600">{item.levelName || item.level}</strong></span>
+                                <span>التقنية: <strong>{item.stats?.tech || item.tech || 'Python'}</strong></span>
                               </div>
                             </div>
                           </div>
@@ -2180,7 +2153,7 @@ const AdminDashboard = () => {
                               onClick={() => openEditInnovationModal(item)}
                               className="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl font-bold text-xs inline-flex items-center gap-1 transition-colors"
                             >
-                              <Edit className="w-3.5 h-3.5" /> ØªØ¹Ø¯ÙŠÙ„
+                              <Edit className="w-3.5 h-3.5" /> تعديل
                             </button>
                             <button 
                               onClick={() => handleDeleteInnovation(item.id)}
@@ -2200,19 +2173,19 @@ const AdminDashboard = () => {
               {activeTab === 'exhibition_products' && (
                 <div className="space-y-6">
                   <div className="flex justify-between items-center bg-white p-4 rounded-2xl border border-slate-200 shadow-sm">
-                    <h3 className="text-lg font-black text-slate-800">إدارة Ù…Ø¹Ø±Ùˆضات ÙˆÙ…Ù†تجات Ø§Ù„Ùˆحدات Ø§Ù„Ø¥Ù†ØªØ§Ø¬ÙŠة Ø¨Ø§Ù„ÙƒÙ„ÙŠات</h3>
+                    <h3 className="text-lg font-black text-slate-800">إدارة معروضات ومنتجات الوحدات الإنتاجية بالكليات</h3>
                     <button 
                       onClick={openAddProductModal}
                       className="px-5 py-2.5 bg-[#1E3A8A] hover:bg-[#1e3a8a] text-[#F4A217] rounded-xl font-bold text-sm inline-flex items-center gap-2 transition-all shadow-md shadow-green-900/10"
                     >
-                      <Plus className="w-4 h-4" /> إضافة Ù…Ù†تج Ø¬Ø¯ÙŠد
+                      <Plus className="w-4 h-4" /> إضافة منتج جديد
                     </button>
                   </div>
 
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     {products.length === 0 ? (
                       <div className="col-span-full py-16 text-center text-slate-400 font-bold bg-white rounded-3xl border border-slate-200">
-                        Ù„ا ØªÙˆجد Ù…Ù†تجات Ù…ضافة Ø­Ø§Ù„ÙŠØ§Ù‹. اضغط Ø¹Ù„Ù‰ Ø§Ù„زر Ø¨Ø§Ù„Ø£Ø¹Ù„Ù‰ Ù„إضافة Ø£ÙˆÙ„ Ù…Ù†تج.
+                        لا توجد منتجات مضافة حالياً. اضغط على الزر بالأعلى لإضافة أول منتج.
                       </div>
                     ) : (
                       products.filter(item => 
@@ -2243,8 +2216,8 @@ const AdminDashboard = () => {
                               <p className="text-xs font-bold text-slate-400 leading-relaxed line-clamp-2">{item.details}</p>
                               
                               <div className="pt-3 border-t border-slate-100 flex items-center justify-between text-[11px] font-bold text-slate-500">
-                                <span>Ø§Ù„Ù‚Ø³Ù…: <strong className="text-indigo-600">{item.category}</strong></span>
-                                <span>Ø§Ù„ØªÙ‚ÙŠÙŠÙ…: <strong>{item.rating || '4.8 (120)'}</strong></span>
+                                <span>القسم: <strong className="text-indigo-600">{item.category}</strong></span>
+                                <span>التقييم: <strong>{item.rating || '4.8 (120)'}</strong></span>
                               </div>
                             </div>
                           </div>
@@ -2254,7 +2227,7 @@ const AdminDashboard = () => {
                               onClick={() => openEditProductModal(item)}
                               className="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl font-bold text-xs inline-flex items-center gap-1 transition-colors"
                             >
-                              <Edit className="w-3.5 h-3.5" /> ØªØ¹Ø¯ÙŠÙ„
+                              <Edit className="w-3.5 h-3.5" /> تعديل
                             </button>
                             <button 
                               onClick={() => handleDeleteProduct(item.id)}
@@ -2275,20 +2248,20 @@ const AdminDashboard = () => {
                 <div className="space-y-8 animate-fade-in">
                   <div className="flex justify-between items-center pb-4 border-b border-slate-200">
                     <button onClick={() => setSelectedItem(null)} className="flex items-center gap-1 text-slate-600 hover:text-slate-900 font-bold text-sm bg-slate-100 px-4 py-2 rounded-xl">
-                      <ArrowLeft className="w-4 h-4" /> Ø§Ù„Ø¹Ùˆدة Ù„Ù„Ø¬Ø¯ÙˆÙ„
+                      <ArrowLeft className="w-4 h-4" /> العودة للجدول
                     </button>
                     <div className="flex items-center gap-3">
-                      <span className="text-sm font-bold text-slate-400">ØªØ­Ø¯ÙŠث Ø­Ø§Ù„ة Ø§Ù„Ø·Ù„ب:</span>
+                      <span className="text-sm font-bold text-slate-400">تحديث حالة الطلب:</span>
                       <select
                         value={selectedItem.status}
                         onChange={(e) => handleStatusChange(selectedItem.id, selectedType, e.target.value)}
                         className="bg-slate-50 border border-slate-300 rounded-xl px-4 py-2 font-black text-sm text-[#1E3A8A] focus:ring-2 focus:ring-[#1E3A8A]"
                       >
-                        <option value="ØªÙ… Ø§Ø³ØªÙ„Ø§Ù… Ø§Ù„Ø·Ù„ب">ØªÙ… Ø§Ø³ØªÙ„Ø§Ù… Ø§Ù„Ø·Ù„ب</option>
-                        <option value="تحت Ø§Ù„فحص Ø§Ù„Ø¥Ø¯Ø§Ø±ÙŠ">تحت Ø§Ù„فحص Ø§Ù„Ø¥Ø¯Ø§Ø±ÙŠ</option>
-                        <option value="تحت Ø§Ù„ØªÙ‚ÙŠÙŠÙ… Ø§Ù„ÙÙ†ÙŠ">تحت Ø§Ù„ØªÙ‚ÙŠÙŠÙ… Ø§Ù„ÙÙ†ÙŠ</option>
-                        <option value="تحت Ù…راجعة Ø§Ù„Ù…Ù„ÙƒÙŠة Ø§Ù„ÙÙƒØ±ÙŠة">تحت Ù…راجعة Ø§Ù„Ù…Ù„ÙƒÙŠة Ø§Ù„ÙÙƒØ±ÙŠة</option>
-                        <option value="Ù…Ù‚Ø¨ÙˆÙ„ Ù„Ù„عرض ÙÙŠ Ø§Ù„Ù‚Ù…ة">Ù…Ù‚Ø¨ÙˆÙ„ Ù„Ù„عرض ÙÙŠ Ø§Ù„Ù‚Ù…ة</option>
+                        <option value="تم استلام الطلب">تم استلام الطلب</option>
+                        <option value="تحت الفحص الإداري">تحت الفحص الإداري</option>
+                        <option value="تحت التقييم الفني">تحت التقييم الفني</option>
+                        <option value="تحت مراجعة الملكية الفكرية">تحت مراجعة الملكية الفكرية</option>
+                        <option value="مقبول للعرض في القمة">مقبول للعرض في القمة</option>
                       </select>
                     </div>
                   </div>
@@ -2298,41 +2271,41 @@ const AdminDashboard = () => {
                     <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 text-right">
                       <div className="lg:col-span-2 space-y-6">
                         <div>
-                          <span className="text-xs font-bold text-slate-400 block mb-1">Ø§Ø³Ù… Ø§Ù„Ù…Ø´Ø±Ùˆع (Ø¹Ø±Ø¨ÙŠ / Ø¥Ù†Ø¬Ù„ÙŠØ²ÙŠ)</span>
+                          <span className="text-xs font-bold text-slate-400 block mb-1">اسم المشروع (عربي / إنجليزي)</span>
                           <h2 className="text-2xl font-black text-[#1E3A8A]">{selectedItem.project_name_ar}</h2>
                           <p className="text-md text-slate-500 font-bold" dir="ltr">{selectedItem.project_name_en}</p>
                         </div>
 
                         <div className="bg-slate-50 p-6 rounded-2xl border border-slate-200">
-                          <h4 className="font-black text-[#1E3A8A] mb-3">Ù…Ù„خص Ø§Ù„Ù…Ø´Ø±Ùˆع</h4>
+                          <h4 className="font-black text-[#1E3A8A] mb-3">ملخص المشروع</h4>
                           <p className="text-slate-700 leading-relaxed font-semibold">{selectedItem.details?.projectSummary}</p>
                         </div>
 
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                           <div className="bg-slate-50 p-6 rounded-2xl border border-slate-200">
-                            <h4 className="font-black text-[#1E3A8A] mb-2">Ø§Ù„Ù…Ø´ÙƒÙ„ة</h4>
+                            <h4 className="font-black text-[#1E3A8A] mb-2">المشكلة</h4>
                             <p className="text-slate-600 text-sm font-semibold">{selectedItem.details?.problemAddressed}</p>
                           </div>
                           <div className="bg-slate-50 p-6 rounded-2xl border border-slate-200">
-                            <h4 className="font-black text-[#1E3A8A] mb-2">Ø§Ù„Ø­Ù„</h4>
+                            <h4 className="font-black text-[#1E3A8A] mb-2">الحل</h4>
                             <p className="text-slate-600 text-sm font-semibold">{selectedItem.details?.solutionProvided}</p>
                           </div>
                         </div>
 
                         {/* Team members list */}
                         <div className="bg-slate-50 p-6 rounded-2xl border border-slate-200">
-                          <h4 className="font-black text-[#1E3A8A] mb-4">أعضاء Ø§Ù„ÙØ±ÙŠÙ‚ ({selectedItem.team_members?.length} Ø·Ù„اب)</h4>
+                          <h4 className="font-black text-[#1E3A8A] mb-4">أعضاء الفريق ({selectedItem.team_members?.length} طلاب)</h4>
                           <div className="space-y-4">
                             {selectedItem.team_members?.map((m, idx) => (
                               <div key={idx} className="bg-white p-4 rounded-xl border border-slate-100 flex flex-col md:flex-row justify-between gap-2">
                                 <div>
                                   <span className="font-black text-slate-800">{m.name}</span>
-                                  <span className="text-xs bg-[#F4A217]/10 text-[#1E3A8A] px-2 py-0.5 rounded mr-2 font-bold">{m.role || 'Ø¹Ø¶Ùˆ'}</span>
+                                  <span className="text-xs bg-[#F4A217]/10 text-[#1E3A8A] px-2 py-0.5 rounded mr-2 font-bold">{m.role || 'عضو'}</span>
                                 </div>
                                 <div className="text-xs font-semibold text-slate-500 flex flex-wrap gap-4">
-                                  <span>Ø§Ù„ÙƒÙ„ÙŠة: {m.college}</span>
-                                  <span>Ø§Ù„Ù‡اتف: {m.phone}</span>
-                                  <span>Ø§Ù„Ø¨Ø±ÙŠد: {m.email}</span>
+                                  <span>الكلية: {m.college}</span>
+                                  <span>الهاتف: {m.phone}</span>
+                                  <span>البريد: {m.email}</span>
                                 </div>
                               </div>
                             ))}
@@ -2343,25 +2316,25 @@ const AdminDashboard = () => {
                       {/* Side project info & attachments */}
                       <div className="space-y-6">
                         <div className="bg-slate-50 p-6 rounded-2xl border border-slate-200 space-y-4">
-                          <h4 className="font-black text-[#1E3A8A] border-b pb-2">Ø¨ÙŠØ§Ù†ات Ø§Ù„Ù…Ù‚رر ÙˆØ§Ù„Ø¬Ø§Ù…عة</h4>
+                          <h4 className="font-black text-[#1E3A8A] border-b pb-2">بيانات المقرر والجامعة</h4>
                           <div>
-                            <span className="text-xs text-slate-400 block">Ø§Ù„ÙƒÙ„ÙŠة</span>
+                            <span className="text-xs text-slate-400 block">الكلية</span>
                             <span className="font-bold text-slate-700">{selectedItem.college}</span>
                           </div>
                           <div>
-                            <span className="text-xs text-slate-400 block">Ø§Ù„Ù‚Ø³Ù…</span>
+                            <span className="text-xs text-slate-400 block">القسم</span>
                             <span className="font-bold text-slate-700">{selectedItem.department}</span>
                           </div>
                           <div>
-                            <span className="text-xs text-slate-400 block">Ø³Ù†ة Ø§Ù„تخرج</span>
+                            <span className="text-xs text-slate-400 block">سنة التخرج</span>
                             <span className="font-bold text-slate-700">{selectedItem.year}</span>
                           </div>
                         </div>
 
                         <div className="bg-slate-50 p-6 rounded-2xl border border-slate-200 space-y-4">
-                          <h4 className="font-black text-[#1E3A8A] border-b pb-2">Ø§Ù„Ù…Ù„فات ÙˆØ§Ù„Ù…Ø±ÙÙ‚ات</h4>
+                          <h4 className="font-black text-[#1E3A8A] border-b pb-2">الملفات والمرفقات</h4>
                           {Object.keys(selectedItem.files || {}).length === 0 ? (
-                            <span className="text-xs text-slate-400 font-bold">Ù„ا ØªÙˆجد Ù…Ù„فات Ù…Ø±ÙÙˆعة</span>
+                            <span className="text-xs text-slate-400 font-bold">لا توجد ملفات مرفوعة</span>
                           ) : (
                             Object.entries(selectedItem.files).map(([key, url]) => (
                               <a 
@@ -2369,7 +2342,7 @@ const AdminDashboard = () => {
                                 onClick={(e) => {
                                   if (url === '#') {
                                     e.preventDefault();
-                                    alert('Ø¹Ø°Ø±Ø§Ù‹ØŒ Ù‡ذا Ø§Ù„Ù…Ù„ف ØºÙŠر Ù…ØªÙˆفر Ø­Ø§Ù„ÙŠØ§Ù‹.');
+                                    alert('عذراً، هذا الملف غير متوفر حالياً.');
                                   }
                                 }}
                                 target="_blank" 
@@ -2379,9 +2352,9 @@ const AdminDashboard = () => {
                               >
                                 <span className="flex items-center gap-2">
                                   <FileText className="w-4 h-4 text-red-500" />
-                                  {key === 'summaryPdf' ? 'Ù…Ù„خص Ø§Ù„Ù…Ø´Ø±Ùˆع PDF' :
-                                   key === 'pitchDeck' ? 'Ø§Ù„عرض Ø§Ù„ØªÙ‚Ø¯ÙŠÙ…ÙŠ' :
-                                   key === 'screenshot' ? 'ØµÙˆرة Ù„Ù‚طة Ø§Ù„شاشة' : key}
+                                  {key === 'summaryPdf' ? 'ملخص المشروع PDF' :
+                                   key === 'pitchDeck' ? 'العرض التقديمي' :
+                                   key === 'screenshot' ? 'صورة لقطة الشاشة' : key}
                                 </span>
                                 <Download className="w-4 h-4 text-slate-400" />
                               </a>
@@ -2397,18 +2370,18 @@ const AdminDashboard = () => {
                     <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 text-right">
                       <div className="lg:col-span-2 space-y-6">
                         <div>
-                          <span className="text-xs font-bold text-slate-400 block mb-1">Ø§Ø³Ù… Ø§Ù„باحث Ø§Ù„Ø±Ø¦ÙŠØ³ÙŠ</span>
+                          <span className="text-xs font-bold text-slate-400 block mb-1">اسم الباحث الرئيسي</span>
                           <h2 className="text-2xl font-black text-[#183059]">{selectedItem.pi_name}</h2>
                           <p className="text-md text-slate-500 font-bold">{selectedItem.pi_rank} - {selectedItem.pi_faculty}</p>
                         </div>
 
                         <div className="bg-slate-50 p-6 rounded-2xl border border-slate-200">
-                          <h4 className="font-black text-slate-800 mb-2">Ø§Ù„Ù…Ø´ÙƒÙ„ة Ø§Ù„Ù…Ø³ØªÙ‡دفة Ø¨Ø§Ù„بحث</h4>
+                          <h4 className="font-black text-slate-800 mb-2">المشكلة المستهدفة بالبحث</h4>
                           <p className="text-slate-700 leading-relaxed font-semibold">{selectedItem.details?.problem}</p>
                         </div>
 
                         <div className="bg-slate-50 p-6 rounded-2xl border border-slate-200">
-                          <h4 className="font-black text-slate-800 mb-2">Ø§Ù„Ø­Ù„ ÙˆØ§Ù„ØªØ·Ø¨ÙŠÙ‚ Ø§Ù„Ù…Ù‚ترح</h4>
+                          <h4 className="font-black text-slate-800 mb-2">الحل والتطبيق المقترح</h4>
                           <p className="text-slate-700 leading-relaxed font-semibold">{selectedItem.details?.solution}</p>
                         </div>
                       </div>
@@ -2416,25 +2389,25 @@ const AdminDashboard = () => {
                       {/* Research Side Panel */}
                       <div className="space-y-6">
                         <div className="bg-slate-50 p-6 rounded-2xl border border-slate-200 space-y-4">
-                          <h4 className="font-black text-slate-800 border-b pb-2">Ø¨ÙŠØ§Ù†ات Ø§Ù„Ø§ØªØµØ§Ù„ Ù„Ù„باحث</h4>
+                          <h4 className="font-black text-slate-800 border-b pb-2">بيانات الاتصال للباحث</h4>
                           <div>
-                            <span className="text-xs text-slate-400 block">Ø§Ù„Ø¨Ø±ÙŠد Ø§Ù„Ø¥Ù„ÙƒØªØ±ÙˆÙ†ÙŠ</span>
+                            <span className="text-xs text-slate-400 block">البريد الإلكتروني</span>
                             <span className="font-bold text-slate-700">{selectedItem.pi_email}</span>
                           </div>
                           <div>
-                            <span className="text-xs text-slate-400 block">Ø±Ù‚Ù… Ø§Ù„Ù‡اتف</span>
+                            <span className="text-xs text-slate-400 block">رقم الهاتف</span>
                             <span className="font-bold text-slate-700">{selectedItem.pi_phone}</span>
                           </div>
                           <div>
-                            <span className="text-xs text-slate-400 block">Ø§Ù„Ù‚Ø³Ù… Ø§Ù„Ø¹Ù„Ù…ÙŠ</span>
+                            <span className="text-xs text-slate-400 block">القسم العلمي</span>
                             <span className="font-bold text-slate-700">{selectedItem.pi_dept}</span>
                           </div>
                         </div>
 
                         <div className="bg-slate-50 p-6 rounded-2xl border border-slate-200 space-y-4">
-                          <h4 className="font-black text-slate-800 border-b pb-2">Ø§Ù„Ù…Ù„فات Ø§Ù„Ø¨Ø­Ø«ÙŠة</h4>
+                          <h4 className="font-black text-slate-800 border-b pb-2">الملفات البحثية</h4>
                           {Object.keys(selectedItem.files || {}).length === 0 ? (
-                            <span className="text-xs text-slate-400 font-bold">Ù„ا ØªÙˆجد Ù…Ù„فات Ù…Ø±ÙÙˆعة</span>
+                            <span className="text-xs text-slate-400 font-bold">لا توجد ملفات مرفوعة</span>
                           ) : (
                             Object.entries(selectedItem.files).map(([key, url]) => (
                               <a 
@@ -2442,7 +2415,7 @@ const AdminDashboard = () => {
                                 onClick={(e) => {
                                   if (url === '#') {
                                     e.preventDefault();
-                                    alert('Ø¹Ø°Ø±Ø§Ù‹ØŒ Ù‡ذا Ø§Ù„Ù…Ù„ف ØºÙŠر Ù…ØªÙˆفر Ø­Ø§Ù„ÙŠØ§Ù‹.');
+                                    alert('عذراً، هذا الملف غير متوفر حالياً.');
                                   }
                                 }}
                                 target="_blank" 
@@ -2452,8 +2425,8 @@ const AdminDashboard = () => {
                               >
                                 <span className="flex items-center gap-2">
                                   <FileText className="w-4 h-4 text-red-500" />
-                                  {key === 'researchPdf' ? 'Ù…Ù„ف Ø§Ù„بحث Ø§Ù„Ø±Ø¦ÙŠØ³ÙŠ' :
-                                   key === 'marketSummaryPdf' ? 'Ø§Ù„Ù…Ù„خص Ø§Ù„ØªØ³ÙˆÙŠÙ‚ÙŠ' : key}
+                                  {key === 'researchPdf' ? 'ملف البحث الرئيسي' :
+                                   key === 'marketSummaryPdf' ? 'الملخص التسويقي' : key}
                                 </span>
                                 <Download className="w-4 h-4 text-slate-400" />
                               </a>
@@ -2483,15 +2456,15 @@ const AdminDashboard = () => {
             <div className="bg-[#1E3A8A] text-white p-6 flex justify-between items-center shrink-0">
               <h2 className="text-2xl font-black text-[#F4A217]">
                 {exhibitionModalType === 'innovation'
-                  ? (exhibitionEditItem ? 'ØªØ¹Ø¯ÙŠÙ„ Ø¨ÙŠØ§Ù†ات Ø§Ù„Ø§Ø¨ØªÙƒار' : 'إضافة Ø§Ø¨ØªÙƒار Ø¬Ø¯ÙŠد Ù„Ù…عرض Ø§Ù„Ø§Ø¨ØªÙƒارات')
-                  : (exhibitionEditItem ? 'ØªØ¹Ø¯ÙŠÙ„ Ø¨ÙŠØ§Ù†ات Ø§Ù„Ù…Ù†تج' : 'إضافة Ù…Ù†تج Ø¬Ø¯ÙŠد Ù„Ù„Ùˆحدات Ø§Ù„Ø¥Ù†ØªØ§Ø¬ÙŠة')
+                  ? (exhibitionEditItem ? 'تعديل بيانات الابتكار' : 'إضافة ابتكار جديد لمعرض الابتكارات')
+                  : (exhibitionEditItem ? 'تعديل بيانات المنتج' : 'إضافة منتج جديد للوحدات الإنتاجية')
                 }
               </h2>
               <button 
                 onClick={() => setIsExhibitionModalOpen(false)}
                 className="w-8 h-8 flex items-center justify-center bg-white/10 hover:bg-white/20 rounded-full transition-colors font-bold"
               >
-                âœ•
+                ✕
               </button>
             </div>
             
@@ -2500,7 +2473,7 @@ const AdminDashboard = () => {
                 <form onSubmit={handleSaveInnovation} className="space-y-4">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-xs font-bold text-slate-700 mb-2">Ø¹Ù†ÙˆØ§Ù† Ø§Ù„Ø§Ø¨ØªÙƒار *</label>
+                      <label className="block text-xs font-bold text-slate-700 mb-2">عنوان الابتكار *</label>
                       <input 
                         type="text" 
                         required
@@ -2510,7 +2483,7 @@ const AdminDashboard = () => {
                       />
                     </div>
                     <div>
-                      <label className="block text-xs font-bold text-slate-700 mb-2">Ø§Ø³Ù… Ø§Ù„ÙØ±ÙŠÙ‚ / Ø§Ù„Ù…Ø¨ØªÙƒر *</label>
+                      <label className="block text-xs font-bold text-slate-700 mb-2">اسم الفريق / المبتكر *</label>
                       <input 
                         type="text" 
                         required
@@ -2520,62 +2493,62 @@ const AdminDashboard = () => {
                       />
                     </div>
                     <div>
-                      <label className="block text-xs font-bold text-slate-700 mb-2">Ø§Ù„ØªØµÙ†ÙŠف *</label>
+                      <label className="block text-xs font-bold text-slate-700 mb-2">التصنيف *</label>
                       <select 
                         value={innovationFormData.category}
                         onChange={(e) => setInnovationFormData({...innovationFormData, category: e.target.value})}
                         className="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:border-[#1E3A8A] outline-none font-bold text-xs"
                       >
-                        <option value="ai">Ø§Ù„Ø°Ùƒاء Ø§Ù„Ø§ØµØ·Ù†Ø§Ø¹ÙŠ</option>
-                        <option value="cyber">Ø§Ù„Ø£Ù…Ù† Ø§Ù„Ø³ÙŠØ¨Ø±Ø§Ù†ÙŠ</option>
-                        <option value="iot">Ø¥Ù†ØªØ±Ù†ت Ø§Ù„Ø£Ø´ÙŠاء</option>
-                        <option value="apps">ØªØ·Ø¨ÙŠÙ‚ات Ø§Ù„ÙˆÙŠب ÙˆØ§Ù„Ø¬ÙˆØ§Ù„</option>
+                        <option value="ai">الذكاء الاصطناعي</option>
+                        <option value="cyber">الأمن السيبراني</option>
+                        <option value="iot">إنترنت الأشياء</option>
+                        <option value="apps">تطبيقات الويب والجوال</option>
                       </select>
                     </div>
                     <div>
-                      <label className="block text-xs font-bold text-slate-700 mb-2">Ù…Ø³ØªÙˆÙ‰ Ø§Ù„Ø¬Ø§Ù‡Ø²ÙŠة *</label>
+                      <label className="block text-xs font-bold text-slate-700 mb-2">مستوى الجاهزية *</label>
                       <select 
                         value={innovationFormData.level}
                         onChange={(e) => {
                           const val = e.target.value;
-                          let name = 'Ù†Ù…Ùˆذج Ø£ÙˆÙ„ÙŠ';
-                          if (val === 'advanced') name = 'Ù…Ø³ØªÙˆÙ‰ Ù…ØªÙ‚Ø¯Ù…';
-                          if (val === 'ready') name = 'Ø¬Ø§Ù‡ز Ù„Ù„ØªØ¨Ù†ÙŠ Ø§Ù„ØªØ¬Ø§Ø±ÙŠ';
+                          let name = 'نموذج أولي';
+                          if (val === 'advanced') name = 'مستوى متقدم';
+                          if (val === 'ready') name = 'جاهز للتبني التجاري';
                           setInnovationFormData({...innovationFormData, level: val, levelName: name});
                         }}
                         className="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:border-[#1E3A8A] outline-none font-bold text-xs"
                       >
-                        <option value="prototype">Ù†Ù…Ùˆذج Ø£ÙˆÙ„ÙŠ</option>
-                        <option value="advanced">Ù…Ø³ØªÙˆÙ‰ Ù…ØªÙ‚Ø¯Ù…</option>
-                        <option value="ready">Ø¬Ø§Ù‡ز Ù„Ù„ØªØ¨Ù†ÙŠ Ø§Ù„ØªØ¬Ø§Ø±ÙŠ</option>
+                        <option value="prototype">نموذج أولي</option>
+                        <option value="advanced">مستوى متقدم</option>
+                        <option value="ready">جاهز للتبني التجاري</option>
                       </select>
                     </div>
                     <div>
-                      <label className="block text-xs font-bold text-slate-700 mb-2">Ø§Ù„ØªÙ‚Ù†ÙŠة Ø§Ù„Ù…Ø³ØªØ®Ø¯Ù…ة</label>
+                      <label className="block text-xs font-bold text-slate-700 mb-2">التقنية المستخدمة</label>
                       <input 
                         type="text" 
                         value={innovationFormData.tech}
                         onChange={(e) => setInnovationFormData({...innovationFormData, tech: e.target.value})}
                         className="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:border-[#1E3A8A] outline-none font-bold text-xs"
-                        placeholder="Ù…Ø«Ø§Ù„: React / Node.js"
+                        placeholder="مثال: React / Node.js"
                       />
                     </div>
                     <div>
-                      <label className="block text-xs font-bold text-slate-700 mb-2">Ø£ÙŠÙ‚ÙˆÙ†ة Ø§Ù„عرض (Ø§Ø³Ù… Ø§Ù„Ø£ÙŠÙ‚ÙˆÙ†ة)</label>
+                      <label className="block text-xs font-bold text-slate-700 mb-2">أيقونة العرض (اسم الأيقونة)</label>
                       <select 
                         value={innovationFormData.icon}
                         onChange={(e) => setInnovationFormData({...innovationFormData, icon: e.target.value})}
                         className="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:border-[#1E3A8A] outline-none font-bold text-xs"
                       >
-                        <option value="Cpu">Cpu (Ù…Ø¹Ø§Ù„ج)</option>
-                        <option value="Lock">Lock (Ù‚ÙÙ„ Ø­Ù…Ø§ÙŠة)</option>
-                        <option value="Sprout">Sprout (Ø¨ÙŠØ¦ÙŠ / Ù†بات)</option>
-                        <option value="Globe">Globe (Ø¥Ù†ØªØ±Ù†ت / Ø´Ø¨Ùƒة)</option>
-                        <option value="Database">Database (Ù‚Ùˆاعد Ø¨ÙŠØ§Ù†ات)</option>
+                        <option value="Cpu">Cpu (معالج)</option>
+                        <option value="Lock">Lock (قفل حماية)</option>
+                        <option value="Sprout">Sprout (بيئي / نبات)</option>
+                        <option value="Globe">Globe (إنترنت / شبكة)</option>
+                        <option value="Database">Database (قواعد بيانات)</option>
                       </select>
                     </div>
                     <div className="md:col-span-2">
-                      <label className="block text-xs font-bold text-slate-700 mb-2">رابط ØµÙˆرة Ø§Ù„Ø§Ø¨ØªÙƒار</label>
+                      <label className="block text-xs font-bold text-slate-700 mb-2">رابط صورة الابتكار</label>
                       <input 
                         type="url" 
                         value={innovationFormData.image}
@@ -2586,7 +2559,7 @@ const AdminDashboard = () => {
                       />
                     </div>
                     <div className="md:col-span-2">
-                      <label className="block text-xs font-bold text-slate-700 mb-2">Ø§Ù„Ùˆصف ÙˆØ§Ù„شرح *</label>
+                      <label className="block text-xs font-bold text-slate-700 mb-2">الوصف والشرح *</label>
                       <textarea 
                         required
                         rows={3}
@@ -2599,10 +2572,10 @@ const AdminDashboard = () => {
                   
                   <div className="pt-4 border-t border-slate-100 flex gap-3">
                     <button type="submit" className="flex-1 bg-[#1E3A8A] hover:bg-[#1e3a8a] text-white px-6 py-3 rounded-xl font-bold transition-colors text-sm">
-                      {exhibitionEditItem ? 'حفظ Ø§Ù„ØªØ¹Ø¯ÙŠÙ„ات' : 'إضافة Ù„Ù„Ø§Ø¨ØªÙƒارات'}
+                      {exhibitionEditItem ? 'حفظ التعديلات' : 'إضافة للابتكارات'}
                     </button>
                     <button type="button" onClick={() => setIsExhibitionModalOpen(false)} className="px-6 py-3 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl font-bold transition-colors text-sm">
-                      Ø¥Ù„غاء
+                      إلغاء
                     </button>
                   </div>
                 </form>
@@ -2610,7 +2583,7 @@ const AdminDashboard = () => {
                 <form onSubmit={handleSaveProduct} className="space-y-4">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-xs font-bold text-slate-700 mb-2">Ø§Ø³Ù… Ø§Ù„Ù…Ù†تج / Ø§Ù„Ø®Ø¯Ù…ة *</label>
+                      <label className="block text-xs font-bold text-slate-700 mb-2">اسم المنتج / الخدمة *</label>
                       <input 
                         type="text" 
                         required
@@ -2620,7 +2593,7 @@ const AdminDashboard = () => {
                       />
                     </div>
                     <div>
-                      <label className="block text-xs font-bold text-slate-700 mb-2">Ø§Ù„ÙƒÙ„ÙŠة Ø§Ù„Ù…Ù†تجة *</label>
+                      <label className="block text-xs font-bold text-slate-700 mb-2">الكلية المنتجة *</label>
                       <select 
                         value={productFormData.facultyId}
                         onChange={(e) => {
@@ -2631,64 +2604,64 @@ const AdminDashboard = () => {
                         }}
                         className="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:border-[#1E3A8A] outline-none font-bold text-xs"
                       >
-                        <option value="agriculture">ÙƒÙ„ÙŠة Ø§Ù„زراعة</option>
-                        <option value="science">ÙƒÙ„ÙŠة Ø§Ù„Ø¹Ù„ÙˆÙ…</option>
-                        <option value="artedu">ÙƒÙ„ÙŠة Ø§Ù„ØªØ±Ø¨ÙŠة Ø§Ù„ÙÙ†ÙŠة</option>
-                        <option value="specific">ÙƒÙ„ÙŠة Ø§Ù„ØªØ±Ø¨ÙŠة Ø§Ù„Ù†ÙˆØ¹ÙŠة</option>
-                        <option value="engineering">ÙƒÙ„ÙŠة Ø§Ù„Ù‡Ù†دسة</option>
-                        <option value="computers">ÙƒÙ„ÙŠة Ø§Ù„حاسبات ÙˆØ§Ù„Ù…Ø¹Ù„ÙˆÙ…ات</option>
-                        <option value="pharmacy">ÙƒÙ„ÙŠة Ø§Ù„ØµÙŠØ¯Ù„ة</option>
-                        <option value="finearts">ÙƒÙ„ÙŠة Ø§Ù„ÙÙ†ÙˆÙ† Ø§Ù„Ø¬Ù…ÙŠÙ„ة</option>
-                        <option value="tourism">ÙƒÙ„ÙŠة Ø§Ù„Ø³ÙŠاحة ÙˆØ§Ù„ÙÙ†Ø§Ø¯Ù‚</option>
+                        <option value="agriculture">كلية الزراعة</option>
+                        <option value="science">كلية العلوم</option>
+                        <option value="artedu">كلية التربية الفنية</option>
+                        <option value="specific">كلية التربية النوعية</option>
+                        <option value="engineering">كلية الهندسة</option>
+                        <option value="computers">كلية الحاسبات والمعلومات</option>
+                        <option value="pharmacy">كلية الصيدلة</option>
+                        <option value="finearts">كلية الفنون الجميلة</option>
+                        <option value="tourism">كلية السياحة والفنادق</option>
                       </select>
                     </div>
                     <div>
-                      <label className="block text-xs font-bold text-slate-700 mb-2">Ø§Ù„ØªØµÙ†ÙŠف ÙˆØ§Ù„Ù‚طاع *</label>
+                      <label className="block text-xs font-bold text-slate-700 mb-2">التصنيف والقطاع *</label>
                       <input 
                         type="text" 
                         required
                         value={productFormData.category}
                         onChange={(e) => setProductFormData({...productFormData, category: e.target.value})}
                         className="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:border-[#1E3A8A] outline-none font-bold text-xs"
-                        placeholder="Ù…Ø«Ø§Ù„: Ù…Ù†تجات Ø²Ø±Ø§Ø¹ÙŠة Ø£Ùˆ Ù…Ù†ظفات"
+                        placeholder="مثال: منتجات زراعية أو منظفات"
                       />
                     </div>
                     <div>
-                      <label className="block text-xs font-bold text-slate-700 mb-2">Ø§Ù„سعر Ø§Ù„ØªØ¬Ø§Ø±ÙŠ *</label>
+                      <label className="block text-xs font-bold text-slate-700 mb-2">السعر التجاري *</label>
                       <input 
                         type="text" 
                         required
                         value={productFormData.price}
                         onChange={(e) => setProductFormData({...productFormData, price: e.target.value})}
                         className="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:border-[#1E3A8A] outline-none font-bold text-xs"
-                        placeholder="Ù…Ø«Ø§Ù„: 150 ج.Ù…"
+                        placeholder="مثال: 150 ج.م"
                       />
                     </div>
                     <div>
-                      <label className="block text-xs font-bold text-slate-700 mb-2">شعار Ø§Ù„ØªØ³ÙˆÙŠÙ‚ (Tag) (Ø§Ø®ØªÙŠØ§Ø±ÙŠ)</label>
+                      <label className="block text-xs font-bold text-slate-700 mb-2">شعار التسويق (Tag) (اختياري)</label>
                       <input 
                         type="text" 
                         value={productFormData.tag}
                         onChange={(e) => setProductFormData({...productFormData, tag: e.target.value})}
                         className="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:border-[#1E3A8A] outline-none font-bold text-xs"
-                        placeholder="Ù…Ø«Ø§Ù„: Ø§Ù„Ø£Ùƒثر Ù…Ø¨ÙŠØ¹Ø§Ù‹ Ø£Ùˆ عصر بارد"
+                        placeholder="مثال: الأكثر مبيعاً أو عصر بارد"
                       />
                     </div>
                     <div>
-                      <label className="block text-xs font-bold text-slate-700 mb-2">Ù„ÙˆÙ† Ø§Ù„شعار</label>
+                      <label className="block text-xs font-bold text-slate-700 mb-2">لون الشعار</label>
                       <select 
                         value={productFormData.tagColor}
                         onChange={(e) => setProductFormData({...productFormData, tagColor: e.target.value})}
                         className="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:border-[#1E3A8A] outline-none font-bold text-xs"
                       >
-                        <option value="bg-emerald-600 text-white">أخضر Ø²Ù…Ø±Ø¯ÙŠ</option>
-                        <option value="bg-amber-500 text-white">Ø°Ù‡Ø¨ÙŠ / Ø¨Ø±ØªÙ‚Ø§Ù„ÙŠ</option>
-                        <option value="bg-blue-600 text-white">Ø£Ø²Ø±Ù‚ Ø¯Ø§ÙƒÙ†</option>
-                        <option value="bg-purple-600 text-white">Ø¨Ù†ÙØ³Ø¬ÙŠ ÙÙ†ÙŠ</option>
+                        <option value="bg-emerald-600 text-white">أخضر زمردي</option>
+                        <option value="bg-amber-500 text-white">ذهبي / برتقالي</option>
+                        <option value="bg-blue-600 text-white">أزرق داكن</option>
+                        <option value="bg-purple-600 text-white">بنفسجي فني</option>
                       </select>
                     </div>
                     <div className="md:col-span-2">
-                      <label className="block text-xs font-bold text-slate-700 mb-2">رابط ØµÙˆرة Ø§Ù„Ù…Ù†تج</label>
+                      <label className="block text-xs font-bold text-slate-700 mb-2">رابط صورة المنتج</label>
                       <input 
                         type="url" 
                         value={productFormData.image}
@@ -2699,7 +2672,7 @@ const AdminDashboard = () => {
                       />
                     </div>
                     <div className="md:col-span-2">
-                      <label className="block text-xs font-bold text-slate-700 mb-2">ØªÙØ§ØµÙŠÙ„ ÙˆÙ…Ùˆاصفات Ø§Ù„Ù…Ù†تج *</label>
+                      <label className="block text-xs font-bold text-slate-700 mb-2">تفاصيل ومواصفات المنتج *</label>
                       <textarea 
                         required
                         rows={3}
@@ -2712,10 +2685,10 @@ const AdminDashboard = () => {
                   
                   <div className="pt-4 border-t border-slate-100 flex gap-3">
                     <button type="submit" className="flex-1 bg-[#1E3A8A] hover:bg-[#1e3a8a] text-white px-6 py-3 rounded-xl font-bold transition-colors text-sm">
-                      {exhibitionEditItem ? 'حفظ Ø§Ù„ØªØ¹Ø¯ÙŠÙ„ات' : 'إضافة Ù„Ù„Ù…Ù†تجات'}
+                      {exhibitionEditItem ? 'حفظ التعديلات' : 'إضافة للمنتجات'}
                     </button>
                     <button type="button" onClick={() => setIsExhibitionModalOpen(false)} className="px-6 py-3 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl font-bold transition-colors text-sm">
-                      Ø¥Ù„غاء
+                      إلغاء
                     </button>
                   </div>
                 </form>
@@ -2731,51 +2704,51 @@ const AdminDashboard = () => {
           <div className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" onClick={() => setIsNewsModalOpen(false)}></div>
           <div className="bg-white rounded-3xl w-full max-w-2xl overflow-hidden relative z-10 shadow-2xl animate-scale-up flex flex-col max-h-[90vh]">
             <div className="bg-[#1E3A8A] text-white p-6 flex justify-between items-center shrink-0">
-              <h2 className="text-2xl font-black text-[#F4A217]">{editingNewsId ? 'ØªØ¹Ø¯ÙŠÙ„ Ø§Ù„خبر' : 'إضافة خبر Ø¬Ø¯ÙŠد'}</h2>
+              <h2 className="text-2xl font-black text-[#F4A217]">{editingNewsId ? 'تعديل الخبر' : 'إضافة خبر جديد'}</h2>
               <button 
                 onClick={() => setIsNewsModalOpen(false)}
                 className="w-8 h-8 flex items-center justify-center bg-white/10 hover:bg-white/20 rounded-full transition-colors font-bold"
               >
-                âœ•
+                ✕
               </button>
             </div>
             
             <div className="p-6 overflow-y-auto flex-1">
               <form onSubmit={handleSaveNews} className="space-y-5">
                 <div>
-                  <label className="block text-sm font-bold text-slate-700 mb-2">Ø¹Ù†ÙˆØ§Ù† Ø§Ù„خبر *</label>
+                  <label className="block text-sm font-bold text-slate-700 mb-2">عنوان الخبر *</label>
                   <input 
                     type="text" 
                     required
                     value={newNewsData.title}
                     onChange={(e) => setNewNewsData({...newNewsData, title: e.target.value})}
                     className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-[#1E3A8A] focus:ring-1 focus:ring-[#1E3A8A] outline-none"
-                    placeholder="Ø§Ùƒتب Ø¹Ù†ÙˆØ§Ù† Ø§Ù„خبر Ù‡Ù†ا"
+                    placeholder="اكتب عنوان الخبر هنا"
                   />
                 </div>
                 
                 <div>
-                  <label className="block text-sm font-bold text-slate-700 mb-2">Ù…Ø­ØªÙˆÙ‰ ÙˆØªÙØ§ØµÙŠÙ„ Ø§Ù„خبر *</label>
+                  <label className="block text-sm font-bold text-slate-700 mb-2">محتوى وتفاصيل الخبر *</label>
                   <textarea 
                     required
                     rows={5}
                     value={newNewsData.content}
                     onChange={(e) => setNewNewsData({...newNewsData, content: e.target.value})}
                     className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-[#1E3A8A] focus:ring-1 focus:ring-[#1E3A8A] outline-none resize-none"
-                    placeholder="Ø§Ùƒتب ØªÙØ§ØµÙŠÙ„ Ø§Ù„خبر Ù‡Ù†ا..."
+                    placeholder="اكتب تفاصيل الخبر هنا..."
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-bold text-slate-700 mb-2">رابط ØµÙˆرة Ø§Ù„خبر (Ø§Ø®ØªÙŠØ§Ø±ÙŠ)</label>
+                  <label className="block text-sm font-bold text-slate-700 mb-2">رابط صورة الخبر (اختياري)</label>
                   <input 
                     type="text" 
                     value={newNewsData.image_url}
                     onChange={(e) => setNewNewsData({...newNewsData, image_url: e.target.value})}
                     className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-[#1E3A8A] focus:ring-1 focus:ring-[#1E3A8A] outline-none"
-                    placeholder="Ù…Ø«Ø§Ù„: https://example.com/image.jpg"
+                    placeholder="مثال: https://example.com/image.jpg"
                   />
-                  <p className="text-xs text-slate-500 mt-2 font-semibold">إذا ØªØ±Ùƒت Ù‡ذا Ø§Ù„Ø­Ù‚Ù„ ÙØ§Ø±ØºØ§Ù‹ØŒ Ø³ÙŠØªÙ… Ùˆضع Ø£ÙŠÙ‚ÙˆÙ†ة Ø§ÙØªØ±Ø§Ø¶ÙŠة.</p>
+                  <p className="text-xs text-slate-500 mt-2 font-semibold">إذا تركت هذا الحقل فارغاً، سيتم وضع أيقونة افتراضية.</p>
                 </div>
                 
                 <div className="pt-6 border-t border-slate-100 flex gap-3">
@@ -2783,14 +2756,14 @@ const AdminDashboard = () => {
                     type="submit"
                     className="flex-1 bg-[#1E3A8A] hover:bg-[#1e3a8a] text-white px-6 py-3 rounded-xl font-bold transition-colors shadow-sm"
                   >
-                    {editingNewsId ? 'حفظ Ø§Ù„ØªØ¹Ø¯ÙŠÙ„ات' : 'Ù†شر Ø§Ù„خبر'}
+                    {editingNewsId ? 'حفظ التعديلات' : 'نشر الخبر'}
                   </button>
                   <button 
                     type="button"
                     onClick={() => setIsNewsModalOpen(false)}
                     className="px-6 py-3 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl font-bold transition-colors"
                   >
-                    Ø¥Ù„غاء
+                    إلغاء
                   </button>
                 </div>
               </form>
@@ -2805,12 +2778,12 @@ const AdminDashboard = () => {
           <div className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" onClick={() => setIsJobModalOpen(false)}></div>
           <div className="bg-white rounded-3xl w-full max-w-2xl overflow-hidden relative z-10 shadow-2xl animate-scale-up flex flex-col max-h-[90vh]">
             <div className="bg-[#1E3A8A] text-white p-6 flex justify-between items-center shrink-0">
-              <h2 className="text-2xl font-black text-[#F4A217]">{jobEditItem ? 'ØªØ¹Ø¯ÙŠÙ„ ÙˆØ¸ÙŠفة' : 'إضافة ÙˆØ¸ÙŠفة Ø¬Ø¯ÙŠدة'}</h2>
+              <h2 className="text-2xl font-black text-[#F4A217]">{jobEditItem ? 'تعديل وظيفة' : 'إضافة وظيفة جديدة'}</h2>
               <button 
                 onClick={() => setIsJobModalOpen(false)}
                 className="w-8 h-8 flex items-center justify-center bg-white/10 hover:bg-white/20 rounded-full transition-colors font-bold cursor-pointer"
               >
-                âœ•
+                ✕
               </button>
             </div>
             
@@ -2818,83 +2791,83 @@ const AdminDashboard = () => {
               <form onSubmit={handleSaveJob} className="space-y-4">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-xs font-bold text-slate-700 mb-2">Ø§Ù„Ù…Ø³Ù…Ù‰ Ø§Ù„ÙˆØ¸ÙŠÙÙŠ *</label>
+                    <label className="block text-xs font-bold text-slate-700 mb-2">المسمى الوظيفي *</label>
                     <input 
                       type="text" 
                       required
                       value={jobFormData.title}
                       onChange={(e) => setJobFormData({...jobFormData, title: e.target.value})}
                       className="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:border-[#1E3A8A] focus:ring-1 focus:ring-[#1E3A8A] outline-none font-semibold text-xs"
-                      placeholder="Ù…Ø«Ø§Ù„: Ù…Ù‡Ù†دس Ø¨Ø±Ù…Ø¬ÙŠات ÙˆØ§Ø¬Ù‡ات Ø£Ù…Ø§Ù…ÙŠة"
+                      placeholder="مثال: مهندس برمجيات واجهات أمامية"
                     />
                   </div>
                   <div>
-                    <label className="block text-xs font-bold text-slate-700 mb-2">Ø§Ø³Ù… Ø§Ù„Ø´Ø±Ùƒة *</label>
+                    <label className="block text-xs font-bold text-slate-700 mb-2">اسم الشركة *</label>
                     <input 
                       type="text" 
                       required
                       value={jobFormData.company}
                       onChange={(e) => setJobFormData({...jobFormData, company: e.target.value})}
                       className="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:border-[#1E3A8A] focus:ring-1 focus:ring-[#1E3A8A] outline-none font-semibold text-xs"
-                      placeholder="Ù…Ø«Ø§Ù„: TechVision Solutions"
+                      placeholder="مثال: TechVision Solutions"
                     />
                   </div>
                   <div>
-                    <label className="block text-xs font-bold text-slate-700 mb-2">Ø§Ù„Ù…ÙˆÙ‚ع Ø§Ù„Ø¬ØºØ±Ø§ÙÙŠ *</label>
+                    <label className="block text-xs font-bold text-slate-700 mb-2">الموقع الجغرافي *</label>
                     <input 
                       type="text" 
                       required
                       value={jobFormData.location}
                       onChange={(e) => setJobFormData({...jobFormData, location: e.target.value})}
                       className="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:border-[#1E3A8A] focus:ring-1 focus:ring-[#1E3A8A] outline-none font-semibold text-xs"
-                      placeholder="Ù…Ø«Ø§Ù„: Ø§Ù„Ù‚Ø±ÙŠة Ø§Ù„Ø°ÙƒÙŠØ©ØŒ Ø§Ù„Ù‚Ø§Ù‡رة"
+                      placeholder="مثال: القرية الذكية، القاهرة"
                     />
                   </div>
                   <div>
-                    <label className="block text-xs font-bold text-slate-700 mb-2">رابط Ø§Ù„شعار (Ø§Ø®ØªÙŠØ§Ø±ÙŠ)</label>
+                    <label className="block text-xs font-bold text-slate-700 mb-2">رابط الشعار (اختياري)</label>
                     <input 
                       type="text" 
                       value={jobFormData.logo}
                       onChange={(e) => setJobFormData({...jobFormData, logo: e.target.value})}
                       className="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:border-[#1E3A8A] focus:ring-1 focus:ring-[#1E3A8A] outline-none font-semibold text-xs"
-                      placeholder="Ù…Ø«Ø§Ù„: https://example.com/logo.jpg"
+                      placeholder="مثال: https://example.com/logo.jpg"
                     />
                   </div>
                   <div>
-                    <label className="block text-xs font-bold text-slate-700 mb-2">Ù†Ùˆع Ø§Ù„Ø¯ÙˆØ§Ù… *</label>
+                    <label className="block text-xs font-bold text-slate-700 mb-2">نوع الدوام *</label>
                     <select 
                       value={jobFormData.type}
                       onChange={(e) => setJobFormData({...jobFormData, type: e.target.value})}
                       className="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:border-[#1E3A8A] focus:ring-1 focus:ring-[#1E3A8A] outline-none font-bold text-xs"
                     >
-                      <option value="Ø¯ÙˆØ§Ù… ÙƒØ§Ù…Ù„">Ø¯ÙˆØ§Ù… ÙƒØ§Ù…Ù„</option>
-                      <option value="Ø¯ÙˆØ§Ù… Ø¬Ø²Ø¦ÙŠ">Ø¯ÙˆØ§Ù… Ø¬Ø²Ø¦ÙŠ</option>
-                      <option value="Ø¹Ù† بُعد (Remote)">Ø¹Ù† بُعد (Remote)</option>
-                      <option value="ØªØ¯Ø±ÙŠب (Internship)">ØªØ¯Ø±ÙŠب (Internship)</option>
+                      <option value="دوام كامل">دوام كامل</option>
+                      <option value="دوام جزئي">دوام جزئي</option>
+                      <option value="عن بُعد (Remote)">عن بُعد (Remote)</option>
+                      <option value="تدريب (Internship)">تدريب (Internship)</option>
                     </select>
                   </div>
                   <div>
-                    <label className="block text-xs font-bold text-slate-700 mb-2">Ø§Ù„خبرة Ø§Ù„Ù…Ø·Ù„Ùˆبة *</label>
+                    <label className="block text-xs font-bold text-slate-700 mb-2">الخبرة المطلوبة *</label>
                     <input 
                       type="text" 
                       required
                       value={jobFormData.experience}
                       onChange={(e) => setJobFormData({...jobFormData, experience: e.target.value})}
                       className="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:border-[#1E3A8A] focus:ring-1 focus:ring-[#1E3A8A] outline-none font-semibold text-xs"
-                      placeholder="Ù…Ø«Ø§Ù„: Ø­Ø¯ÙŠث Ø§Ù„ØªØ®Ø±Ø¬ØŒ 1-3 Ø³Ù†Ùˆات"
+                      placeholder="مثال: حديث التخرج، 1-3 سنوات"
                     />
                   </div>
                 </div>
 
                 <div>
-                  <label className="block text-xs font-bold text-slate-700 mb-2">ØªÙØ§ØµÙŠÙ„ ÙˆØ´Ø±Ùˆط Ø§Ù„ÙˆØ¸ÙŠفة *</label>
+                  <label className="block text-xs font-bold text-slate-700 mb-2">تفاصيل وشروط الوظيفة *</label>
                   <textarea 
                     required
                     rows={4}
                     value={jobFormData.details}
                     onChange={(e) => setJobFormData({...jobFormData, details: e.target.value})}
                     className="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:border-[#1E3A8A] focus:ring-1 focus:ring-[#1E3A8A] outline-none font-semibold text-xs resize-none"
-                    placeholder="Ø§Ùƒتب Ù…ØªØ·Ù„بات Ø§Ù„ÙˆØ¸ÙŠفة ÙˆÙˆصف Ø§Ù„Ø¯Ùˆر Ø¨Ø§Ù„ØªÙØµÙŠÙ„..."
+                    placeholder="اكتب متطلبات الوظيفة ووصف الدور بالتفصيل..."
                   />
                 </div>
                 
@@ -2903,14 +2876,14 @@ const AdminDashboard = () => {
                     type="submit"
                     className="flex-1 bg-[#1E3A8A] hover:bg-[#1e3a8a] text-white px-6 py-3 rounded-xl font-bold transition-colors shadow-sm cursor-pointer"
                   >
-                    {jobEditItem ? 'حفظ Ø§Ù„ØªØ¹Ø¯ÙŠÙ„ات' : 'إضافة Ø§Ù„ÙˆØ¸ÙŠفة'}
+                    {jobEditItem ? 'حفظ التعديلات' : 'إضافة الوظيفة'}
                   </button>
                   <button 
                     type="button"
                     onClick={() => setIsJobModalOpen(false)}
                     className="px-6 py-3 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl font-bold transition-colors cursor-pointer"
                   >
-                    Ø¥Ù„غاء
+                    إلغاء
                   </button>
                 </div>
               </form>
@@ -2924,5 +2897,3 @@ const AdminDashboard = () => {
 };
 
 export default AdminDashboard;
-
-
