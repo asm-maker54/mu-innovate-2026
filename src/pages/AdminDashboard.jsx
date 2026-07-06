@@ -692,30 +692,51 @@ const AdminDashboard = () => {
   };
 
   useEffect(() => {
-    // Check if already authenticated via session
-    const authStatus = sessionStorage.getItem('isAdminAuthenticated');
-    if (authStatus === 'true') {
-      setIsAuthenticated(true);
-      const usernameKey = sessionStorage.getItem('adminUsername');
-      if (usernameKey) {
-        let account = ADMIN_ACCOUNTS[usernameKey];
-        if (!account) {
-          const customAdmins = JSON.parse(localStorage.getItem('custom_admins') || '[]');
-          const found = customAdmins.find(a => a.username.toLowerCase() === usernameKey);
-          if (found) account = { ...found, role: 'custom_admin' };
-        }
-        if (account) {
-          setAdminRole(account.role);
-          if (account.role === 'superAdmin') {
-            setAdminPermissions(['overview', 'projects', 'research', 'jobs', 'news', 'digital_mentors', 'registrations', 'admins', 'profile']);
-          } else if (account.role === 'academic') {
-            setAdminPermissions(['overview', 'projects', 'research', 'registrations', 'profile']);
-          } else {
-            setAdminPermissions(account.permissions || []);
+    const checkAuth = async () => {
+      const authStatus = sessionStorage.getItem('isAdminAuthenticated');
+      if (authStatus === 'true') {
+        setIsAuthenticated(true);
+        const usernameKey = sessionStorage.getItem('adminUsername');
+        if (usernameKey) {
+          let account = ADMIN_ACCOUNTS[usernameKey];
+          
+          if (!account && isSupabaseConfigured) {
+            try {
+              const { data, error } = await supabase.from('admins').select('*').eq('username', usernameKey).single();
+              if (!error && data) {
+                account = { role: data.role, permissions: data.permissions || [], displayName: data.display_name, title: data.title };
+              }
+            } catch(e) {}
+          }
+          
+          if (!account) {
+            const customAdmins = JSON.parse(localStorage.getItem('custom_admins') || '[]');
+            const found = customAdmins.find(a => a.username.toLowerCase() === usernameKey);
+            if (found) account = { ...found, role: 'custom_admin' };
+          }
+          
+          if (account) {
+            setAdminRole(account.role);
+            if (account.role === 'superAdmin') {
+              setAdminPermissions(['overview', 'graduation', 'research', 'news', 'jobs', 'exhibition_innovations', 'exhibition_products', 'speakers', 'startups', 'investors', 'mentors', 'digital_mentors', 'researchers', 'partners', 'volunteers', 'profile', 'admins']);
+            } else if (account.role === 'academic') {
+              setAdminPermissions(['overview', 'graduation', 'research', 'researchers', 'profile']);
+            } else {
+              setAdminPermissions(account.permissions || []);
+            }
+            
+            // Fix Profile Loading
+            const savedProfile = localStorage.getItem('admin_profile_' + usernameKey);
+            if (savedProfile) {
+              setAdminProfile(JSON.parse(savedProfile));
+            } else if (account.displayName || account.title) {
+              setAdminProfile({ name: account.displayName || account.name || 'أدمن', title: account.title || '', avatar: account.avatar || '' });
+            }
           }
         }
       }
-    }
+    };
+    checkAuth();
   }, []);
 
   useEffect(() => {
@@ -724,67 +745,86 @@ const AdminDashboard = () => {
     }
   }, [isAuthenticated]);
 
-  const handleLogin = (e) => {
+  const handleLogin = async (e) => {
     e.preventDefault();
     const inputValue = username.trim().toLowerCase();
     
-    let accountKey = inputValue;
-    let account = ADMIN_ACCOUNTS[accountKey]; // Exact username match in main accounts
-    
-    // If not found by exact username, try displayName or title in ADMIN_ACCOUNTS
-    if (!account) {
-      for (const [k, v] of Object.entries(ADMIN_ACCOUNTS)) {
-        if (
-          (v.displayName && v.displayName.trim().toLowerCase() === inputValue) ||
-          (v.title && v.title.trim().toLowerCase() === inputValue)
-        ) {
-          account = v;
-          accountKey = k;
-          break;
-        }
-      }
-    }
+    setLoading(true);
+    try {
+      let account = null;
+      let accountKey = inputValue;
 
-    // If STILL not found in main accounts, check custom admins
-    if (!account) {
-      const customAdmins = JSON.parse(localStorage.getItem('custom_admins') || '[]');
-      let found = customAdmins.find(a => 
-        a.username.toLowerCase() === inputValue || 
-        (a.displayName && a.displayName.trim().toLowerCase() === inputValue) ||
-        (a.title && a.title.trim().toLowerCase() === inputValue)
-      );
-      if (found) {
-        account = { ...found, role: 'custom_admin' };
-        accountKey = found.username.toLowerCase();
-      }
-    }
-
-    if (account) {
-      const savedPw = localStorage.getItem('admin_password_' + accountKey);
-      const validPassword = savedPw || account.password;
-      
-      if (password === validPassword || password === account.password) {
-        setIsAuthenticated(true);
-        setAdminRole(account.role);
-        
-        if (account.role === 'superAdmin') {
-          setAdminPermissions(['overview', 'graduation', 'research', 'news', 'jobs', 'exhibition_innovations', 'exhibition_products', 'speakers', 'startups', 'investors', 'mentors', 'digital_mentors', 'researchers', 'partners', 'volunteers', 'profile', 'admins']);
-        } else if (account.role === 'academic') {
-          setAdminPermissions(['overview', 'graduation', 'research', 'researchers', 'profile']);
+      if (isSupabaseConfigured) {
+        // Try exact username
+        const { data, error } = await supabase.from('admins').select('*').eq('username', inputValue).single();
+        if (!error && data) {
+          account = { password: data.password, role: data.role, displayName: data.display_name, title: data.title, permissions: data.permissions || [] };
         } else {
-          setAdminPermissions(account.permissions || []);
+          // Try display_name or title
+          const { data: searchData, error: searchErr } = await supabase.from('admins').select('*')
+            .or(`display_name.eq."${inputValue}",title.eq."${inputValue}"`).limit(1);
+          if (!searchErr && searchData && searchData.length > 0) {
+            const d = searchData[0];
+            account = { password: d.password, role: d.role, displayName: d.display_name, title: d.title, permissions: d.permissions || [] };
+            accountKey = d.username;
+          }
         }
-
-        const savedProfile = localStorage.getItem('admin_profile_' + accountKey);
-        const loadedProfile = savedProfile ? JSON.parse(savedProfile) : { name: account.displayName, title: account.title, avatar: account.avatar || '' };
-        setAdminProfile(loadedProfile);
-        sessionStorage.setItem('isAdminAuthenticated', 'true');
-        sessionStorage.setItem('adminUsername', accountKey);
-        setLoginError('');
-        return;
       }
+
+      // Fallback
+      if (!account) {
+        account = ADMIN_ACCOUNTS[accountKey];
+        if (!account) {
+          for (const [k, v] of Object.entries(ADMIN_ACCOUNTS)) {
+            if ((v.displayName && v.displayName.trim().toLowerCase() === inputValue) || (v.title && v.title.trim().toLowerCase() === inputValue)) {
+              account = v;
+              accountKey = k;
+              break;
+            }
+          }
+        }
+        if (!account) {
+          const customAdmins = JSON.parse(localStorage.getItem('custom_admins') || '[]');
+          let found = customAdmins.find(a => a.username.toLowerCase() === inputValue || (a.displayName && a.displayName.trim().toLowerCase() === inputValue) || (a.title && a.title.trim().toLowerCase() === inputValue));
+          if (found) {
+            account = { ...found, role: 'custom_admin' };
+            accountKey = found.username.toLowerCase();
+          }
+        }
+      }
+
+      if (account) {
+        const savedPw = localStorage.getItem('admin_password_' + accountKey);
+        const validPassword = savedPw || account.password;
+        
+        if (password === validPassword || password === account.password) {
+          setIsAuthenticated(true);
+          setAdminRole(account.role);
+          
+          if (account.role === 'superAdmin') {
+            setAdminPermissions(['overview', 'graduation', 'research', 'news', 'jobs', 'exhibition_innovations', 'exhibition_products', 'speakers', 'startups', 'investors', 'mentors', 'digital_mentors', 'researchers', 'partners', 'volunteers', 'profile', 'admins']);
+          } else if (account.role === 'academic') {
+            setAdminPermissions(['overview', 'graduation', 'research', 'researchers', 'profile']);
+          } else {
+            setAdminPermissions(account.permissions || []);
+          }
+
+          const savedProfile = localStorage.getItem('admin_profile_' + accountKey);
+          const loadedProfile = savedProfile ? JSON.parse(savedProfile) : { name: account.displayName || 'أدمن', title: account.title || '', avatar: account.avatar || '' };
+          setAdminProfile(loadedProfile);
+          sessionStorage.setItem('isAdminAuthenticated', 'true');
+          sessionStorage.setItem('adminUsername', accountKey);
+          setLoginError('');
+          return;
+        }
+      }
+      setLoginError('اسم المستخدم أو كلمة المرور غير صحيحة!');
+    } catch (err) {
+      console.error(err);
+      setLoginError('حدث خطأ أثناء الاتصال بالخادم.');
+    } finally {
+      setLoading(false);
     }
-    setLoginError('اسم المستخدم أو كلمة المرور غير صحيحة!');
   };
 
   const handleLogout = () => {
@@ -794,13 +834,33 @@ const AdminDashboard = () => {
     sessionStorage.removeItem('adminUsername');
   };
 
-  const handleSaveAdmin = (e) => {
+  const handleSaveAdmin = async (e) => {
     e.preventDefault();
     if (!adminForm.username || !adminForm.password) return alert('يرجى إدخال اسم المستخدم وكلمة المرور');
     const existing = customAdmins.find(a => a.username.toLowerCase() === adminForm.username.toLowerCase()) || ADMIN_ACCOUNTS[adminForm.username.toLowerCase()];
     if (existing) return alert('اسم المستخدم مسجل مسبقاً!');
     
     const newAdmin = { ...adminForm, id: Date.now().toString() };
+    
+    if (isSupabaseConfigured) {
+      const { data, error } = await supabase.from('admins').insert([{
+        username: newAdmin.username.toLowerCase(),
+        password: newAdmin.password,
+        display_name: newAdmin.displayName,
+        title: newAdmin.title,
+        role: 'custom_admin',
+        permissions: newAdmin.permissions
+      }]).select();
+      
+      if (error) {
+        console.error(error);
+        return alert('حدث خطأ أثناء حفظ الإدارة في قاعدة البيانات.');
+      }
+      if (data && data.length > 0) {
+        newAdmin.id = data[0].id;
+      }
+    }
+
     const updated = [...customAdmins, newAdmin];
     setCustomAdmins(updated);
     localStorage.setItem('custom_admins', JSON.stringify(updated));
@@ -808,8 +868,24 @@ const AdminDashboard = () => {
     alert('تم إنشاء حساب الإدارة بنجاح!');
   };
 
-  const handleDeleteAdmin = (id) => {
+  const handleDeleteAdmin = async (id) => {
     if (window.confirm('هل أنت متأكد من حذف هذا الحساب نهائياً؟')) {
+      if (isSupabaseConfigured) {
+        const adminToDelete = customAdmins.find(a => a.id === id);
+        if (adminToDelete && typeof adminToDelete.id !== 'string') {
+          // If it's a numeric ID (from Supabase UUID or DB serial), we delete by ID or Username
+          const { error } = await supabase.from('admins').delete().eq('id', id);
+          if (error) {
+            console.error(error);
+            return alert('حدث خطأ أثناء الحذف من قاعدة البيانات.');
+          }
+        } else if (adminToDelete) {
+          // It might be a string ID (Date.now()) from local, let's try by username just in case
+          const { error } = await supabase.from('admins').delete().eq('username', adminToDelete.username);
+          if (error) console.error(error);
+        }
+      }
+
       const updated = customAdmins.filter(a => a.id !== id);
       setCustomAdmins(updated);
       localStorage.setItem('custom_admins', JSON.stringify(updated));
@@ -1080,6 +1156,25 @@ const AdminDashboard = () => {
           console.error("Error fetching news from supabase:", nErr);
           setNewsList(initialMockNews);
         }
+
+        // Fetch Custom Admins
+        const { data: cAdmins, error: cErr } = await supabase
+          .from('admins')
+          .select('*')
+          .eq('role', 'custom_admin')
+          .order('created_at', { ascending: false });
+        if (!cErr && cAdmins) {
+          const mappedAdmins = cAdmins.map(a => ({
+            id: a.id,
+            username: a.username,
+            password: a.password,
+            displayName: a.display_name,
+            title: a.title,
+            permissions: a.permissions || []
+          }));
+          setCustomAdmins(mappedAdmins);
+        }
+
       } else {
         // Use Mock Data merged with localStorage Data for offline/demo persistence
         const localRegs = JSON.parse(localStorage.getItem('local_registrations') || '[]');
