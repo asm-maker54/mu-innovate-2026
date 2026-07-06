@@ -100,12 +100,27 @@ const mockRegistrations = [
   }
 ];
 
+// Default admin accounts
+const ADMIN_ACCOUNTS = {
+  admin: { password: 'admin123', role: 'superAdmin', displayName: 'أدمن القمة الرئيسي', title: 'رئيس لجنة الإشراف العام' },
+  academic: { password: 'acad123', role: 'academic', displayName: 'أدمن المشروعات والبحوث', title: 'مسؤول الأكاديمية العلمية' },
+};
+
 const AdminDashboard = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [loginError, setLoginError] = useState('');
-  
+  const [adminRole, setAdminRole] = useState('superAdmin');
   const [activeTab, setActiveTab] = useState('overview');
+
+  const defaultProfile = { name: 'أدمن القمة الرئيسي', title: 'رئيس لجنة الإشراف العام', avatar: '' };
+  const [adminProfile, setAdminProfile] = useState(() => {
+    try { return JSON.parse(localStorage.getItem('admin_profile')) || defaultProfile; }
+    catch { return defaultProfile; }
+  });
+  const [profileForm, setProfileForm] = useState({ name: '', title: '', avatar: '', newPassword: '', currentPassword: '' });
+  const [profileSaved, setProfileSaved] = useState(false);
   
   // Database state
   const [gradProjects, setGradProjects] = useState([]);
@@ -119,7 +134,7 @@ const AdminDashboard = () => {
   
   // News modal state
   const [isNewsModalOpen, setIsNewsModalOpen] = useState(false);
-  const [newNewsData, setNewNewsData] = useState({ title: '', content: '', image_url: '', uploader_name: 'أدمن النظام' });
+  const [newNewsData, setNewNewsData] = useState({ title: '', content: '', image_url: '', uploader_name: adminProfile.name });
   const [selectedType, setSelectedType] = useState(null); // 'graduation', 'research', 'registration'
   
   const [searchQuery, setSearchQuery] = useState('');
@@ -553,7 +568,7 @@ const AdminDashboard = () => {
         
         setIsNewsModalOpen(false);
         setEditingNewsId(null);
-        setNewNewsData({ title: '', content: '', image_url: '', uploader_name: 'أدمن النظام' });
+        setNewNewsData({ title: '', content: '', image_url: '', uploader_name: adminProfile.name });
       } else {
         alert("حدث خطأ أثناء حفظ الخبر: " + err.message);
       }
@@ -621,18 +636,53 @@ const AdminDashboard = () => {
 
   const handleLogin = (e) => {
     e.preventDefault();
-    if (password === 'admin123' || password === 'admin@mu2026') {
+    const usernameKey = username.trim().toLowerCase();
+    const account = ADMIN_ACCOUNTS[usernameKey];
+    const savedPw = localStorage.getItem('admin_password_' + usernameKey);
+    const validPassword = savedPw || account?.password;
+    if (account && password === validPassword) {
       setIsAuthenticated(true);
+      setAdminRole(account.role);
+      const savedProfile = localStorage.getItem('admin_profile_' + usernameKey);
+      const loadedProfile = savedProfile ? JSON.parse(savedProfile) : { name: account.displayName, title: account.title, avatar: '' };
+      setAdminProfile(loadedProfile);
       sessionStorage.setItem('isAdminAuthenticated', 'true');
+      sessionStorage.setItem('adminUsername', usernameKey);
       setLoginError('');
     } else {
-      setLoginError('كلمة المرور غير صحيحة!');
+      setLoginError('اسم المستخدم أو كلمة المرور غير صحيحة!');
     }
   };
 
   const handleLogout = () => {
     setIsAuthenticated(false);
+    setAdminRole('superAdmin');
     sessionStorage.removeItem('isAdminAuthenticated');
+    sessionStorage.removeItem('adminUsername');
+  };
+
+  const handleSaveProfile = (e) => {
+    e.preventDefault();
+    const usernameKey = sessionStorage.getItem('adminUsername') || 'admin';
+    const account = ADMIN_ACCOUNTS[usernameKey];
+    const savedPw = localStorage.getItem('admin_password_' + usernameKey) || account?.password;
+    if (profileForm.currentPassword && profileForm.currentPassword !== savedPw) {
+      alert('كلمة المرور الحالية غير صحيحة!');
+      return;
+    }
+    const updated = {
+      name: profileForm.name || adminProfile.name,
+      title: profileForm.title || adminProfile.title,
+      avatar: profileForm.avatar || adminProfile.avatar
+    };
+    setAdminProfile(updated);
+    localStorage.setItem('admin_profile_' + usernameKey, JSON.stringify(updated));
+    if (profileForm.newPassword && profileForm.newPassword.length >= 6) {
+      localStorage.setItem('admin_password_' + usernameKey, profileForm.newPassword);
+    }
+    setProfileForm({ name: '', title: '', avatar: '', newPassword: '', currentPassword: '' });
+    setProfileSaved(true);
+    setTimeout(() => setProfileSaved(false), 3000);
   };
 
   const fetchData = async () => {
