@@ -143,6 +143,7 @@ const AdminDashboard = () => {
   // Custom Admins State
   const [customAdmins, setCustomAdmins] = useState(() => JSON.parse(localStorage.getItem('custom_admins') || '[]'));
   const [adminForm, setAdminForm] = useState({ username: '', password: '', displayName: '', title: '', permissions: [] });
+  const [editingAdminUsername, setEditingAdminUsername] = useState(null);
 
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState('الكل');
@@ -836,59 +837,141 @@ const AdminDashboard = () => {
 
   const handleSaveAdmin = async (e) => {
     e.preventDefault();
-    if (!adminForm.username || !adminForm.password) return alert('يرجى إدخال اسم المستخدم وكلمة المرور');
-    const existing = customAdmins.find(a => a.username.toLowerCase() === adminForm.username.toLowerCase()) || ADMIN_ACCOUNTS[adminForm.username.toLowerCase()];
-    if (existing) return alert('اسم المستخدم مسجل مسبقاً!');
+    if (!adminForm.username) return alert('يرجى إدخال اسم المستخدم');
     
+    // If we are changing the username, check if the new one already exists
+    if (!editingAdminUsername || editingAdminUsername.toLowerCase() !== adminForm.username.toLowerCase()) {
+      const existing = customAdmins.find(a => a.username.toLowerCase() === adminForm.username.toLowerCase()) || ADMIN_ACCOUNTS[adminForm.username.toLowerCase()];
+      if (existing) return alert('اسم المستخدم مسجل مسبقاً!');
+    }
+    
+    if (!editingAdminUsername && !adminForm.password) {
+      return alert('يرجى إدخال كلمة المرور للحساب الجديد');
+    }
+
     const newAdmin = { ...adminForm, id: Date.now().toString() };
     
     if (isSupabaseConfigured) {
-      const { data, error } = await supabase.from('admins').insert([{
-        username: newAdmin.username.toLowerCase(),
-        password: newAdmin.password,
-        display_name: newAdmin.displayName,
-        title: newAdmin.title,
-        role: 'custom_admin',
-        permissions: newAdmin.permissions
-      }]).select();
-      
-      if (error) {
-        console.error(error);
-        return alert('حدث خطأ أثناء حفظ الإدارة في قاعدة البيانات.');
-      }
-      if (data && data.length > 0) {
-        newAdmin.id = data[0].id;
+      if (editingAdminUsername) {
+        // UPDATE existing
+        const updatePayload = {
+          username: newAdmin.username.toLowerCase(),
+          display_name: newAdmin.displayName,
+          title: newAdmin.title,
+          permissions: newAdmin.permissions
+        };
+        if (newAdmin.password) updatePayload.password = newAdmin.password; // only update if provided
+
+        const { data: existingData } = await supabase.from('admins').select('id, role').eq('username', editingAdminUsername).single();
+        
+        if (existingData) {
+          const { error } = await supabase.from('admins').update(updatePayload).eq('username', editingAdminUsername);
+          if (error) {
+            console.error(error);
+            return alert('حدث خطأ أثناء تحديث الإدارة في قاعدة البيانات.');
+          }
+          newAdmin.id = existingData.id;
+        } else {
+          // If it was a default account not yet in Supabase, we insert it
+          const { data, error } = await supabase.from('admins').insert([{
+            username: newAdmin.username.toLowerCase(),
+            password: newAdmin.password || '123456', // Fallback if they didn't set one
+            display_name: newAdmin.displayName,
+            title: newAdmin.title,
+            role: 'custom_admin',
+            permissions: newAdmin.permissions
+          }]).select();
+          if (error) {
+             console.error(error);
+             return alert('حدث خطأ أثناء حفظ الإدارة في قاعدة البيانات.');
+          }
+          if (data && data.length > 0) newAdmin.id = data[0].id;
+        }
+      } else {
+        // INSERT new
+        const { data, error } = await supabase.from('admins').insert([{
+          username: newAdmin.username.toLowerCase(),
+          password: newAdmin.password,
+          display_name: newAdmin.displayName,
+          title: newAdmin.title,
+          role: 'custom_admin',
+          permissions: newAdmin.permissions
+        }]).select();
+        
+        if (error) {
+          console.error(error);
+          return alert('حدث خطأ أثناء حفظ الإدارة في قاعدة البيانات.');
+        }
+        if (data && data.length > 0) {
+          newAdmin.id = data[0].id;
+        }
       }
     }
 
-    const updated = [...customAdmins, newAdmin];
+    let updated;
+    if (editingAdminUsername) {
+      // Find and replace, or if it was default, just push
+      const existsIndex = customAdmins.findIndex(a => a.username.toLowerCase() === editingAdminUsername.toLowerCase());
+      if (existsIndex >= 0) {
+        updated = [...customAdmins];
+        updated[existsIndex] = { ...updated[existsIndex], ...newAdmin, password: newAdmin.password || updated[existsIndex].password };
+      } else {
+        updated = [...customAdmins, newAdmin];
+      }
+    } else {
+      updated = [...customAdmins, newAdmin];
+    }
+    
     setCustomAdmins(updated);
     localStorage.setItem('custom_admins', JSON.stringify(updated));
     setAdminForm({ username: '', password: '', displayName: '', title: '', permissions: [] });
-    alert('تم إنشاء حساب الإدارة بنجاح!');
+    setEditingAdminUsername(null);
+    alert(editingAdminUsername ? 'تم تحديث حساب الإدارة بنجاح!' : 'تم إنشاء حساب الإدارة بنجاح!');
   };
 
-  const handleDeleteAdmin = async (id) => {
+  const handleEditAdmin = (admin) => {
+    setEditingAdminUsername(admin.username);
+    setAdminForm({
+      username: admin.username,
+      password: '', // don't show existing password
+      displayName: admin.displayName || '',
+      title: admin.title || '',
+      permissions: admin.permissions || []
+    });
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const handleCancelEdit = () => {
+    setEditingAdminUsername(null);
+    setAdminForm({ username: '', password: '', displayName: '', title: '', permissions: [] });
+  };
+
+  const handleDeleteAdmin = async (id, username, isDefault) => {
     if (window.confirm('هل أنت متأكد من حذف هذا الحساب نهائياً؟')) {
       if (isSupabaseConfigured) {
-        const adminToDelete = customAdmins.find(a => a.id === id);
-        if (adminToDelete && typeof adminToDelete.id !== 'string') {
-          // If it's a numeric ID (from Supabase UUID or DB serial), we delete by ID or Username
+        if (!isDefault) {
           const { error } = await supabase.from('admins').delete().eq('id', id);
           if (error) {
             console.error(error);
             return alert('حدث خطأ أثناء الحذف من قاعدة البيانات.');
           }
-        } else if (adminToDelete) {
-          // It might be a string ID (Date.now()) from local, let's try by username just in case
-          const { error } = await supabase.from('admins').delete().eq('username', adminToDelete.username);
-          if (error) console.error(error);
+        } else {
+           const { error } = await supabase.from('admins').delete().eq('username', username);
+           if (error) console.error(error);
         }
       }
 
-      const updated = customAdmins.filter(a => a.id !== id);
+      if (isDefault) {
+        const deletedDefaults = JSON.parse(localStorage.getItem('deleted_default_admins') || '[]');
+        localStorage.setItem('deleted_default_admins', JSON.stringify([...deletedDefaults, username.toLowerCase()]));
+      }
+
+      const updated = customAdmins.filter(a => a.id !== id && a.username.toLowerCase() !== username.toLowerCase());
       setCustomAdmins(updated);
       localStorage.setItem('custom_admins', JSON.stringify(updated));
+      if (editingAdminUsername === username) {
+         handleCancelEdit();
+      }
     }
   };
 
@@ -1929,16 +2012,16 @@ const AdminDashboard = () => {
                     {/* Add Admin Form */}
                     <div className="lg:col-span-1">
                       <form onSubmit={handleSaveAdmin} className="bg-white rounded-3xl border border-slate-100 shadow-sm p-6 space-y-5">
-                        <h4 className="font-black text-slate-800 text-sm border-b border-slate-100 pb-3">إضافة مدير جديد</h4>
+                        <h4 className="font-black text-slate-800 text-sm border-b border-slate-100 pb-3">{editingAdminUsername ? "تعديل بيانات المدير" : "إضافة مدير جديد"}</h4>
                         
                         <div className="space-y-4">
                           <div>
                             <label className="block text-xs font-bold text-slate-500 mb-2">اسم المستخدم (للدخول) *</label>
-                            <input type="text" required value={adminForm.username} onChange={e => setAdminForm({...adminForm, username: e.target.value})} className="w-full px-4 py-2 rounded-xl border border-slate-200 focus:ring-2 focus:ring-[#1E3A8A] outline-none text-xs font-semibold" placeholder="مثال: hr_admin" />
+                            <input type="text" required readOnly={!!editingAdminUsername} value={adminForm.username} onChange={e => setAdminForm({...adminForm, username: e.target.value})} className="w-full px-4 py-2 rounded-xl border border-slate-200 focus:ring-2 focus:ring-[#1E3A8A] outline-none text-xs font-semibold" placeholder="مثال: hr_admin" />
                           </div>
                           <div>
                             <label className="block text-xs font-bold text-slate-500 mb-2">كلمة المرور *</label>
-                            <input type="password" required value={adminForm.password} onChange={e => setAdminForm({...adminForm, password: e.target.value})} className="w-full px-4 py-2 rounded-xl border border-slate-200 focus:ring-2 focus:ring-[#1E3A8A] outline-none text-xs font-semibold" placeholder="••••••••" />
+                            <input type="password" required={!editingAdminUsername} value={adminForm.password} onChange={e => setAdminForm({...adminForm, password: e.target.value})} className="w-full px-4 py-2 rounded-xl border border-slate-200 focus:ring-2 focus:ring-[#1E3A8A] outline-none text-xs font-semibold" placeholder={editingAdminUsername ? "اتركه فارغاً للاحتفاظ بالكلمة الحالية" : "••••••••"} />
                           </div>
                           <div>
                             <label className="block text-xs font-bold text-slate-500 mb-2">الاسم الظاهر</label>
