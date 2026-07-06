@@ -2407,6 +2407,154 @@ const AdminDashboard = () => {
                 </div>
               )}
 
+              {/* Digital Mentors Tab */}
+              {activeTab === 'digital_mentors' && (
+                <div className="space-y-6 animate-fade-in">
+                  <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-slate-50 p-6 rounded-2xl border border-slate-200">
+                    <div>
+                      <h2 className="text-xl font-bold text-[#1E3A8A]">شبكة المدربين الرقمية</h2>
+                      <p className="text-sm text-slate-500 mt-1">إدارة المدربين المعروضين في صفحة الشبكة الرقمية.</p>
+                    </div>
+                    <button
+                      onClick={() => {
+                        setEditingMentorId(null);
+                        setNewMentorData({ name: '', title: '', specialty: '', category: 'web', rating: 5.0, sessions: 0, email: '', image: '' });
+                        setIsMentorModalOpen(true);
+                      }}
+                      className="bg-[#1E3A8A] hover:bg-[#1E3A8A]/90 text-white px-5 py-2.5 rounded-xl text-sm font-bold transition-all shadow-md flex items-center gap-2 cursor-pointer"
+                    >
+                      <Plus className="h-5 w-5" />
+                      إضافة مدرب جديد
+                    </button>
+                  </div>
+
+                  <div className="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
+                    <div className="p-6 overflow-x-auto">
+                      <table className="w-full text-right min-w-[800px]">
+                        <thead>
+                          <tr className="bg-slate-50 border-b border-slate-100 text-slate-500 text-sm">
+                            <th className="py-3 px-4 font-bold rounded-tr-xl">اسم المدرب</th>
+                            <th className="py-3 px-4 font-bold">المسمى الوظيفي</th>
+                            <th className="py-3 px-4 font-bold">التخصص</th>
+                            <th className="py-3 px-4 font-bold">التقييم / الجلسات</th>
+                            <th className="py-3 px-4 font-bold rounded-tl-xl text-center">إجراءات</th>
+                          </tr>
+                        </thead>
+                        <tbody className="divide-y divide-slate-100">
+                          {digitalMentors.length === 0 ? (
+                            <tr><td colSpan="5" className="text-center py-8 text-slate-500">لا يوجد مدربين مضافين بعد</td></tr>
+                          ) : (
+                            digitalMentors.map(m => (
+                              <tr key={m.id} className="hover:bg-slate-50 transition-colors">
+                                <td className="py-4 px-4">
+                                  <div className="flex items-center gap-3">
+                                    <img src={m.image || 'https://via.placeholder.com/150'} alt={m.name} className="w-10 h-10 rounded-full object-cover" />
+                                    <div className="font-bold text-[#1E3A8A]">{m.name}</div>
+                                  </div>
+                                </td>
+                                <td className="py-4 px-4 text-slate-600 text-sm">{m.title}</td>
+                                <td className="py-4 px-4 text-slate-600 text-sm">{m.specialty}</td>
+                                <td className="py-4 px-4 text-sm">
+                                  <div className="flex flex-col">
+                                    <span className="text-amber-500 font-bold">⭐ {m.rating}</span>
+                                    <span className="text-slate-400 text-xs">{m.sessions} جلسة</span>
+                                  </div>
+                                </td>
+                                <td className="py-4 px-4">
+                                  <div className="flex items-center justify-center gap-2">
+                                    <button
+                                      onClick={() => {
+                                        setEditingMentorId(m.id);
+                                        setNewMentorData({ name: m.name, title: m.title, specialty: m.specialty, category: m.category, rating: m.rating, sessions: m.sessions, email: m.email || '', image: m.image || '' });
+                                        setIsMentorModalOpen(true);
+                                      }}
+                                      className="p-2 text-blue-500 hover:bg-blue-50 rounded-lg transition-colors cursor-pointer"
+                                      title="تعديل"
+                                    >
+                                      <Edit className="h-5 w-5" />
+                                    </button>
+                                    <button
+                                      onClick={() => handleDeleteMentor(m.id)}
+                                      className="p-2 text-red-500 hover:bg-red-50 rounded-lg transition-colors cursor-pointer"
+                                      title="حذف"
+                                    >
+                                      <Trash className="h-5 w-5" />
+                                    </button>
+                                  </div>
+                                </td>
+                              </tr>
+                            ))
+                          )}
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+
+                  {/* Mentor Modal */}
+                  {isMentorModalOpen && (
+                    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm">
+                      <div className="bg-white rounded-3xl shadow-xl w-full max-w-2xl overflow-hidden" dir="rtl">
+                        <div className="p-6 border-b border-slate-100 flex justify-between items-center bg-gradient-to-l from-slate-50 to-white">
+                          <h3 className="text-xl font-bold text-[#1E3A8A]">
+                            {editingMentorId ? 'تعديل بيانات المدرب' : 'إضافة مدرب جديد'}
+                          </h3>
+                          <button onClick={() => setIsMentorModalOpen(false)} className="text-slate-400 hover:text-red-500 transition-colors p-2 cursor-pointer">✕</button>
+                        </div>
+                        <form onSubmit={handleSaveMentor} className="p-6">
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                            <div>
+                              <label className="block text-sm font-bold text-slate-700 mb-1">اسم المدرب <span className="text-red-500">*</span></label>
+                              <input type="text" value={newMentorData.name} onChange={e => setNewMentorData({...newMentorData, name: e.target.value})} required className="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:ring-2 focus:ring-[#1E3A8A] outline-none" />
+                            </div>
+                            <div>
+                              <label className="block text-sm font-bold text-slate-700 mb-1">المسمى الوظيفي <span className="text-red-500">*</span></label>
+                              <input type="text" value={newMentorData.title} onChange={e => setNewMentorData({...newMentorData, title: e.target.value})} required className="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:ring-2 focus:ring-[#1E3A8A] outline-none" />
+                            </div>
+                            <div>
+                              <label className="block text-sm font-bold text-slate-700 mb-1">التخصص الدقيق <span className="text-red-500">*</span></label>
+                              <input type="text" value={newMentorData.specialty} onChange={e => setNewMentorData({...newMentorData, specialty: e.target.value})} required className="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:ring-2 focus:ring-[#1E3A8A] outline-none" />
+                            </div>
+                            <div>
+                              <label className="block text-sm font-bold text-slate-700 mb-1">القسم / الفئة</label>
+                              <select value={newMentorData.category} onChange={e => setNewMentorData({...newMentorData, category: e.target.value})} className="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:ring-2 focus:ring-[#1E3A8A] outline-none">
+                                <option value="ai">الذكاء الاصطناعي وتعلم الآلة</option>
+                                <option value="marketing">التسويق الإلكتروني</option>
+                                <option value="business">تطوير الأعمال</option>
+                                <option value="web">برمجة وتطوير</option>
+                                <option value="sustainability">الاستدامة والبيئة</option>
+                                <option value="design">التصميم (UI/UX)</option>
+                              </select>
+                            </div>
+                            <div>
+                              <label className="block text-sm font-bold text-slate-700 mb-1">التقييم (من 5)</label>
+                              <input type="number" step="0.1" max="5" min="1" value={newMentorData.rating} onChange={e => setNewMentorData({...newMentorData, rating: parseFloat(e.target.value)})} className="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:ring-2 focus:ring-[#1E3A8A] outline-none" />
+                            </div>
+                            <div>
+                              <label className="block text-sm font-bold text-slate-700 mb-1">عدد الجلسات التوجيهية</label>
+                              <input type="number" min="0" value={newMentorData.sessions} onChange={e => setNewMentorData({...newMentorData, sessions: parseInt(e.target.value, 10)})} className="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:ring-2 focus:ring-[#1E3A8A] outline-none" />
+                            </div>
+                            <div className="md:col-span-2">
+                              <label className="block text-sm font-bold text-slate-700 mb-1">البريد الإلكتروني</label>
+                              <input type="email" value={newMentorData.email} onChange={e => setNewMentorData({...newMentorData, email: e.target.value})} className="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:ring-2 focus:ring-[#1E3A8A] outline-none text-left" dir="ltr" />
+                            </div>
+                            <div className="md:col-span-2">
+                              <label className="block text-sm font-bold text-slate-700 mb-1">رابط الصورة الشخصية</label>
+                              <input type="url" value={newMentorData.image} onChange={e => setNewMentorData({...newMentorData, image: e.target.value})} placeholder="https://..." className="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:ring-2 focus:ring-[#1E3A8A] outline-none text-left" dir="ltr" />
+                            </div>
+                          </div>
+                          <div className="flex justify-end gap-3 pt-4 border-t border-slate-100">
+                            <button type="button" onClick={() => setIsMentorModalOpen(false)} className="px-5 py-2.5 rounded-xl text-slate-600 font-bold hover:bg-slate-100 transition-colors cursor-pointer">إلغاء</button>
+                            <button type="submit" disabled={loading} className="bg-[#1E3A8A] hover:bg-[#1E3A8A]/90 text-white px-8 py-2.5 rounded-xl font-bold transition-all shadow-md disabled:opacity-50 cursor-pointer">
+                              {loading ? 'جاري الحفظ...' : 'حفظ البيانات'}
+                            </button>
+                          </div>
+                        </form>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
+
               {/* --- JOBS TAB --- */}
               {activeTab === 'jobs' && !selectedItem && (
                 <div className="space-y-6 animate-fade-in">
