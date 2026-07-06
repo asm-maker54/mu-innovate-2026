@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { 
   Users, Award, BookOpen, Download, Search, CheckCircle, Clock, 
-  AlertTriangle, Eye, ArrowLeft, RefreshCw, KeyRound, BarChart2,
+  AlertTriangle, Eye, EyeOff, ArrowLeft, RefreshCw, KeyRound, BarChart2,
   FileText, Briefcase, GraduationCap, Presentation, Newspaper,
   Trash, FileSpreadsheet, Sparkles, ShoppingBag, Plus, Edit, Upload
 } from 'lucide-react';
@@ -111,6 +111,7 @@ const AdminDashboard = () => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [loginError, setLoginError] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [adminRole, setAdminRole] = useState('superAdmin');
   const [adminPermissions, setAdminPermissions] = useState([]);
   const [activeTab, setActiveTab] = useState('overview');
@@ -1514,14 +1515,21 @@ const AdminDashboard = () => {
                       <KeyRound className="h-5 w-5 text-slate-400" />
                     </div>
                     <input 
-                      type="password" 
+                      type={showPassword ? "text" : "password"} 
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
                       placeholder="••••••••"
-                      className="w-full pl-4 pr-12 py-3.5 bg-slate-50 border border-slate-200 rounded-xl text-slate-800 font-mono tracking-wider focus:bg-white focus:ring-2 focus:ring-[#1E3A8A] focus:border-transparent outline-none transition-all"
+                      className="w-full pl-12 pr-12 py-3.5 bg-slate-50 border border-slate-200 rounded-xl text-slate-800 font-mono tracking-wider focus:bg-white focus:ring-2 focus:ring-[#1E3A8A] focus:border-transparent outline-none transition-all"
                       dir="ltr"
                       required
                     />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="absolute inset-y-0 left-0 pl-4 flex items-center text-slate-400 hover:text-slate-600 transition-colors"
+                    >
+                      {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+                    </button>
                   </div>
                   {loginError && (
                     <div className="mt-3 bg-red-50 text-red-600 p-3 rounded-lg flex items-start gap-2 border border-red-100 animate-fade-in">
@@ -1563,58 +1571,6 @@ const AdminDashboard = () => {
     );
   }
 
-  return (
-      <div className="min-h-screen pt-20 pb-20 flex items-center justify-center bg-gradient-to-br from-[#0F172A] via-[#1E3A8A]/80 to-[#0F172A] px-4 relative overflow-hidden" dir="rtl" style={{ fontFamily: "'Cairo', sans-serif" }}>
-        <div className="absolute top-20 right-10 w-[400px] h-[400px] bg-blue-500/10 rounded-full blur-[120px] pointer-events-none" />
-        <div className="absolute bottom-10 left-10 w-[400px] h-[400px] bg-[#F4A217]/5 rounded-full blur-[120px] pointer-events-none" />
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-blue-700/5 rounded-full blur-[160px] pointer-events-none" />
-        
-        <div className="max-w-md w-full bg-white/10 backdrop-blur-xl rounded-3xl shadow-2xl border border-white/15 p-8 md:p-10 relative z-10">
-          <div className="w-20 h-20 bg-[#F4A217]/20 rounded-3xl flex items-center justify-center mx-auto mb-6 relative group border border-[#F4A217]/20">
-            <div className="absolute inset-0 bg-[#F4A217]/10 rounded-3xl animate-pulse"></div>
-            <KeyRound className="w-10 h-10 text-[#F4A217] group-hover:scale-110 transition-transform duration-300" />
-          </div>
-          <h2 className="text-2xl md:text-3xl font-black text-center text-white mb-1 tracking-tight">لوحة الإدارة - القمة 2026</h2>
-          <p className="text-xs font-bold text-blue-200/70 text-center mb-8">يرجى إدخال بيانات حسابك للوصول الآمن للوحة التحكم</p>
-          
-          <form onSubmit={handleLogin} className="space-y-5">
-            <div>
-              <label className="block text-xs font-black text-blue-100/80 mb-2">اسم المستخدم *</label>
-              <input 
-                type="text"
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
-                placeholder="admin أو academic"
-                className="w-full border border-white/20 bg-white/10 rounded-xl p-3.5 text-white placeholder-blue-300/50 focus:bg-white/15 focus:ring-2 focus:ring-[#F4A217] focus:border-[#F4A217]/50 outline-none transition-all duration-300 font-bold text-sm"
-                required
-              />
-            </div>
-            <div>
-              <label className="block text-xs font-black text-blue-100/80 mb-2">كلمة المرور *</label>
-              <input 
-                type="password" 
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="••••••••"
-                className="w-full border border-white/20 bg-white/10 rounded-xl p-3.5 text-white placeholder-blue-300/50 focus:bg-white/15 focus:ring-2 focus:ring-[#F4A217] focus:border-[#F4A217]/50 font-mono text-center text-lg outline-none transition-all duration-300"
-                required
-              />
-              {loginError && <p className="text-red-300 text-xs font-bold mt-2.5 text-center bg-red-500/10 rounded-lg p-2">{loginError}</p>}
-            </div>
-            
-            <button type="submit" className="w-full bg-gradient-to-r from-[#F4A217] to-amber-500 hover:from-amber-500 hover:to-[#F4A217] text-[#0F172A] py-3.5 rounded-xl font-black text-base shadow-lg hover:shadow-amber-500/30 hover:-translate-y-0.5 transition-all duration-300 flex items-center justify-center gap-2 cursor-pointer mt-2">
-              <span>تسجيل الدخول الآمن</span>
-            </button>
-
-            <div className="pt-3 border-t border-white/10 text-center">
-              <p className="text-[11px] text-blue-200/50 font-bold">حسابات الدخول المتاحة:</p>
-              <p className="text-[11px] text-blue-200/40 mt-1">super admin: admin / admin123 &nbsp;|&nbsp; academic: academic / acad123</p>
-            </div>
-          </form>
-        </div>
-      </div>
-    );
-  }
 
   return (
     <div className="min-h-screen bg-slate-50 flex" dir="rtl" style={{ fontFamily: "'Cairo', sans-serif" }}>
